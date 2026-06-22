@@ -1,0 +1,71 @@
+import pandas as pd
+import gspread
+from gspread_dataframe import set_with_dataframe
+from google.oauth2.service_account import Credentials
+
+def update_biomarker_sheet(data_list, sheet_id, credentials_path='credentials.json'):
+    # 1. Google Sheets API 인증 및 시트 연결
+    scopes = [
+        'https://www.googleapis.com/auth/spreadsheets',
+        'https://www.googleapis.com/auth/drive'
+    ]
+    credentials = Credentials.from_service_account_file(credentials_path, scopes=scopes)
+    gc = gspread.authorize(credentials)
+    
+    doc = gc.open_by_key(sheet_id)
+    worksheet = doc.sheet1  # 첫 번째 시트 선택
+
+    # 2. 리스트를 Pandas DataFrame으로 변환
+    df = pd.DataFrame(data_list, columns=["Gene", "LUAD_p_value", "LUSC_p_value"])
+
+    # 3. 데이터 전처리: 임계값(p < 0.05) 기준 유의성 자동 판별
+    df['LUAD_Significance (p < 0.05)'] = df['LUAD_p_value'].apply(
+        lambda x: 'Significant' if x < 0.05 else 'Not Significant'
+    )
+    df['LUSC_Significance (p < 0.05)'] = df['LUSC_p_value'].apply(
+        lambda x: 'Significant' if x < 0.05 else 'Not Significant'
+    )
+
+    # 4. 데이터 전처리: 암종 특이성(Specificity) 분류 함수
+    def determine_specificity(row):
+        luad_sig = row['LUAD_p_value'] < 0.05
+        lusc_sig = row['LUSC_p_value'] < 0.05
+        
+        if luad_sig and lusc_sig:
+            return 'Common'
+        elif luad_sig:
+            return 'LUAD-specific'
+        elif lusc_sig:
+            return 'LUSC-specific'
+        else:
+            return 'None'
+
+    df['Specificity'] = df.apply(determine_specificity, axis=1)
+    
+    # Notes 열 빈칸으로 초기화 (템플릿 구조 맞춤용)
+    df['Notes'] = "" 
+
+    # 5. 구글 시트 업데이트
+    worksheet.clear()  # 기존 시트의 데이터를 모두 지움
+    set_with_dataframe(worksheet, df)  # DataFrame의 컬럼명과 데이터를 시트에 삽입
+    
+    print(f"총 {len(df)}개의 유전자 데이터가 스프레드시트에 성공적으로 업데이트되었습니다.")
+
+# ==========================================
+# 실행 예시
+# ==========================================
+if __name__ == "__main__":
+    # 파이썬 리스트 데이터 (Gene, LUAD_p_value, LUSC_p_value)
+    biomarker_list = [
+        ["EGFR", 0.0001, 0.4500],
+        ["KRAS", 0.0030, 0.6100],
+        ["SOX2", 0.5500, 0.0002],
+        ["TP63", 0.7200, 0.0001],
+        ["TP53", 0.0010, 0.0020]
+    ]
+
+    # 앞서 생성한 구글 시트의 ID
+    TARGET_SHEET_ID = '1nVOfXU6r9yBIhASdF63cl9G1krHts72TVRnjKu8IGjE'
+    
+    # 함수 실행
+    update_biomarker_sheet(biomarker_list, TARGET_SHEET_ID)

@@ -1,0 +1,43 @@
+
+============================================================
+          자동화 GSEA (Gene Set Enrichment Analysis) 시작
+============================================================
+--- 1. GSEA 데이터 준비 시작 ---
+  [진단 로그] 발현량 데이터 로드 중: D:\coding\medin\database\TCGA_LUAD_RNAseq_Expression.csv
+  [진단 로그] 임상 그룹 데이터 로드 중: D:\coding\medin\database\(LUAD) lung adenocarcinoma.sav
+  [진단 로그] 공통 환자 샘플 수: 492 명
+  [진단 로그] 감지된 환자 그룹 분포:
+High    246
+Low     246
+--- GSEA 데이터 준비 완료 ---
+
+
+>> MSigDB_Hallmark_2020 분석 시작...
+--- 2. GSEA 분석 실행 (Gene Set: MSigDB_Hallmark_2020) ---
+  [진단 로그] 발현량 데이터 스케일링 생략 (입력값이 이미 Log2 변환된 데이터로 간주함)...
+  [저장] GSEA Report CSV 원본 저장 완료: D:\coding\medin\result_gsea\LUAD_SMAD7_2차\LUAD_MSigDB_Hallmark_2020\gseapy.phenotype.gsea.report.csv
+  [저장] GSEA Report CSV 소수점 넷째 자리 반올림 전처리 파일 추가 완료: D:\coding\medin\result_gsea\LUAD_SMAD7_2차\LUAD_MSigDB_Hallmark_2020\gseapy.phenotype.gsea.report_cleaned.csv
+  [완료] FDR < 2.00 기준 유의미한 Pathway 수: 50개
+  [저장] GSEA 결과 엑셀: D:\coding\medin\result_gsea\LUAD_SMAD7_2차\LUAD_MSigDB_Hallmark_2020\LUAD_GSEA_MSigDB_Hallmark_2020_results.xlsx
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\LUAD_SMAD7_2차\LUAD_MSigDB_Hallmark_2020\LUAD_GSEA_Plot_Myogenesis.png
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\LUAD_SMAD7_2차\LUAD_MSigDB_Hallmark_2020\LUAD_GSEA_Plot_Apical_Junction.png
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\LUAD_SMAD7_2차\LUAD_MSigDB_Hallmark_2020\LUAD_GSEA_Plot_Angiogenesis.png
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\LUAD_SMAD7_2차\LUAD_MSigDB_Hallmark_2020\LUAD_GSEA_Plot_Notch_Signaling.png
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\LUAD_SMAD7_2차\LUAD_MSigDB_Hallmark_2020\LUAD_GSEA_Plot_Hedgehog_Signaling.png
+
+>> KEGG_2021_Human 분석 시작...
+--- 2. GSEA 분석 실행 (Gene Set: KEGG_2021_Human) ---
+  [진단 로그] 발현량 데이터 스케일링 생략 (입력값이 이미 Log2 변환된 데이터로 간주함)...
+  [저장] GSEA Report CSV 원본 저장 완료: D:\coding\medin\result_gsea\LUAD_SMAD7_2차\LUAD_KEGG_2021_Human\gseapy.phenotype.gsea.report.csv
+  [저장] GSEA Report CSV 소수점 넷째 자리 반올림 전처리 파일 추가 완료: D:\coding\medin\result_gsea\LUAD_SMAD7_2차\LUAD_KEGG_2021_Human\gseapy.phenotype.gsea.report_cleaned.csv
+  [완료] FDR < 2.00 기준 유의미한 Pathway 수: 306개
+  [저장] GSEA 결과 엑셀: D:\coding\medin\result_gsea\LUAD_SMAD7_2차\LUAD_KEGG_2021_Human\LUAD_GSEA_KEGG_2021_Human_results.xlsx
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\LUAD_SMAD7_2차\LUAD_KEGG_2021_Human\LUAD_GSEA_Plot_Focal_adhesion.png
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\LUAD_SMAD7_2차\LUAD_KEGG_2021_Human\LUAD_GSEA_Plot_AGE-RAGE_signaling_pathway_in_diabetic_complications.png
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\LUAD_SMAD7_2차\LUAD_KEGG_2021_Human\LUAD_GSEA_Plot_Proteoglycans_in_cancer.png
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\LUAD_SMAD7_2차\LUAD_KEGG_2021_Human\LUAD_GSEA_Plot_Ras_signaling_pathway.png
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\LUAD_SMAD7_2차\LUAD_KEGG_2021_Human\LUAD_GSEA_Plot_TGF-beta_signaling_pathway.png
+
+============================================================
+          GSEA 파이프라인 실행 완료
+============================================================

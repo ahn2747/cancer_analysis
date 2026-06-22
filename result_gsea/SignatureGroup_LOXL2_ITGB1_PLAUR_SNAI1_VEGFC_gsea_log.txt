@@ -1,0 +1,27 @@
+
+============================================================
+          자동화 GSEA (Gene Set Enrichment Analysis) 시작
+============================================================
+--- 1. GSEA 데이터 준비 시작 ---
+  [진단 로그] 발현량 데이터 로드 중: D:\coding\medin\database\TCGA_LUAD_RNAseq_Expression.csv
+  [진단 로그] 임상 그룹 데이터 로드 중: D:\coding\medin\database\(LUAD) lung adenocarcinoma.sav
+  [진단 로그] 공통 환자 샘플 수: 492 명
+--- GSEA 데이터 준비 완료 ---
+
+
+>> MSigDB_Hallmark_2020 분석 시작...
+--- 2. GSEA 분석 실행 (Gene Set: MSigDB_Hallmark_2020) ---
+  [진단 로그] 발현량 데이터 Log2(TPM+1) 스케일링 진행 중...
+  [저장] GSEA Report CSV 원본 저장 완료: D:\coding\medin\result_gsea\LUAD_SignatureGroup_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC_\LUAD_MSigDB_Hallmark_2020\gseapy.phenotype.gsea.report.csv
+  [저장] GSEA Report CSV 소수점 넷째 자리 반올림 전처리 파일 추가 완료: D:\coding\medin\result_gsea\LUAD_SignatureGroup_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC_\LUAD_MSigDB_Hallmark_2020\gseapy.phenotype.gsea.report_cleaned.csv
+  [완료] FDR < 2.00 기준 유의미한 Pathway 수: 50개
+  [저장] GSEA 결과 엑셀: D:\coding\medin\result_gsea\LUAD_SignatureGroup_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC_\LUAD_MSigDB_Hallmark_2020\LUAD_GSEA_MSigDB_Hallmark_2020_results.xlsx
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\LUAD_SignatureGroup_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC_\LUAD_MSigDB_Hallmark_2020\LUAD_GSEA_Plot_Hypoxia.png
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\LUAD_SignatureGroup_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC_\LUAD_MSigDB_Hallmark_2020\LUAD_GSEA_Plot_TNF-alpha_Signaling_via_NF-kB.png
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\LUAD_SignatureGroup_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC_\LUAD_MSigDB_Hallmark_2020\LUAD_GSEA_Plot_Apoptosis.png
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\LUAD_SignatureGroup_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC_\LUAD_MSigDB_Hallmark_2020\LUAD_GSEA_Plot_Epithelial_Mesenchymal_Transition.png
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\LUAD_SignatureGroup_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC_\LUAD_MSigDB_Hallmark_2020\LUAD_GSEA_Plot_Glycolysis.png
+
+============================================================
+          GSEA 파이프라인 실행 완료
+============================================================

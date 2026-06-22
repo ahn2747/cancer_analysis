@@ -1,0 +1,270 @@
+--- 2-3. 다변량 일반선형모형 (GLM / OLS) - 4개 개별 모델 분석 ---
+
+[Model: Pathologic Stage]
+                                         OLS Regression Results                                         
+========================================================================================================
+Dep. Variable:     SignatureScore_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC   R-squared:                       0.030
+Model:                                                      OLS   Adj. R-squared:                  0.012
+Method:                                           Least Squares   F-statistic:                     1.687
+Date:                                          Mon, 22 Jun 2026   Prob (F-statistic):              0.124
+Time:                                                  16:29:25   Log-Likelihood:                -334.81
+No. Observations:                                           330   AIC:                             683.6
+Df Residuals:                                               323   BIC:                             710.2
+Df Model:                                                     6                                         
+Covariance Type:                                      nonrobust                                         
+=======================================================================================================
+                                          coef    std err          t      P>|t|      [0.025      0.975]
+-------------------------------------------------------------------------------------------------------
+Intercept                               0.0465      0.254      0.183      0.855      -0.454       0.547
+C(gender)[T.MALE]                       0.0179      0.077      0.231      0.818      -0.134       0.170
+C(pathologic_stage)[T.2.0]              0.1911      0.093      2.054      0.041       0.008       0.374
+C(pathologic_stage)[T.3.0]              0.2377      0.104      2.293      0.023       0.034       0.442
+C(pathologic_stage)[T.4.0]             -0.0520      0.173     -0.301      0.764      -0.392       0.288
+age_at_initial_pathologic_diagnosis    -0.0029      0.004     -0.771      0.441      -0.010       0.004
+number_pack_years_smoked                0.0018      0.001      1.281      0.201      -0.001       0.005
+==============================================================================
+Omnibus:                      139.422   Durbin-Watson:                   2.135
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              542.833
+Skew:                           1.841   Prob(JB):                    1.33e-118
+Kurtosis:                       8.091   Cond. No.                         553.
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+[Model: Pathologic T]
+                                         OLS Regression Results                                         
+========================================================================================================
+Dep. Variable:     SignatureScore_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC   R-squared:                       0.043
+Model:                                                      OLS   Adj. R-squared:                  0.026
+Method:                                           Least Squares   F-statistic:                     2.469
+Date:                                          Mon, 22 Jun 2026   Prob (F-statistic):             0.0238
+Time:                                                  16:29:25   Log-Likelihood:                -334.54
+No. Observations:                                           333   AIC:                             683.1
+Df Residuals:                                               326   BIC:                             709.7
+Df Model:                                                     6                                         
+Covariance Type:                                      nonrobust                                         
+=======================================================================================================
+                                          coef    std err          t      P>|t|      [0.025      0.975]
+-------------------------------------------------------------------------------------------------------
+Intercept                              -0.0339      0.252     -0.135      0.893      -0.529       0.462
+C(gender)[T.MALE]                      -0.0147      0.077     -0.190      0.849      -0.167       0.137
+C(pathologic_T)[T.2.0]                  0.2000      0.082      2.429      0.016       0.038       0.362
+C(pathologic_T)[T.3.0]                  0.4315      0.139      3.106      0.002       0.158       0.705
+C(pathologic_T)[T.4.0]                  0.3556      0.196      1.811      0.071      -0.031       0.742
+age_at_initial_pathologic_diagnosis    -0.0025      0.004     -0.677      0.499      -0.010       0.005
+number_pack_years_smoked                0.0017      0.001      1.198      0.232      -0.001       0.004
+==============================================================================
+Omnibus:                      133.840   Durbin-Watson:                   2.105
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              490.997
+Skew:                           1.767   Prob(JB):                    2.41e-107
+Kurtosis:                       7.785   Cond. No.                         561.
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+[Model: Pathologic N]
+                                         OLS Regression Results                                         
+========================================================================================================
+Dep. Variable:     SignatureScore_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC   R-squared:                       0.013
+Model:                                                      OLS   Adj. R-squared:                 -0.006
+Method:                                           Least Squares   F-statistic:                    0.6860
+Date:                                          Mon, 22 Jun 2026   Prob (F-statistic):              0.661
+Time:                                                  16:29:25   Log-Likelihood:                -336.21
+No. Observations:                                           328   AIC:                             686.4
+Df Residuals:                                               321   BIC:                             713.0
+Df Model:                                                     6                                         
+Covariance Type:                                      nonrobust                                         
+=======================================================================================================
+                                          coef    std err          t      P>|t|      [0.025      0.975]
+-------------------------------------------------------------------------------------------------------
+Intercept                               0.1149      0.257      0.448      0.654      -0.390       0.620
+C(gender)[T.MALE]                       0.0242      0.078      0.308      0.758      -0.130       0.178
+C(pathologic_N)[T.1.0]                  0.1071      0.099      1.083      0.279      -0.087       0.302
+C(pathologic_N)[T.2.0]                  0.1407      0.111      1.273      0.204      -0.077       0.358
+C(pathologic_N)[T.3.0]                  0.0457      0.488      0.094      0.925      -0.915       1.006
+age_at_initial_pathologic_diagnosis    -0.0031      0.004     -0.804      0.422      -0.011       0.004
+number_pack_years_smoked                0.0014      0.001      1.014      0.311      -0.001       0.004
+==============================================================================
+Omnibus:                      139.874   Durbin-Watson:                   2.111
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              540.568
+Skew:                           1.864   Prob(JB):                    4.14e-118
+Kurtosis:                       8.065   Cond. No.                     1.04e+03
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+[2] The condition number is large, 1.04e+03. This might indicate that there are
+strong multicollinearity or other numerical problems.
+
+[Model: Pathologic M]
+                                         OLS Regression Results                                         
+========================================================================================================
+Dep. Variable:     SignatureScore_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC   R-squared:                       0.012
+Model:                                                      OLS   Adj. R-squared:                 -0.005
+Method:                                           Least Squares   F-statistic:                    0.6826
+Date:                                          Mon, 22 Jun 2026   Prob (F-statistic):              0.605
+Time:                                                  16:29:25   Log-Likelihood:                -260.64
+No. Observations:                                           236   AIC:                             531.3
+Df Residuals:                                               231   BIC:                             548.6
+Df Model:                                                     4                                         
+Covariance Type:                                      nonrobust                                         
+=======================================================================================================
+                                          coef    std err          t      P>|t|      [0.025      0.975]
+-------------------------------------------------------------------------------------------------------
+Intercept                               0.0754      0.318      0.237      0.813      -0.551       0.702
+C(gender)[T.MALE]                       0.0246      0.099      0.249      0.803      -0.170       0.219
+C(pathologic_M)[T.1.0]                 -0.2037      0.187     -1.087      0.278      -0.573       0.165
+age_at_initial_pathologic_diagnosis    -0.0013      0.005     -0.261      0.794      -0.011       0.008
+number_pack_years_smoked                0.0022      0.002      1.209      0.228      -0.001       0.006
+==============================================================================
+Omnibus:                       96.659   Durbin-Watson:                   2.031
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              313.781
+Skew:                           1.766   Prob(JB):                     7.30e-69
+Kurtosis:                       7.408   Cond. No.                         528.
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+
+  [OS Log-rank Test] p-value: 0.0003
+  [RFS Log-rank Test] p-value: 0.0166
+✅ LUAD Signature 기반 분석 및 엑셀 저장 완료
+
+============================================================
+          LUSC Signature 자동화 분석 시작
+============================================================
+--- 2-3. 다변량 일반선형모형 (GLM / OLS) - 4개 개별 모델 분석 ---
+
+[Model: Pathologic Stage]
+                                         OLS Regression Results                                         
+========================================================================================================
+Dep. Variable:     SignatureScore_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC   R-squared:                       0.020
+Model:                                                      OLS   Adj. R-squared:                  0.006
+Method:                                           Least Squares   F-statistic:                     1.386
+Date:                                          Mon, 22 Jun 2026   Prob (F-statistic):              0.219
+Time:                                                  16:29:28   Log-Likelihood:                -415.92
+No. Observations:                                           410   AIC:                             845.8
+Df Residuals:                                               403   BIC:                             874.0
+Df Model:                                                     6                                         
+Covariance Type:                                      nonrobust                                         
+==============================================================================================
+                                 coef    std err          t      P>|t|      [0.025      0.975]
+----------------------------------------------------------------------------------------------
+Intercept                     -0.5470      0.288     -1.899      0.058      -1.113       0.019
+C(gender)[T.MALE]             -0.0420      0.076     -0.550      0.582      -0.192       0.108
+C(pathologic_stage)[T.2.0]     0.1302      0.076      1.720      0.086      -0.019       0.279
+C(pathologic_stage)[T.3.0]     0.1512      0.095      1.599      0.111      -0.035       0.337
+C(pathologic_stage)[T.4.0]     0.3279      0.280      1.171      0.242      -0.223       0.878
+age                            0.0065      0.004      1.598      0.111      -0.001       0.014
+number_pack_years_smoked       0.0011      0.001      1.004      0.316      -0.001       0.003
+==============================================================================
+Omnibus:                      128.366   Durbin-Watson:                   1.983
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              353.337
+Skew:                           1.499   Prob(JB):                     1.88e-77
+Kurtosis:                       6.420   Cond. No.                         769.
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+[Model: Pathologic T]
+                                         OLS Regression Results                                         
+========================================================================================================
+Dep. Variable:     SignatureScore_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC   R-squared:                       0.028
+Model:                                                      OLS   Adj. R-squared:                  0.014
+Method:                                           Least Squares   F-statistic:                     1.974
+Date:                                          Mon, 22 Jun 2026   Prob (F-statistic):             0.0683
+Time:                                                  16:29:28   Log-Likelihood:                -415.82
+No. Observations:                                           413   AIC:                             845.6
+Df Residuals:                                               406   BIC:                             873.8
+Df Model:                                                     6                                         
+Covariance Type:                                      nonrobust                                         
+============================================================================================
+                               coef    std err          t      P>|t|      [0.025      0.975]
+--------------------------------------------------------------------------------------------
+Intercept                   -0.5677      0.284     -2.001      0.046      -1.126      -0.010
+C(gender)[T.MALE]           -0.0416      0.076     -0.544      0.586      -0.192       0.109
+C(pathologic_T)[T.2.0]       0.1074      0.082      1.313      0.190      -0.053       0.268
+C(pathologic_T)[T.3.0]       0.3236      0.115      2.815      0.005       0.098       0.550
+C(pathologic_T)[T.4.0]       0.2306      0.177      1.303      0.193      -0.117       0.579
+age                          0.0061      0.004      1.515      0.131      -0.002       0.014
+number_pack_years_smoked     0.0011      0.001      1.077      0.282      -0.001       0.003
+==============================================================================
+Omnibus:                      127.844   Durbin-Watson:                   1.953
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              350.675
+Skew:                           1.483   Prob(JB):                     7.11e-77
+Kurtosis:                       6.402   Cond. No.                         767.
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+[Model: Pathologic N]
+                                         OLS Regression Results                                         
+========================================================================================================
+Dep. Variable:     SignatureScore_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC   R-squared:                       0.019
+Model:                                                      OLS   Adj. R-squared:                  0.004
+Method:                                           Least Squares   F-statistic:                     1.269
+Date:                                          Mon, 22 Jun 2026   Prob (F-statistic):              0.270
+Time:                                                  16:29:28   Log-Likelihood:                -413.31
+No. Observations:                                           408   AIC:                             840.6
+Df Residuals:                                               401   BIC:                             868.7
+Df Model:                                                     6                                         
+Covariance Type:                                      nonrobust                                         
+============================================================================================
+                               coef    std err          t      P>|t|      [0.025      0.975]
+--------------------------------------------------------------------------------------------
+Intercept                   -0.4557      0.290     -1.571      0.117      -1.026       0.114
+C(gender)[T.MALE]           -0.0398      0.076     -0.523      0.601      -0.189       0.110
+C(pathologic_N)[T.1.0]       0.1429      0.077      1.847      0.065      -0.009       0.295
+C(pathologic_N)[T.2.0]      -0.0779      0.125     -0.622      0.534      -0.324       0.168
+C(pathologic_N)[T.3.0]      -0.1065      0.304     -0.351      0.726      -0.704       0.491
+age                          0.0056      0.004      1.376      0.170      -0.002       0.014
+number_pack_years_smoked     0.0011      0.001      0.989      0.323      -0.001       0.003
+==============================================================================
+Omnibus:                      130.688   Durbin-Watson:                   2.046
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              372.623
+Skew:                           1.517   Prob(JB):                     1.22e-81
+Kurtosis:                       6.565   Cond. No.                         810.
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+[Model: Pathologic M]
+                                         OLS Regression Results                                         
+========================================================================================================
+Dep. Variable:     SignatureScore_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC   R-squared:                       0.017
+Model:                                                      OLS   Adj. R-squared:                  0.006
+Method:                                           Least Squares   F-statistic:                     1.495
+Date:                                          Mon, 22 Jun 2026   Prob (F-statistic):              0.203
+Time:                                                  16:29:28   Log-Likelihood:                -345.71
+No. Observations:                                           347   AIC:                             701.4
+Df Residuals:                                               342   BIC:                             720.7
+Df Model:                                                     4                                         
+Covariance Type:                                      nonrobust                                         
+============================================================================================
+                               coef    std err          t      P>|t|      [0.025      0.975]
+--------------------------------------------------------------------------------------------
+Intercept                   -0.5776      0.310     -1.862      0.064      -1.188       0.033
+C(gender)[T.MALE]           -0.0112      0.082     -0.136      0.892      -0.173       0.151
+C(pathologic_M)[T.1.0]       0.2640      0.273      0.966      0.335      -0.274       0.802
+age                          0.0070      0.004      1.582      0.115      -0.002       0.016
+number_pack_years_smoked     0.0018      0.001      1.515      0.131      -0.001       0.004
+==============================================================================
+Omnibus:                      110.323   Durbin-Watson:                   1.994
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              313.184
+Skew:                           1.477   Prob(JB):                     9.84e-69
+Kurtosis:                       6.596   Cond. No.                         780.
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+
+  [OS Log-rank Test] p-value: 0.0005
+  [RFS Log-rank Test] p-value: 0.0231
+✅ LUSC Signature 기반 분석 및 엑셀 저장 완료

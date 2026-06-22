@@ -1,0 +1,34 @@
+
+============================================================
+          자동화 GSEA (Gene Set Enrichment Analysis) 시작
+============================================================
+--- 1. GSEA 데이터 준비 시작 ---
+  [진단 로그] 발현량 데이터 로드 중: D:\coding\medin\database\TCGA_LUSC_RNAseq_Expression.csv
+  [진단 로그] 임상 그룹 데이터 로드 중: D:\coding\medin\database\(LUSC) lung squamous cell carcinoma.sav
+  [진단 로그] 공통 환자 샘플 수: 489 명
+--- GSEA 데이터 준비 완료 ---
+
+
+>> MSigDB_Hallmark_2020 분석 시작...
+--- 2. GSEA 분석 실행 (Gene Set: MSigDB_Hallmark_2020) ---
+  [완료] FDR < 0.25 기준 유의미한 Pathway 수: 8개
+  [저장] GSEA 결과 테이블: D:\coding\medin\result_gsea\MyAnalysis_LUSC_MSigDB_Hallmark_2020\MyAnalysis_LUSC_GSEA_MSigDB_Hallmark_2020_results.xlsx
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\MyAnalysis_LUSC_MSigDB_Hallmark_2020\MyAnalysis_LUSC_GSEA_Plot_TNF-alpha_Signaling_via_NF-kB.png
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\MyAnalysis_LUSC_MSigDB_Hallmark_2020\MyAnalysis_LUSC_GSEA_Plot_Angiogenesis.png
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\MyAnalysis_LUSC_MSigDB_Hallmark_2020\MyAnalysis_LUSC_GSEA_Plot_Interferon_Alpha_Response.png
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\MyAnalysis_LUSC_MSigDB_Hallmark_2020\MyAnalysis_LUSC_GSEA_Plot_Inflammatory_Response.png
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\MyAnalysis_LUSC_MSigDB_Hallmark_2020\MyAnalysis_LUSC_GSEA_Plot_Interferon_Gamma_Response.png
+
+>> KEGG_2021_Human 분석 시작...
+--- 2. GSEA 분석 실행 (Gene Set: KEGG_2021_Human) ---
+  [완료] FDR < 0.25 기준 유의미한 Pathway 수: 25개
+  [저장] GSEA 결과 테이블: D:\coding\medin\result_gsea\MyAnalysis_LUSC_KEGG_2021_Human\MyAnalysis_LUSC_GSEA_KEGG_2021_Human_results.xlsx
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\MyAnalysis_LUSC_KEGG_2021_Human\MyAnalysis_LUSC_GSEA_Plot_Osteoclast_differentiation.png
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\MyAnalysis_LUSC_KEGG_2021_Human\MyAnalysis_LUSC_GSEA_Plot_Viral_myocarditis.png
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\MyAnalysis_LUSC_KEGG_2021_Human\MyAnalysis_LUSC_GSEA_Plot_Phagosome.png
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\MyAnalysis_LUSC_KEGG_2021_Human\MyAnalysis_LUSC_GSEA_Plot_Th1_and_Th2_cell_differentiation.png
+  [저장] GSEA Plot 생성: D:\coding\medin\result_gsea\MyAnalysis_LUSC_KEGG_2021_Human\MyAnalysis_LUSC_GSEA_Plot_Primary_bile_acid_biosynthesis.png
+
+============================================================
+          GSEA 파이프라인 실행 완료
+============================================================
