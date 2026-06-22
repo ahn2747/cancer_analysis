@@ -483,10 +483,10 @@ if __name__ == "__main__":
         
         # [수정됨] 암종별로 통제(교란) 변수로 사용할 연속형 유전자 발현량(gene_vars) 분리
         if mode == "LUAD":
-            gene_vars = ['TP53Expression', 'ALKExpression']
+            gene_vars = []
             corr_vars = [score_col_name, 'number_pack_years_smoked', 'age_at_initial_pathologic_diagnosis'] + gene_vars
         else:
-            gene_vars = ['SOX2Expression', 'PIK3CAExpression', 'NOTCH1Expression']
+            gene_vars = []
             corr_vars = [score_col_name, 'number_pack_years_smoked', 'age'] + gene_vars
             
         df_table2 = analyze_bivariate_correlation(merged_df, gene_list=corr_vars)
