@@ -1,0 +1,807 @@
+--- 2-3. 다변량 일반선형모형 (GLM / OLS) - 4개 개별 모델 분석 ---
+
+[Model: Pathologic Stage]
+                                         OLS Regression Results                                         
+========================================================================================================
+Dep. Variable:     SignatureScore_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC   R-squared:                       0.030
+Model:                                                      OLS   Adj. R-squared:                  0.012
+Method:                                           Least Squares   F-statistic:                     1.687
+Date:                                          Tue, 23 Jun 2026   Prob (F-statistic):              0.124
+Time:                                                  03:57:27   Log-Likelihood:                -334.81
+No. Observations:                                           330   AIC:                             683.6
+Df Residuals:                                               323   BIC:                             710.2
+Df Model:                                                     6                                         
+Covariance Type:                                      nonrobust                                         
+=======================================================================================================
+                                          coef    std err          t      P>|t|      [0.025      0.975]
+-------------------------------------------------------------------------------------------------------
+Intercept                               0.0465      0.254      0.183      0.855      -0.454       0.547
+C(gender)[T.MALE]                       0.0179      0.077      0.231      0.818      -0.134       0.170
+C(pathologic_stage)[T.2.0]              0.1911      0.093      2.054      0.041       0.008       0.374
+C(pathologic_stage)[T.3.0]              0.2377      0.104      2.293      0.023       0.034       0.442
+C(pathologic_stage)[T.4.0]             -0.0520      0.173     -0.301      0.764      -0.392       0.288
+age_at_initial_pathologic_diagnosis    -0.0029      0.004     -0.771      0.441      -0.010       0.004
+number_pack_years_smoked                0.0018      0.001      1.281      0.201      -0.001       0.005
+==============================================================================
+Omnibus:                      139.422   Durbin-Watson:                   2.135
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              542.833
+Skew:                           1.841   Prob(JB):                    1.33e-118
+Kurtosis:                       8.091   Cond. No.                         553.
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+[Model: Pathologic T]
+                                         OLS Regression Results                                         
+========================================================================================================
+Dep. Variable:     SignatureScore_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC   R-squared:                       0.043
+Model:                                                      OLS   Adj. R-squared:                  0.026
+Method:                                           Least Squares   F-statistic:                     2.469
+Date:                                          Tue, 23 Jun 2026   Prob (F-statistic):             0.0238
+Time:                                                  03:57:27   Log-Likelihood:                -334.54
+No. Observations:                                           333   AIC:                             683.1
+Df Residuals:                                               326   BIC:                             709.7
+Df Model:                                                     6                                         
+Covariance Type:                                      nonrobust                                         
+=======================================================================================================
+                                          coef    std err          t      P>|t|      [0.025      0.975]
+-------------------------------------------------------------------------------------------------------
+Intercept                              -0.0339      0.252     -0.135      0.893      -0.529       0.462
+C(gender)[T.MALE]                      -0.0147      0.077     -0.190      0.849      -0.167       0.137
+C(pathologic_T)[T.2.0]                  0.2000      0.082      2.429      0.016       0.038       0.362
+C(pathologic_T)[T.3.0]                  0.4315      0.139      3.106      0.002       0.158       0.705
+C(pathologic_T)[T.4.0]                  0.3556      0.196      1.811      0.071      -0.031       0.742
+age_at_initial_pathologic_diagnosis    -0.0025      0.004     -0.677      0.499      -0.010       0.005
+number_pack_years_smoked                0.0017      0.001      1.198      0.232      -0.001       0.004
+==============================================================================
+Omnibus:                      133.840   Durbin-Watson:                   2.105
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              490.997
+Skew:                           1.767   Prob(JB):                    2.41e-107
+Kurtosis:                       7.785   Cond. No.                         561.
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+[Model: Pathologic N]
+                                         OLS Regression Results                                         
+========================================================================================================
+Dep. Variable:     SignatureScore_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC   R-squared:                       0.013
+Model:                                                      OLS   Adj. R-squared:                 -0.006
+Method:                                           Least Squares   F-statistic:                    0.6860
+Date:                                          Tue, 23 Jun 2026   Prob (F-statistic):              0.661
+Time:                                                  03:57:27   Log-Likelihood:                -336.21
+No. Observations:                                           328   AIC:                             686.4
+Df Residuals:                                               321   BIC:                             713.0
+Df Model:                                                     6                                         
+Covariance Type:                                      nonrobust                                         
+=======================================================================================================
+                                          coef    std err          t      P>|t|      [0.025      0.975]
+-------------------------------------------------------------------------------------------------------
+Intercept                               0.1149      0.257      0.448      0.654      -0.390       0.620
+C(gender)[T.MALE]                       0.0242      0.078      0.308      0.758      -0.130       0.178
+C(pathologic_N)[T.1.0]                  0.1071      0.099      1.083      0.279      -0.087       0.302
+C(pathologic_N)[T.2.0]                  0.1407      0.111      1.273      0.204      -0.077       0.358
+C(pathologic_N)[T.3.0]                  0.0457      0.488      0.094      0.925      -0.915       1.006
+age_at_initial_pathologic_diagnosis    -0.0031      0.004     -0.804      0.422      -0.011       0.004
+number_pack_years_smoked                0.0014      0.001      1.014      0.311      -0.001       0.004
+==============================================================================
+Omnibus:                      139.874   Durbin-Watson:                   2.111
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              540.568
+Skew:                           1.864   Prob(JB):                    4.14e-118
+Kurtosis:                       8.065   Cond. No.                     1.04e+03
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+[2] The condition number is large, 1.04e+03. This might indicate that there are
+strong multicollinearity or other numerical problems.
+
+[Model: Pathologic M]
+                                         OLS Regression Results                                         
+========================================================================================================
+Dep. Variable:     SignatureScore_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC   R-squared:                       0.012
+Model:                                                      OLS   Adj. R-squared:                 -0.005
+Method:                                           Least Squares   F-statistic:                    0.6826
+Date:                                          Tue, 23 Jun 2026   Prob (F-statistic):              0.605
+Time:                                                  03:57:27   Log-Likelihood:                -260.64
+No. Observations:                                           236   AIC:                             531.3
+Df Residuals:                                               231   BIC:                             548.6
+Df Model:                                                     4                                         
+Covariance Type:                                      nonrobust                                         
+=======================================================================================================
+                                          coef    std err          t      P>|t|      [0.025      0.975]
+-------------------------------------------------------------------------------------------------------
+Intercept                               0.0754      0.318      0.237      0.813      -0.551       0.702
+C(gender)[T.MALE]                       0.0246      0.099      0.249      0.803      -0.170       0.219
+C(pathologic_M)[T.1.0]                 -0.2037      0.187     -1.087      0.278      -0.573       0.165
+age_at_initial_pathologic_diagnosis    -0.0013      0.005     -0.261      0.794      -0.011       0.008
+number_pack_years_smoked                0.0022      0.002      1.209      0.228      -0.001       0.006
+==============================================================================
+Omnibus:                       96.659   Durbin-Watson:                   2.031
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              313.781
+Skew:                           1.766   Prob(JB):                     7.30e-69
+Kurtosis:                       7.408   Cond. No.                         528.
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+[Model: TP53 Expression]
+                                         OLS Regression Results                                         
+========================================================================================================
+Dep. Variable:     SignatureScore_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC   R-squared:                       1.000
+Model:                                                      OLS   Adj. R-squared:                    nan
+Method:                                           Least Squares   F-statistic:                       nan
+Date:                                          Tue, 23 Jun 2026   Prob (F-statistic):                nan
+Time:                                                  03:57:28   Log-Likelihood:                 9666.9
+No. Observations:                                           333   AIC:                        -1.867e+04
+Df Residuals:                                                 0   BIC:                        -1.740e+04
+Df Model:                                                   332                                         
+Covariance Type:                                      nonrobust                                         
+=======================================================================================================
+                                          coef    std err          t      P>|t|      [0.025      0.975]
+-------------------------------------------------------------------------------------------------------
+Intercept                               0.1538        inf          0        nan         nan         nan
+C(gender)[T.MALE]                      -0.4437        inf         -0        nan         nan         nan
+C(TP53Expression)[T.192.44]             4.1986        inf          0        nan         nan         nan
+C(TP53Expression)[T.208.17]            -0.5109        inf         -0        nan         nan         nan
+C(TP53Expression)[T.213.85]            -0.7547        inf         -0        nan         nan         nan
+C(TP53Expression)[T.240.9]             -0.7605        inf         -0        nan         nan         nan
+C(TP53Expression)[T.247.15]            -0.4942        inf         -0        nan         nan         nan
+C(TP53Expression)[T.266.18]             1.5289        inf          0        nan         nan         nan
+C(TP53Expression)[T.269.24]             1.0501        inf          0        nan         nan         nan
+C(TP53Expression)[T.287.34]            -0.3296        inf         -0        nan         nan         nan
+C(TP53Expression)[T.288.48]            -0.2212        inf         -0        nan         nan         nan
+C(TP53Expression)[T.308.13]            -0.9968        inf         -0        nan         nan         nan
+C(TP53Expression)[T.311.59]             0.0079        inf          0        nan         nan         nan
+C(TP53Expression)[T.315.68]             0.8755        inf          0        nan         nan         nan
+C(TP53Expression)[T.316.19]             1.1557        inf          0        nan         nan         nan
+C(TP53Expression)[T.321.27]             2.5771        inf          0        nan         nan         nan
+C(TP53Expression)[T.325.88]             0.3958        inf          0        nan         nan         nan
+C(TP53Expression)[T.331.88]             1.2955        inf          0        nan         nan         nan
+C(TP53Expression)[T.345.08]            -1.0548        inf         -0        nan         nan         nan
+C(TP53Expression)[T.352.14]            -0.5879        inf         -0        nan         nan         nan
+C(TP53Expression)[T.357.79]            -0.1618        inf         -0        nan         nan         nan
+C(TP53Expression)[T.361.24]            -0.9133        inf         -0        nan         nan         nan
+C(TP53Expression)[T.369.29]             1.4423        inf          0        nan         nan         nan
+C(TP53Expression)[T.372.17]             0.5775        inf          0        nan         nan         nan
+C(TP53Expression)[T.383.2]             -0.4751        inf         -0        nan         nan         nan
+C(TP53Expression)[T.409.98]            -0.0257        inf         -0        nan         nan         nan
+C(TP53Expression)[T.418.13]             0.0145        inf          0        nan         nan         nan
+C(TP53Expression)[T.425.94]             1.3127        inf          0        nan         nan         nan
+C(TP53Expression)[T.430.98]             0.5684        inf          0        nan         nan         nan
+C(TP53Expression)[T.441.66]             2.3844        inf          0        nan         nan         nan
+C(TP53Expression)[T.443.07]             0.0288        inf          0        nan         nan         nan
+C(TP53Expression)[T.443.16]             0.1032        inf          0        nan         nan         nan
+C(TP53Expression)[T.458.25]            -0.4805        inf         -0        nan         nan         nan
+C(TP53Expression)[T.480.13]             0.1674        inf          0        nan         nan         nan
+C(TP53Expression)[T.482.64]             0.0212        inf          0        nan         nan         nan
+C(TP53Expression)[T.502.84]             0.3233        inf          0        nan         nan         nan
+C(TP53Expression)[T.504.14]             1.3491        inf          0        nan         nan         nan
+C(TP53Expression)[T.507.35]            -0.5257        inf         -0        nan         nan         nan
+C(TP53Expression)[T.528.99]            -0.3283        inf         -0        nan         nan         nan
+C(TP53Expression)[T.535.71]            -0.0506        inf         -0        nan         nan         nan
+C(TP53Expression)[T.539.75]             1.0843        inf          0        nan         nan         nan
+C(TP53Expression)[T.546.57]            -0.2610        inf         -0        nan         nan         nan
+C(TP53Expression)[T.552.92]            -0.9671        inf         -0        nan         nan         nan
+C(TP53Expression)[T.559.79]            -0.1034        inf         -0        nan         nan         nan
+C(TP53Expression)[T.569.48]            -0.1870        inf         -0        nan         nan         nan
+C(TP53Expression)[T.571.74]            -0.1781        inf         -0        nan         nan         nan
+C(TP53Expression)[T.579.96]            -0.5523        inf         -0        nan         nan         nan
+C(TP53Expression)[T.588.83]            -0.4609        inf         -0        nan         nan         nan
+C(TP53Expression)[T.597.77]            -0.1074        inf         -0        nan         nan         nan
+C(TP53Expression)[T.599.06]            -0.5291        inf         -0        nan         nan         nan
+C(TP53Expression)[T.603.23]            -0.6618        inf         -0        nan         nan         nan
+C(TP53Expression)[T.608.97]             0.0791        inf          0        nan         nan         nan
+C(TP53Expression)[T.610.56]             1.3145        inf          0        nan         nan         nan
+C(TP53Expression)[T.611.11]            -0.7819        inf         -0        nan         nan         nan
+C(TP53Expression)[T.617.57]             1.1425        inf          0        nan         nan         nan
+C(TP53Expression)[T.632.68]            -0.8298        inf         -0        nan         nan         nan
+C(TP53Expression)[T.646.36]            -0.2284        inf         -0        nan         nan         nan
+C(TP53Expression)[T.652.02]             0.8998        inf          0        nan         nan         nan
+C(TP53Expression)[T.673.08]            -0.5843        inf         -0        nan         nan         nan
+C(TP53Expression)[T.702.01]             0.6563        inf          0        nan         nan         nan
+C(TP53Expression)[T.714.97]             0.6136        inf          0        nan         nan         nan
+C(TP53Expression)[T.722.67]            -0.7130        inf         -0        nan         nan         nan
+C(TP53Expression)[T.728.54]            -0.6841        inf         -0        nan         nan         nan
+C(TP53Expression)[T.753.02]            -0.8311        inf         -0        nan         nan         nan
+C(TP53Expression)[T.756.91]             1.5465        inf          0        nan         nan         nan
+C(TP53Expression)[T.761.76]            -0.1457        inf         -0        nan         nan         nan
+C(TP53Expression)[T.763.25]             0.5555        inf          0        nan         nan         nan
+C(TP53Expression)[T.770.61]            -0.1457        inf         -0        nan         nan         nan
+C(TP53Expression)[T.772.05]            -0.5289        inf         -0        nan         nan         nan
+C(TP53Expression)[T.787.21]             0.4471        inf          0        nan         nan         nan
+C(TP53Expression)[T.790.24]            -0.2051        inf         -0        nan         nan         nan
+C(TP53Expression)[T.805.14]             0.0487        inf          0        nan         nan         nan
+C(TP53Expression)[T.805.81]            -0.7916        inf         -0        nan         nan         nan
+C(TP53Expression)[T.823.34]            -0.4853        inf         -0        nan         nan         nan
+C(TP53Expression)[T.848.35]             0.1891        inf          0        nan         nan         nan
+C(TP53Expression)[T.857.4]             -0.4584        inf         -0        nan         nan         nan
+C(TP53Expression)[T.900.11]            -0.8680        inf         -0        nan         nan         nan
+C(TP53Expression)[T.904.96]             0.0780        inf          0        nan         nan         nan
+C(TP53Expression)[T.906.65]            -0.4992        inf         -0        nan         nan         nan
+C(TP53Expression)[T.920.18]            -0.3532        inf         -0        nan         nan         nan
+C(TP53Expression)[T.921.26]            -0.2489        inf         -0        nan         nan         nan
+C(TP53Expression)[T.924.88]             1.1203        inf          0        nan         nan         nan
+C(TP53Expression)[T.933.36]             0.2026        inf          0        nan         nan         nan
+C(TP53Expression)[T.936.95]            -0.0595        inf         -0        nan         nan         nan
+C(TP53Expression)[T.948.43]            -0.3490        inf         -0        nan         nan         nan
+C(TP53Expression)[T.950.91]             0.6842        inf          0        nan         nan         nan
+C(TP53Expression)[T.955.02]             0.7063        inf          0        nan         nan         nan
+C(TP53Expression)[T.958.81]            -0.9417        inf         -0        nan         nan         nan
+C(TP53Expression)[T.978.65]            -0.8473        inf         -0        nan         nan         nan
+C(TP53Expression)[T.983.35]            -1.2396        inf         -0        nan         nan         nan
+C(TP53Expression)[T.984.46]            -0.0665        inf         -0        nan         nan         nan
+C(TP53Expression)[T.984.56]             0.1840        inf          0        nan         nan         nan
+C(TP53Expression)[T.989.37]            -0.0943        inf         -0        nan         nan         nan
+C(TP53Expression)[T.994.68]            -0.0784        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1029.93]           -0.3641        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1031.95]           -0.0301        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1031.99]            0.9977        inf          0        nan         nan         nan
+C(TP53Expression)[T.1032.97]           -0.1415        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1034.52]            0.5123        inf          0        nan         nan         nan
+C(TP53Expression)[T.1044.44]            2.2340        inf          0        nan         nan         nan
+C(TP53Expression)[T.1044.64]           -0.0637        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1049.78]           -0.4537        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1052.32]           -0.5816        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1056.65]           -0.4671        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1060.3]            -0.7091        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1060.97]            0.5439        inf          0        nan         nan         nan
+C(TP53Expression)[T.1064.44]            0.1620        inf          0        nan         nan         nan
+C(TP53Expression)[T.1066.57]            0.5779        inf          0        nan         nan         nan
+C(TP53Expression)[T.1066.78]            0.0782        inf          0        nan         nan         nan
+C(TP53Expression)[T.1075.05]            0.2991        inf          0        nan         nan         nan
+C(TP53Expression)[T.1088.35]            0.7008        inf          0        nan         nan         nan
+C(TP53Expression)[T.1089.79]           -0.8074        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1098.51]           -0.6282        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1105.75]            1.2095        inf          0        nan         nan         nan
+C(TP53Expression)[T.1109.57]           -0.2746        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1115.21]           -0.2315        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1121.61]           -0.4298        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1122.77]           -1.0960        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1123.01]           -0.5767        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1124.79]           -0.4213        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1130.65]            0.0609        inf          0        nan         nan         nan
+C(TP53Expression)[T.1131.1]            -0.6670        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1140.17]           -0.2875        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1141.2]             0.2309        inf          0        nan         nan         nan
+C(TP53Expression)[T.1143.26]            0.1892        inf          0        nan         nan         nan
+C(TP53Expression)[T.1143.36]           -0.1608        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1146.72]            0.1251        inf          0        nan         nan         nan
+C(TP53Expression)[T.1147.04]           -0.3111        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1152.57]            1.7722        inf          0        nan         nan         nan
+C(TP53Expression)[T.1156.42]           -0.6533        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1160.25]            0.4093        inf          0        nan         nan         nan
+C(TP53Expression)[T.1172.63]            0.6594        inf          0        nan         nan         nan
+C(TP53Expression)[T.1177.23]            0.9341        inf          0        nan         nan         nan
+C(TP53Expression)[T.1179.44]            0.1453        inf          0        nan         nan         nan
+C(TP53Expression)[T.1181.17]           -0.1387        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1200.19]           -0.9917        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1200.76]           -0.0238        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1217.41]           -0.3408        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1219.22]           -0.2094        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1221.91]           -0.6157        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1225.93]            0.4199        inf          0        nan         nan         nan
+C(TP53Expression)[T.1228.87]           -0.6015        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1229.27]            0.5016        inf          0        nan         nan         nan
+C(TP53Expression)[T.1238.18]           -0.1420        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1248.36]            0.1868        inf          0        nan         nan         nan
+C(TP53Expression)[T.1253.98]            3.1002        inf          0        nan         nan         nan
+C(TP53Expression)[T.1259.34]            1.3940        inf          0        nan         nan         nan
+C(TP53Expression)[T.1266.25]            0.5318        inf          0        nan         nan         nan
+C(TP53Expression)[T.1268.85]            0.0152        inf          0        nan         nan         nan
+C(TP53Expression)[T.1273.68]           -0.3584        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1274.06]            0.7708        inf          0        nan         nan         nan
+C(TP53Expression)[T.1278.8]             0.0066        inf          0        nan         nan         nan
+C(TP53Expression)[T.1283.7]            -0.1626        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1290.24]            0.3750        inf          0        nan         nan         nan
+C(TP53Expression)[T.1295.52]           -0.6740        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1303.29]           -0.6102        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1304.74]           -0.8310        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1305.83]           -0.3478        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1306.63]           -0.9086        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1307.15]            1.1792        inf          0        nan         nan         nan
+C(TP53Expression)[T.1310.33]            0.6281        inf          0        nan         nan         nan
+C(TP53Expression)[T.1312.78]           -0.8524        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1313.34]           -1.0620        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1316.14]           -0.5741        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1320.98]           -0.2642        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1324.27]            0.0519        inf          0        nan         nan         nan
+C(TP53Expression)[T.1324.6]            -0.5196        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1338.26]           -0.4663        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1340.66]           -0.0098        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1342.1]            -0.5356        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1347.15]           -0.8109        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1351.1]            -0.9353        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1362.92]           -0.4201        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1366.12]           -0.0313        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1372.1]             1.5551        inf          0        nan         nan         nan
+C(TP53Expression)[T.1375.45]           -0.0724        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1383.95]           -0.4467        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1386.77]           -0.7619        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1395.76]           -0.8167        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1406.33]            0.3813        inf          0        nan         nan         nan
+C(TP53Expression)[T.1408.99]           -0.2109        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1411.67]           -0.2350        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1415.1]            -0.3089        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1428.7]             0.5978        inf          0        nan         nan         nan
+C(TP53Expression)[T.1429.21]           -0.5113        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1446.64]           -0.3918        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1450.08]           -0.7750        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1450.77]           -0.3326        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1453.8]            -0.8737        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1458.49]           -0.0620        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1471.38]           -0.2093        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1474.9]            -0.2109        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1485.63]           -0.9895        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1488.81]           -0.3656        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1499.49]           -0.7920        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1504.88]            0.0527        inf          0        nan         nan         nan
+C(TP53Expression)[T.1508.16]           -0.6557        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1514.21]            0.4297        inf          0        nan         nan         nan
+C(TP53Expression)[T.1514.87]           -0.8508        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1520.45]           -0.2096        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1521.02]           -0.3829        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1523.95]           -0.8628        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1526.79]            0.2074        inf          0        nan         nan         nan
+C(TP53Expression)[T.1529.41]           -0.3745        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1530.4]            -0.4741        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1531.01]           -0.4776        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1538.43]            0.5484        inf          0        nan         nan         nan
+C(TP53Expression)[T.1542.77]           -0.3830        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1542.99]           -0.3942        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1544.4]            -0.3714        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1547.8]             0.2251        inf          0        nan         nan         nan
+C(TP53Expression)[T.1547.83]           -0.5058        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1550.12]           -0.6841        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1566.36]           -0.5548        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1572.34]            0.3476        inf          0        nan         nan         nan
+C(TP53Expression)[T.1580.92]           -0.8318        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1584.92]           -0.1262        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1592.33]           -0.6806        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1593.73]           -0.4157        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1595.47]            0.5636        inf          0        nan         nan         nan
+C(TP53Expression)[T.1599.25]           -0.2946        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1603.86]           -0.7933        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1606.7]             0.1311        inf          0        nan         nan         nan
+C(TP53Expression)[T.1610.52]            0.7816        inf          0        nan         nan         nan
+C(TP53Expression)[T.1629.48]           -0.2339        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1650.84]            1.3748        inf          0        nan         nan         nan
+C(TP53Expression)[T.1650.86]           -0.2622        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1663.43]            1.3182        inf          0        nan         nan         nan
+C(TP53Expression)[T.1670.86]           -0.2130        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1675.21]            0.2041        inf          0        nan         nan         nan
+C(TP53Expression)[T.1685.39]           -0.6863        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1687.29]           -0.6767        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1696.58]           -0.5625        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1703.19]            0.3875        inf          0        nan         nan         nan
+C(TP53Expression)[T.1712.77]           -0.2806        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1715.57]           -0.5960        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1729.7]            -0.2260        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1730.08]           -0.3424        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1732.15]           -0.0682        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1737.65]           -0.9199        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1740.91]           -0.3680        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1745.7]            -0.2220        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1774.92]           -0.3375        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1781.37]           -0.6556        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1790.65]            0.6487        inf          0        nan         nan         nan
+C(TP53Expression)[T.1790.98]            0.1064        inf          0        nan         nan         nan
+C(TP53Expression)[T.1798.34]           -0.8500        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1801.46]           -0.3456        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1803.66]           -0.8145        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1803.7]             0.1950        inf          0        nan         nan         nan
+C(TP53Expression)[T.1807.47]           -0.6279        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1827.64]           -0.3207        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1831.25]           -0.3760        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1843.95]           -0.7961        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1853.56]           -0.6491        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1853.76]            0.5525        inf          0        nan         nan         nan
+C(TP53Expression)[T.1858.97]           -0.8828        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1869.05]           -0.2173        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1877.5]            -0.8334        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1887.6]            -0.3425        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1898.65]            1.8242        inf          0        nan         nan         nan
+C(TP53Expression)[T.1912.72]           -0.8098        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1913.57]            1.1417        inf          0        nan         nan         nan
+C(TP53Expression)[T.1915.22]           -0.4651        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1920.99]           -0.7363        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1923.42]           -0.1312        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1923.94]           -0.5377        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1932.86]           -0.4571        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1935.97]           -0.0667        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1943.47]           -0.0416        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1946.5]             0.1268        inf          0        nan         nan         nan
+C(TP53Expression)[T.1951.4]            -0.2653        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1953.27]           -0.2060        inf         -0        nan         nan         nan
+C(TP53Expression)[T.1988.49]           -0.7364        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2006.33]           -0.7600        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2015.95]           -0.0451        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2035.22]           -0.3399        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2041.01]           -0.8502        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2050.23]           -0.5817        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2066.18]            0.1124        inf          0        nan         nan         nan
+C(TP53Expression)[T.2072.41]           -0.8452        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2074.7]             1.0974        inf          0        nan         nan         nan
+C(TP53Expression)[T.2077.85]           -0.3222        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2079.84]           -1.0660        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2091.9]             0.6946        inf          0        nan         nan         nan
+C(TP53Expression)[T.2092.75]           -0.1022        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2095.41]           -0.5703        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2142.63]           -0.2518        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2160.83]           -0.6776        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2167.39]           -0.0727        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2177.62]           -0.8588        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2193.99]           -0.1078        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2201.39]           -0.6534        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2207.56]           -0.0930        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2225.84]           -0.3253        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2226.89]           -0.8869        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2232.59]           -0.7519        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2254.28]           -0.1470        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2278.16]           -0.2734        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2290.84]            0.2460        inf          0        nan         nan         nan
+C(TP53Expression)[T.2324.79]           -0.3578        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2343.28]            0.5014        inf          0        nan         nan         nan
+C(TP53Expression)[T.2360.57]            1.6730        inf          0        nan         nan         nan
+C(TP53Expression)[T.2366.7]            -0.3959        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2366.92]           -0.6188        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2385.46]           -0.1289        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2399.37]            0.2102        inf          0        nan         nan         nan
+C(TP53Expression)[T.2422.11]            0.1640        inf          0        nan         nan         nan
+C(TP53Expression)[T.2520.8]            -0.7636        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2574.65]        -8.645e-05        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2579.65]            0.3138        inf          0        nan         nan         nan
+C(TP53Expression)[T.2603.34]           -0.3519        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2613.83]           -0.3583        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2629.92]            0.9758        inf          0        nan         nan         nan
+C(TP53Expression)[T.2639.13]           -0.6389        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2701.2]            -0.3182        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2703.61]           -0.0098        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2706.19]           -0.2216        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2730.52]           -0.1055        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2907.15]           -0.2089        inf         -0        nan         nan         nan
+C(TP53Expression)[T.2939.47]           -0.7747        inf         -0        nan         nan         nan
+C(TP53Expression)[T.3066.43]           -0.2766        inf         -0        nan         nan         nan
+C(TP53Expression)[T.3083.37]            0.3966        inf          0        nan         nan         nan
+C(TP53Expression)[T.3121.16]           -0.8255        inf         -0        nan         nan         nan
+C(TP53Expression)[T.3309.18]           -0.1643        inf         -0        nan         nan         nan
+C(TP53Expression)[T.3478.36]           -0.6037        inf         -0        nan         nan         nan
+C(TP53Expression)[T.3629.55]            0.2479        inf          0        nan         nan         nan
+C(TP53Expression)[T.3632.8]            -0.9709        inf         -0        nan         nan         nan
+C(TP53Expression)[T.3723.57]           -0.1597        inf         -0        nan         nan         nan
+C(TP53Expression)[T.4117.84]           -0.8670        inf         -0        nan         nan         nan
+C(TP53Expression)[T.4184.99]           -0.9238        inf         -0        nan         nan         nan
+C(TP53Expression)[T.4571.26]           -0.5678        inf         -0        nan         nan         nan
+C(TP53Expression)[T.4703.88]           -0.8496        inf         -0        nan         nan         nan
+age_at_initial_pathologic_diagnosis     0.0009        inf          0        nan         nan         nan
+number_pack_years_smoked                0.0029        inf          0        nan         nan         nan
+==============================================================================
+Omnibus:                       51.266   Durbin-Watson:                   1.537
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              269.290
+Skew:                           0.475   Prob(JB):                     3.35e-59
+Kurtosis:                       7.302   Cond. No.                     2.45e+04
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+[2] The input rank is higher than the number of observations.
+[3] The condition number is large, 2.45e+04. This might indicate that there are
+strong multicollinearity or other numerical problems.
+
+[Model: ALK Expression]
+                                         OLS Regression Results                                         
+========================================================================================================
+Dep. Variable:     SignatureScore_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC   R-squared:                       0.887
+Model:                                                      OLS   Adj. R-squared:                  0.165
+Method:                                           Least Squares   F-statistic:                     1.229
+Date:                                          Tue, 23 Jun 2026   Prob (F-statistic):              0.203
+Time:                                                  03:57:28   Log-Likelihood:                 20.867
+No. Observations:                                           333   AIC:                             534.3
+Df Residuals:                                                45   BIC:                             1631.
+Df Model:                                                   287                                         
+Covariance Type:                                      nonrobust                                         
+=======================================================================================================
+                                          coef    std err          t      P>|t|      [0.025      0.975]
+-------------------------------------------------------------------------------------------------------
+Intercept                              -0.3142      0.606     -0.518      0.607      -1.535       0.907
+C(gender)[T.MALE]                       0.2088      0.178      1.174      0.246      -0.149       0.567
+C(ALKExpression)[T.0.26]                1.0040      0.664      1.512      0.138      -0.334       2.342
+C(ALKExpression)[T.0.28]                2.3389      0.665      3.516      0.001       0.999       3.679
+C(ALKExpression)[T.0.3]                -0.7066      0.683     -1.034      0.307      -2.083       0.670
+C(ALKExpression)[T.0.32]                0.1262      0.666      0.190      0.850      -1.214       1.467
+C(ALKExpression)[T.0.35]                2.2234      0.691      3.219      0.002       0.832       3.614
+C(ALKExpression)[T.0.38]               -0.4066      0.665     -0.612      0.544      -1.746       0.932
+C(ALKExpression)[T.0.44]               -0.2773      0.650     -0.427      0.672      -1.586       1.032
+C(ALKExpression)[T.0.45]                0.0887      0.684      0.130      0.897      -1.290       1.467
+C(ALKExpression)[T.0.48]               -0.0269      0.654     -0.041      0.967      -1.344       1.290
+C(ALKExpression)[T.0.51]                0.8726      0.653      1.336      0.188      -0.443       2.188
+C(ALKExpression)[T.0.56]                0.5471      0.653      0.837      0.407      -0.769       1.863
+C(ALKExpression)[T.0.57]                0.3882      0.403      0.962      0.341      -0.424       1.201
+C(ALKExpression)[T.0.6]                -0.5494      0.683     -0.804      0.425      -1.925       0.826
+C(ALKExpression)[T.0.62]               -0.9711      0.698     -1.390      0.171      -2.378       0.436
+C(ALKExpression)[T.0.63]               -0.0390      0.662     -0.059      0.953      -1.372       1.294
+C(ALKExpression)[T.0.66]               -0.2706      0.656     -0.413      0.682      -1.592       1.051
+C(ALKExpression)[T.0.73]                0.4568      0.661      0.691      0.493      -0.875       1.789
+C(ALKExpression)[T.0.75]               -0.0720      0.662     -0.109      0.914      -1.404       1.261
+C(ALKExpression)[T.0.77]               -0.3414      0.497     -0.687      0.496      -1.342       0.659
+C(ALKExpression)[T.0.78]               -0.3465      0.650     -0.533      0.596      -1.655       0.962
+C(ALKExpression)[T.0.8]                 1.2106      0.661      1.832      0.074      -0.121       2.542
+C(ALKExpression)[T.0.83]               -0.5104      0.656     -0.778      0.441      -1.832       0.812
+C(ALKExpression)[T.0.85]               -0.1304      0.671     -0.194      0.847      -1.483       1.222
+C(ALKExpression)[T.0.88]                1.2197      0.678      1.799      0.079      -0.146       2.585
+C(ALKExpression)[T.0.89]                1.8324      0.657      2.789      0.008       0.509       3.156
+C(ALKExpression)[T.0.93]                1.4404      0.489      2.943      0.005       0.455       2.426
+C(ALKExpression)[T.0.98]                1.5756      0.668      2.358      0.023       0.230       2.922
+C(ALKExpression)[T.1.04]                0.3135      0.665      0.471      0.640      -1.027       1.654
+C(ALKExpression)[T.1.05]                0.0437      0.672      0.065      0.948      -1.310       1.397
+C(ALKExpression)[T.1.06]               -0.0075      0.676     -0.011      0.991      -1.369       1.354
+C(ALKExpression)[T.1.09]                1.1759      0.670      1.755      0.086      -0.174       2.526
+C(ALKExpression)[T.1.15]               -0.7184      0.719     -0.999      0.323      -2.167       0.730
+C(ALKExpression)[T.1.16]               -0.0352      0.401     -0.088      0.930      -0.842       0.772
+C(ALKExpression)[T.1.17]                0.0945      0.486      0.194      0.847      -0.885       1.074
+C(ALKExpression)[T.1.18]                1.8919      0.663      2.853      0.007       0.556       3.227
+C(ALKExpression)[T.1.19]               -0.9326      0.692     -1.348      0.185      -2.327       0.461
+C(ALKExpression)[T.1.22]                0.4568      0.487      0.938      0.353      -0.525       1.438
+C(ALKExpression)[T.1.23]                0.4457      0.481      0.926      0.359      -0.524       1.415
+C(ALKExpression)[T.1.28]               -0.2583      0.651     -0.397      0.694      -1.570       1.054
+C(ALKExpression)[T.1.31]                0.4111      0.647      0.636      0.528      -0.892       1.714
+C(ALKExpression)[T.1.33]               -0.1080      0.371     -0.291      0.772      -0.855       0.639
+C(ALKExpression)[T.1.34]                0.2921      0.529      0.552      0.584      -0.773       1.358
+C(ALKExpression)[T.1.39]                1.0609      0.650      1.632      0.110      -0.249       2.370
+C(ALKExpression)[T.1.42]               -0.2905      0.663     -0.438      0.664      -1.627       1.046
+C(ALKExpression)[T.1.49]               -0.6426      0.655     -0.982      0.332      -1.961       0.676
+C(ALKExpression)[T.1.5]                 0.7847      0.650      1.208      0.233      -0.524       2.093
+C(ALKExpression)[T.1.53]               -0.0408      0.648     -0.063      0.950      -1.347       1.265
+C(ALKExpression)[T.1.54]               -0.0975      0.653     -0.149      0.882      -1.413       1.218
+C(ALKExpression)[T.1.56]               -0.4988      0.673     -0.741      0.463      -1.855       0.857
+C(ALKExpression)[T.1.57]                0.6282      0.657      0.956      0.344      -0.696       1.952
+C(ALKExpression)[T.1.59]                0.4389      0.688      0.637      0.527      -0.948       1.826
+C(ALKExpression)[T.1.6]                -0.5936      0.674     -0.881      0.383      -1.950       0.763
+C(ALKExpression)[T.1.62]                0.3562      0.687      0.518      0.607      -1.028       1.741
+C(ALKExpression)[T.1.65]               -0.8506      0.771     -1.104      0.275      -2.403       0.701
+C(ALKExpression)[T.1.66]                1.5000      0.672      2.232      0.031       0.146       2.854
+C(ALKExpression)[T.1.69]               -0.9024      0.693     -1.301      0.200      -2.299       0.494
+C(ALKExpression)[T.1.7]                -0.0332      0.659     -0.050      0.960      -1.360       1.293
+C(ALKExpression)[T.1.76]               -0.0657      0.504     -0.130      0.897      -1.082       0.950
+C(ALKExpression)[T.1.81]                1.9673      0.733      2.685      0.010       0.492       3.443
+C(ALKExpression)[T.1.85]               -0.4333      0.708     -0.612      0.544      -1.860       0.994
+C(ALKExpression)[T.1.89]               -0.5022      0.438     -1.148      0.257      -1.383       0.379
+C(ALKExpression)[T.1.99]                1.3337      0.670      1.991      0.053      -0.015       2.683
+C(ALKExpression)[T.2.03]                0.8367      0.669      1.251      0.217      -0.511       2.184
+C(ALKExpression)[T.2.11]                0.1487      0.669      0.222      0.825      -1.199       1.496
+C(ALKExpression)[T.2.13]               -0.1799      0.667     -0.270      0.789      -1.523       1.163
+C(ALKExpression)[T.2.14]                0.0292      0.471      0.062      0.951      -0.919       0.978
+C(ALKExpression)[T.2.17]                0.0529      0.480      0.110      0.913      -0.914       1.020
+C(ALKExpression)[T.2.18]                0.1099      0.482      0.228      0.821      -0.861       1.080
+C(ALKExpression)[T.2.19]                2.0368      0.656      3.107      0.003       0.716       3.357
+C(ALKExpression)[T.2.21]               -0.0894      0.688     -0.130      0.897      -1.475       1.296
+C(ALKExpression)[T.2.22]                0.4809      0.662      0.726      0.471      -0.853       1.814
+C(ALKExpression)[T.2.26]               -0.4223      0.650     -0.649      0.519      -1.732       0.887
+C(ALKExpression)[T.2.29]               -0.5590      0.683     -0.818      0.418      -1.935       0.817
+C(ALKExpression)[T.2.3]                 0.5948      0.650      0.916      0.365      -0.713       1.903
+C(ALKExpression)[T.2.31]               -0.0963      0.656     -0.147      0.884      -1.419       1.226
+C(ALKExpression)[T.2.33]                1.0491      0.653      1.607      0.115      -0.266       2.364
+C(ALKExpression)[T.2.35]               -0.3718      0.705     -0.527      0.601      -1.792       1.048
+C(ALKExpression)[T.2.37]                0.7998      0.657      1.217      0.230      -0.524       2.124
+C(ALKExpression)[T.2.38]               -0.0247      0.666     -0.037      0.971      -1.366       1.316
+C(ALKExpression)[T.2.39]                1.3555      0.726      1.867      0.068      -0.107       2.818
+C(ALKExpression)[T.2.44]               -0.8512      0.782     -1.089      0.282      -2.426       0.723
+C(ALKExpression)[T.2.46]                0.2977      0.657      0.453      0.653      -1.026       1.621
+C(ALKExpression)[T.2.5]                -0.3778      0.653     -0.579      0.565      -1.692       0.936
+C(ALKExpression)[T.2.51]                0.2468      0.660      0.374      0.710      -1.083       1.577
+C(ALKExpression)[T.2.53]                0.4347      0.680      0.639      0.526      -0.935       1.804
+C(ALKExpression)[T.2.54]                0.4259      0.666      0.640      0.526      -0.915       1.767
+C(ALKExpression)[T.2.56]                0.8424      0.478      1.762      0.085      -0.120       1.805
+C(ALKExpression)[T.2.57]               -0.8486      0.756     -1.123      0.267      -2.370       0.673
+C(ALKExpression)[T.2.61]                1.1126      0.650      1.711      0.094      -0.197       2.422
+C(ALKExpression)[T.2.62]                0.0051      0.474      0.011      0.991      -0.949       0.959
+C(ALKExpression)[T.2.68]               -0.7703      0.663     -1.161      0.252      -2.107       0.566
+C(ALKExpression)[T.2.69]               -0.1982      0.652     -0.304      0.762      -1.511       1.114
+C(ALKExpression)[T.2.77]               -0.0764      0.658     -0.116      0.908      -1.401       1.248
+C(ALKExpression)[T.2.78]               -0.0331      0.661     -0.050      0.960      -1.365       1.299
+C(ALKExpression)[T.2.81]               -0.1265      0.493     -0.257      0.799      -1.119       0.866
+C(ALKExpression)[T.2.86]                0.9484      0.660      1.437      0.158      -0.381       2.277
+C(ALKExpression)[T.2.88]               -0.3866      0.663     -0.583      0.563      -1.722       0.948
+C(ALKExpression)[T.2.93]                0.2783      0.656      0.424      0.673      -1.043       1.600
+C(ALKExpression)[T.2.94]                0.4415      0.652      0.677      0.502      -0.871       1.754
+C(ALKExpression)[T.3.0]                 0.4023      0.423      0.951      0.347      -0.450       1.255
+C(ALKExpression)[T.3.06]                0.6049      0.672      0.900      0.373      -0.749       1.959
+C(ALKExpression)[T.3.08]               -0.1545      0.650     -0.238      0.813      -1.463       1.154
+C(ALKExpression)[T.3.11]                0.0114      0.650      0.018      0.986      -1.298       1.321
+C(ALKExpression)[T.3.15]                0.1044      0.659      0.159      0.875      -1.222       1.431
+C(ALKExpression)[T.3.19]               -0.1734      0.660     -0.263      0.794      -1.502       1.155
+C(ALKExpression)[T.3.26]                0.6829      0.493      1.386      0.172      -0.309       1.675
+C(ALKExpression)[T.3.28]               -0.3872      0.716     -0.541      0.591      -1.829       1.055
+C(ALKExpression)[T.3.33]                0.9542      0.661      1.444      0.156      -0.376       2.285
+C(ALKExpression)[T.3.36]                0.0070      0.647      0.011      0.991      -1.296       1.310
+C(ALKExpression)[T.3.42]                1.8142      0.502      3.613      0.001       0.803       2.826
+C(ALKExpression)[T.3.55]                0.7516      0.654      1.149      0.257      -0.566       2.070
+C(ALKExpression)[T.3.58]                0.5095      0.664      0.768      0.447      -0.827       1.846
+C(ALKExpression)[T.3.59]                1.5617      0.657      2.378      0.022       0.239       2.884
+C(ALKExpression)[T.3.64]                0.1324      0.669      0.198      0.844      -1.214       1.479
+C(ALKExpression)[T.3.74]                0.1658      0.676      0.245      0.807      -1.196       1.528
+C(ALKExpression)[T.3.76]               -0.4443      0.650     -0.683      0.498      -1.754       0.866
+C(ALKExpression)[T.3.8]                 0.6487      0.664      0.977      0.334      -0.689       1.986
+C(ALKExpression)[T.3.81]                0.4787      0.652      0.735      0.466      -0.834       1.791
+C(ALKExpression)[T.3.82]               -0.3659      0.654     -0.559      0.579      -1.684       0.952
+C(ALKExpression)[T.3.83]                2.1368      0.660      3.238      0.002       0.808       3.466
+C(ALKExpression)[T.3.87]               -0.2160      0.672     -0.322      0.749      -1.569       1.137
+C(ALKExpression)[T.3.96]                0.2499      0.662      0.377      0.708      -1.084       1.584
+C(ALKExpression)[T.4.0]                 4.1574      0.647      6.423      0.000       2.854       5.461
+C(ALKExpression)[T.4.03]                0.4984      0.659      0.756      0.453      -0.829       1.826
+C(ALKExpression)[T.4.06]               -0.5379      0.774     -0.695      0.491      -2.097       1.021
+C(ALKExpression)[T.4.1]                 1.7231      0.653      2.638      0.011       0.407       3.039
+C(ALKExpression)[T.4.11]                0.6661      0.652      1.022      0.312      -0.647       1.979
+C(ALKExpression)[T.4.14]               -0.2256      0.714     -0.316      0.754      -1.665       1.213
+C(ALKExpression)[T.4.16]               -0.0715      0.656     -0.109      0.914      -1.393       1.250
+C(ALKExpression)[T.4.25]                0.4601      0.650      0.708      0.483      -0.849       1.770
+C(ALKExpression)[T.4.31]               -0.3047      0.662     -0.461      0.647      -1.637       1.028
+C(ALKExpression)[T.4.33]               -0.6760      0.787     -0.858      0.395      -2.262       0.910
+C(ALKExpression)[T.4.34]               -0.0542      0.661     -0.082      0.935      -1.385       1.276
+C(ALKExpression)[T.4.38]               -0.3614      0.652     -0.554      0.582      -1.674       0.951
+C(ALKExpression)[T.4.39]               -0.2248      0.662     -0.340      0.736      -1.557       1.108
+C(ALKExpression)[T.4.4]                -0.7022      0.797     -0.881      0.383      -2.307       0.903
+C(ALKExpression)[T.4.41]               -0.1066      0.668     -0.159      0.874      -1.452       1.239
+C(ALKExpression)[T.4.42]               -0.2470      0.659     -0.375      0.710      -1.575       1.081
+C(ALKExpression)[T.4.43]               -0.1404      0.716     -0.196      0.846      -1.583       1.303
+C(ALKExpression)[T.4.58]               -0.0463      0.481     -0.096      0.924      -1.015       0.922
+C(ALKExpression)[T.4.64]               -0.2727      0.650     -0.419      0.677      -1.582       1.037
+C(ALKExpression)[T.4.65]                1.2212      0.652      1.874      0.067      -0.091       2.534
+C(ALKExpression)[T.4.73]               -0.7960      0.733     -1.086      0.283      -2.272       0.680
+C(ALKExpression)[T.4.75]               -0.2368      0.676     -0.350      0.728      -1.599       1.125
+C(ALKExpression)[T.4.85]                1.0687      0.664      1.609      0.115      -0.269       2.406
+C(ALKExpression)[T.4.87]               -1.5328      0.861     -1.780      0.082      -3.267       0.202
+C(ALKExpression)[T.4.88]                0.5935      0.678      0.875      0.386      -0.772       1.959
+C(ALKExpression)[T.4.97]                0.9182      0.657      1.397      0.169      -0.406       2.242
+C(ALKExpression)[T.4.98]               -0.1519      0.655     -0.232      0.818      -1.471       1.167
+C(ALKExpression)[T.5.01]                0.0365      0.521      0.070      0.944      -1.013       1.086
+C(ALKExpression)[T.5.03]               -0.4600      0.651     -0.706      0.484      -1.772       0.852
+C(ALKExpression)[T.5.04]               -0.1716      0.653     -0.263      0.794      -1.486       1.143
+C(ALKExpression)[T.5.15]               -0.1328      0.651     -0.204      0.839      -1.444       1.179
+C(ALKExpression)[T.5.16]               -0.0513      0.658     -0.078      0.938      -1.376       1.274
+C(ALKExpression)[T.5.22]                0.6122      0.649      0.944      0.350      -0.695       1.919
+C(ALKExpression)[T.5.33]               -0.2763      0.494     -0.559      0.579      -1.271       0.719
+C(ALKExpression)[T.5.35]                0.6450      0.655      0.985      0.330      -0.674       1.964
+C(ALKExpression)[T.5.38]               -0.2608      0.649     -0.402      0.690      -1.568       1.046
+C(ALKExpression)[T.5.46]               -0.2088      0.653     -0.320      0.751      -1.524       1.106
+C(ALKExpression)[T.5.5]                -0.2772      0.651     -0.426      0.672      -1.589       1.034
+C(ALKExpression)[T.5.54]                0.6853      0.665      1.031      0.308      -0.654       2.025
+C(ALKExpression)[T.5.62]                0.9299      0.664      1.400      0.168      -0.408       2.267
+C(ALKExpression)[T.5.63]                0.1485      0.487      0.305      0.762      -0.833       1.130
+C(ALKExpression)[T.5.87]               -0.5166      0.656     -0.788      0.435      -1.837       0.804
+C(ALKExpression)[T.5.9]                 1.4222      0.495      2.875      0.006       0.426       2.418
+C(ALKExpression)[T.5.97]                0.1217      0.655      0.186      0.853      -1.197       1.440
+C(ALKExpression)[T.6.04]                0.3665      0.482      0.761      0.451      -0.604       1.337
+C(ALKExpression)[T.6.13]                0.4880      0.658      0.742      0.462      -0.837       1.813
+C(ALKExpression)[T.6.18]                0.4572      0.665      0.687      0.496      -0.883       1.798
+C(ALKExpression)[T.6.26]               -0.4518      0.665     -0.679      0.501      -1.792       0.888
+C(ALKExpression)[T.6.3]                -0.1332      0.658     -0.202      0.840      -1.458       1.192
+C(ALKExpression)[T.6.31]               -1.0950      0.795     -1.377      0.175      -2.697       0.507
+C(ALKExpression)[T.6.45]               -0.3585      0.661     -0.542      0.590      -1.690       0.973
+C(ALKExpression)[T.6.56]               -0.0829      0.669     -0.124      0.902      -1.431       1.265
+C(ALKExpression)[T.6.57]               -0.3298      0.656     -0.503      0.617      -1.651       0.991
+C(ALKExpression)[T.6.65]               -0.0622      0.661     -0.094      0.925      -1.393       1.268
+C(ALKExpression)[T.6.71]                1.9105      0.659      2.899      0.006       0.583       3.238
+C(ALKExpression)[T.6.72]                0.2696      0.655      0.412      0.682      -1.049       1.588
+C(ALKExpression)[T.6.8]                -0.3082      0.660     -0.467      0.643      -1.637       1.021
+C(ALKExpression)[T.6.95]               -0.4976      0.470     -1.058      0.296      -1.445       0.450
+C(ALKExpression)[T.7.08]               -0.5225      0.658     -0.794      0.432      -1.848       0.804
+C(ALKExpression)[T.7.38]               -0.5204      0.656     -0.793      0.432      -1.842       0.801
+C(ALKExpression)[T.7.4]                -0.8248      0.719     -1.147      0.257      -2.273       0.624
+C(ALKExpression)[T.7.47]                0.7274      0.651      1.118      0.270      -0.583       2.038
+C(ALKExpression)[T.7.53]                0.1503      0.654      0.230      0.819      -1.166       1.467
+C(ALKExpression)[T.7.56]               -0.2652      0.649     -0.409      0.685      -1.573       1.042
+C(ALKExpression)[T.7.57]                0.4147      0.661      0.627      0.534      -0.918       1.747
+C(ALKExpression)[T.7.64]               -0.3724      0.669     -0.556      0.581      -1.721       0.976
+C(ALKExpression)[T.7.69]                0.0403      0.652      0.062      0.951      -1.272       1.353
+C(ALKExpression)[T.7.72]                2.1711      0.652      3.331      0.002       0.858       3.484
+C(ALKExpression)[T.7.77]               -0.1868      0.647     -0.288      0.774      -1.491       1.117
+C(ALKExpression)[T.7.86]                1.2280      0.660      1.861      0.069      -0.101       2.557
+C(ALKExpression)[T.7.92]                0.5306      0.653      0.813      0.420      -0.784       1.845
+C(ALKExpression)[T.7.94]                0.7874      0.667      1.181      0.244      -0.556       2.131
+C(ALKExpression)[T.7.96]               -0.1534      0.664     -0.231      0.818      -1.491       1.184
+C(ALKExpression)[T.8.06]                1.2782      0.674      1.895      0.064      -0.080       2.637
+C(ALKExpression)[T.8.09]               -0.2650      0.657     -0.403      0.689      -1.589       1.059
+C(ALKExpression)[T.8.17]               -0.1232      0.659     -0.187      0.853      -1.452       1.205
+C(ALKExpression)[T.8.22]               -0.6096      0.655     -0.931      0.357      -1.929       0.710
+C(ALKExpression)[T.8.31]               -0.0759      0.666     -0.114      0.910      -1.417       1.265
+C(ALKExpression)[T.8.55]                0.0711      0.497      0.143      0.887      -0.930       1.072
+C(ALKExpression)[T.8.61]                0.9131      0.656      1.391      0.171      -0.409       2.235
+C(ALKExpression)[T.8.7]                -0.6508      0.701     -0.928      0.358      -2.063       0.762
+C(ALKExpression)[T.8.97]                0.7110      0.650      1.094      0.280      -0.599       2.021
+C(ALKExpression)[T.9.02]               -0.1729      0.667     -0.259      0.797      -1.517       1.171
+C(ALKExpression)[T.9.08]                0.3396      0.692      0.491      0.626      -1.054       1.733
+C(ALKExpression)[T.9.18]                0.4654      0.657      0.709      0.482      -0.857       1.788
+C(ALKExpression)[T.9.24]               -0.7987      0.741     -1.079      0.287      -2.290       0.693
+C(ALKExpression)[T.9.33]                0.5881      0.669      0.880      0.384      -0.758       1.935
+C(ALKExpression)[T.9.37]                0.0215      0.662      0.032      0.974      -1.312       1.355
+C(ALKExpression)[T.9.58]               -0.3698      0.649     -0.570      0.572      -1.676       0.937
+C(ALKExpression)[T.9.87]                0.2844      0.488      0.583      0.563      -0.698       1.267
+C(ALKExpression)[T.9.93]                0.0910      0.677      0.134      0.894      -1.272       1.454
+C(ALKExpression)[T.9.96]                0.5068      0.654      0.775      0.442      -0.810       1.823
+C(ALKExpression)[T.9.98]                0.1929      0.727      0.265      0.792      -1.272       1.658
+C(ALKExpression)[T.10.01]               0.1740      0.804      0.217      0.830      -1.444       1.792
+C(ALKExpression)[T.10.11]              -1.0442      0.732     -1.427      0.160      -2.518       0.429
+C(ALKExpression)[T.10.18]              -0.4143      0.654     -0.633      0.530      -1.732       0.903
+C(ALKExpression)[T.10.34]               0.4959      0.655      0.757      0.453      -0.824       1.816
+C(ALKExpression)[T.10.46]              -0.4375      0.650     -0.673      0.504      -1.746       0.871
+C(ALKExpression)[T.10.64]              -0.4551      0.688     -0.661      0.512      -1.842       0.931
+C(ALKExpression)[T.10.71]               0.1053      0.662      0.159      0.874      -1.228       1.439
+C(ALKExpression)[T.10.72]               0.4661      0.650      0.718      0.477      -0.842       1.774
+C(ALKExpression)[T.11.01]               0.6854      0.681      1.007      0.319      -0.686       2.057
+C(ALKExpression)[T.11.08]              -0.3618      0.685     -0.529      0.600      -1.741       1.017
+C(ALKExpression)[T.11.31]               0.3087      0.694      0.445      0.659      -1.089       1.707
+C(ALKExpression)[T.11.38]               0.5708      0.660      0.865      0.392      -0.758       1.900
+C(ALKExpression)[T.11.82]               0.7572      0.662      1.143      0.259      -0.577       2.091
+C(ALKExpression)[T.11.92]              -0.1709      0.648     -0.264      0.793      -1.475       1.133
+C(ALKExpression)[T.12.39]              -0.0034      0.733     -0.005      0.996      -1.479       1.473
+C(ALKExpression)[T.12.97]              -0.0679      0.650     -0.105      0.917      -1.376       1.240
+C(ALKExpression)[T.13.05]               0.3412      0.691      0.494      0.624      -1.051       1.733
+C(ALKExpression)[T.13.28]               0.6913      0.656      1.054      0.298      -0.630       2.013
+C(ALKExpression)[T.13.54]              -0.0564      0.669     -0.084      0.933      -1.404       1.291
+C(ALKExpression)[T.13.55]               0.2183      0.662      0.330      0.743      -1.116       1.552
+C(ALKExpression)[T.13.94]               0.5178      0.653      0.793      0.432      -0.797       1.833
+C(ALKExpression)[T.13.99]               0.8898      0.676      1.317      0.195      -0.471       2.251
+C(ALKExpression)[T.14.65]              -0.7354      0.679     -1.083      0.285      -2.104       0.633
+C(ALKExpression)[T.14.77]              -0.0990      0.662     -0.150      0.882      -1.432       1.234
+C(ALKExpression)[T.15.14]               0.1003      0.650      0.154      0.878      -1.210       1.410
+C(ALKExpression)[T.15.15]               0.4690      0.649      0.723      0.473      -0.838       1.776
+C(ALKExpression)[T.15.23]              -0.2165      0.665     -0.326      0.746      -1.556       1.123
+C(ALKExpression)[T.15.35]              -0.3302      0.655     -0.504      0.617      -1.649       0.989
+C(ALKExpression)[T.15.64]              -0.4570      0.710     -0.644      0.523      -1.887       0.973
+C(ALKExpression)[T.16.41]              -0.3441      0.649     -0.530      0.598      -1.651       0.963
+C(ALKExpression)[T.16.66]               0.5600      0.658      0.850      0.400      -0.766       1.886
+C(ALKExpression)[T.16.97]               0.2783      0.652      0.427      0.672      -1.035       1.591
+C(ALKExpression)[T.17.24]               0.1837      0.655      0.281      0.780      -1.135       1.502
+C(ALKExpression)[T.17.35]              -0.4437      0.648     -0.684      0.497      -1.750       0.862
+C(ALKExpression)[T.18.09]               0.5843      0.656      0.891      0.378      -0.737       1.905
+C(ALKExpression)[T.19.03]               0.1728      0.649      0.266      0.791      -1.135       1.480
+C(ALKExpression)[T.19.41]              -0.0389      0.659     -0.059      0.953      -1.367       1.289
+C(ALKExpression)[T.20.2]               -0.1213      0.663     -0.183      0.856      -1.457       1.214
+C(ALKExpression)[T.21.59]               0.1003      0.650      0.154      0.878      -1.209       1.410
+C(ALKExpression)[T.22.85]              -0.0744      0.662     -0.112      0.911      -1.408       1.259
+C(ALKExpression)[T.24.26]              -1.1522      0.735     -1.568      0.124      -2.632       0.328
+C(ALKExpression)[T.24.61]              -0.0358      0.658     -0.054      0.957      -1.362       1.290
+C(ALKExpression)[T.25.26]              -0.3242      0.735     -0.441      0.661      -1.804       1.155
+C(ALKExpression)[T.29.46]               0.5601      0.698      0.802      0.427      -0.846       1.967
+C(ALKExpression)[T.29.82]               0.0252      0.651      0.039      0.969      -1.285       1.335
+C(ALKExpression)[T.30.89]              -0.6341      0.668     -0.949      0.348      -1.980       0.712
+C(ALKExpression)[T.31.03]               0.2136      0.677      0.316      0.754      -1.150       1.577
+C(ALKExpression)[T.31.7]                0.8369      0.650      1.287      0.205      -0.473       2.147
+C(ALKExpression)[T.33.84]              -0.2051      0.660     -0.311      0.757      -1.534       1.124
+C(ALKExpression)[T.33.95]              -0.1111      0.649     -0.171      0.865      -1.418       1.196
+C(ALKExpression)[T.34.82]               0.3830      0.681      0.563      0.576      -0.988       1.754
+C(ALKExpression)[T.36.12]               0.1992      0.672      0.296      0.768      -1.154       1.553
+C(ALKExpression)[T.43.34]               0.1090      0.649      0.168      0.867      -1.199       1.417
+C(ALKExpression)[T.45.38]               0.3628      0.662      0.548      0.587      -0.971       1.697
+C(ALKExpression)[T.51.95]               1.4522      0.652      2.227      0.031       0.139       2.766
+C(ALKExpression)[T.58.43]              -0.5178      0.690     -0.750      0.457      -1.908       0.872
+C(ALKExpression)[T.59.45]               0.4759      0.673      0.707      0.483      -0.880       1.832
+C(ALKExpression)[T.63.96]               0.0874      0.650      0.134      0.894      -1.222       1.397
+C(ALKExpression)[T.69.06]              -1.0045      0.732     -1.372      0.177      -2.479       0.470
+C(ALKExpression)[T.82.72]              -0.1694      0.651     -0.260      0.796      -1.481       1.142
+C(ALKExpression)[T.88.66]               0.2663      0.660      0.404      0.688      -1.063       1.596
+C(ALKExpression)[T.96.69]               0.2941      0.696      0.422      0.675      -1.108       1.696
+C(ALKExpression)[T.115.56]             -0.2375      0.655     -0.363      0.718      -1.556       1.081
+C(ALKExpression)[T.150.19]             -0.4230      0.652     -0.648      0.520      -1.737       0.891
+C(ALKExpression)[T.156.92]              0.8577      0.657      1.306      0.198      -0.465       2.180
+C(ALKExpression)[T.179.72]             -0.5460      0.651     -0.839      0.406      -1.857       0.765
+C(ALKExpression)[T.182.86]              0.9129      0.758      1.204      0.235      -0.614       2.440
+C(ALKExpression)[T.502.07]             -0.2170      0.664     -0.327      0.745      -1.555       1.121
+C(ALKExpression)[T.836.09]             -0.8583      0.649     -1.322      0.193      -2.166       0.449
+age_at_initial_pathologic_diagnosis    -0.0048      0.009     -0.514      0.610      -0.023       0.014
+number_pack_years_smoked                0.0091      0.005      1.876      0.067      -0.001       0.019
+==============================================================================
+Omnibus:                      147.549   Durbin-Watson:                   2.059
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):             6103.206
+Skew:                           1.079   Prob(JB):                         0.00
+Kurtosis:                      23.862   Cond. No.                     7.82e+03
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+[2] The condition number is large, 7.82e+03. This might indicate that there are
+strong multicollinearity or other numerical problems.

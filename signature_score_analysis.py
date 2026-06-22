@@ -27,7 +27,7 @@ class PrintLogger:
 warnings.filterwarnings('ignore')
 
 # =====================================================================
-# 핵심: Signature Score 계산 및 그룹화 (요청하신 로직 반영)
+# 핵심: Signature Score 계산 및 그룹화
 # =====================================================================
 def get_signature_group(df, gene_list, sav_path):
     # 5개 유전자의 Z-score 평균을 구해 High/Low 그룹 생성 및 기존 DB 병합
@@ -125,14 +125,17 @@ def analyze_bivariate_correlation(df, gene_list):
         
     return pd.DataFrame(table2_data, columns=['Variable', 'Stat'] + valid_genes)
 
-def analyze_glm_multivariate(df, mode, expr_col='SignatureScore', group_col='SignatureGroup'):
+def analyze_glm_multivariate(df, mode, expr_col='SignatureScore', group_col='SignatureGroup', gene_vars=None):
     print("--- 2-3. 다변량 일반선형모형 (GLM / OLS) - 4개 개별 모델 분석 ---")
+    if gene_vars is None:
+        gene_vars = []
+        
     if mode == "LUAD":
         age_var = "age_at_initial_pathologic_diagnosis"
     elif mode == "LUSC":
         age_var = "age"
         
-    base_vars = [age_var, 'gender', 'number_pack_years_smoked']
+    base_vars = [age_var, 'gender', 'number_pack_years_smoked'] + gene_vars
     target_vars = [
         ('Pathologic Stage', 'pathologic_stage'),
         ('Pathologic T', 'pathologic_T'),
@@ -158,11 +161,16 @@ def analyze_glm_multivariate(df, mode, expr_col='SignatureScore', group_col='Sig
             print(f"  [경고] 결측치 제거 후 {model_name} 모델 분석할 데이터가 없습니다.")
             continue
             
-        # Formula 작성 (Group 변수는 순환 논리 방지를 위해 제외)
+        # Formula 작성 (명목형 변수는 C()로 감싸고, gene_vars 같은 연속형 변수는 C() 없이 추가)
         predictors = []
         if age_var in valid_base_vars: predictors.append(age_var)
         if 'gender' in valid_base_vars: predictors.append("C(gender)")
         if 'number_pack_years_smoked' in valid_base_vars: predictors.append("number_pack_years_smoked")
+        
+        for g in gene_vars:
+            if g in valid_base_vars:
+                predictors.append(g)  # 연속형 데이터이므로 C() 처리 안함
+                
         predictors.append(f"C({target_var})")
         
         formula = f"{expr_col} ~ " + " + ".join(predictors)
@@ -233,7 +241,6 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', plot_ty
         if g not in color_map:
             color_map[g] = colors[i % len(colors)]
     
-    # SPSS 방식 범례(Legend) 핸들 커스텀 설정
     import matplotlib.lines as mlines
     from matplotlib.legend_handler import HandlerLine2D
     
@@ -242,7 +249,6 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', plot_ty
         
     class StepHandler(HandlerLine2D):
         def create_artists(self, legend, orig_handle, xdescent, ydescent, width, height, fontsize, trans):
-            # 사진과 완벽히 일치하는 _|‾| (위로 꺾이고 오른쪽으로 가다가 아래로 꺾이는) 모양
             xdata = [0, width*0.35, width*0.35, width*0.85, width*0.85]
             ydata = [height*0.2, height*0.2, height*0.8, height*0.8, height*0.2]
             line = mlines.Line2D(xdata, ydata, color=orig_handle.get_color(), lw=1.5)
@@ -250,7 +256,7 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', plot_ty
             return [line]
 
     # ---------------- OS 분석 ----------------
-    plt.figure(figsize=(8, 6)) # 가로세로 비율을 사진과 동일하게(4:3) 설정
+    plt.figure(figsize=(8, 6)) 
     ax_os = plt.gca()
     
     for group in groups:
@@ -281,11 +287,9 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', plot_ty
     handles_os = []
     labels_os = []
     for group in groups:
-        # 커스텀 _|‾| 꺾인 선 마커 추가
         handles_os.append(StepLine2D([0], [0], color=color_map[group]))
         labels_os.append(group)
     for group in groups:
-        # 십자가(+) 마커 추가 (사진처럼 -+- 모양이 되도록 실선 속성 추가)
         handles_os.append(mlines.Line2D([], [], color=color_map[group], marker='+', linestyle='-', lw=1.5, mew=1, ms=6))
         if plot_type == 1:
             labels_os.append(f'{group}-중도절단')
@@ -309,7 +313,6 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', plot_ty
             plt.setp(legend.get_title(), fontweight='bold')
             
     plt.tight_layout()
-    # 기존 결과 대체 형식 (timestamp 제거) 및 덮어쓰기 강제
     km_plot_path_os = os.path.join(save_dir, f'{file_prefix}Signature_{mode}_OS_KM.png')
     if os.path.exists(km_plot_path_os):
         try: os.remove(km_plot_path_os)
@@ -321,7 +324,7 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', plot_ty
     if 'RFS.time' in df.columns and 'RFS' in df.columns:
         df_rfs = df_km.dropna(subset=['RFS.time', 'RFS'])
         if not df_rfs.empty:
-            plt.figure(figsize=(8, 6)) # 가로세로 비율을 사진과 동일하게(4:3) 설정
+            plt.figure(figsize=(8, 6)) 
             ax_rfs = plt.gca()
             
             for group in groups:
@@ -333,11 +336,11 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', plot_ty
                                                show_censors=True, censor_styles={'marker': '+', 'mew': 1, 'ms': 6, 'mec': color})
                     
             if plot_type == 1:
-                ax_rfs.set_title(f'{mode}_RFS 생존함수')
+                ax_rfs.set_title('생존함수')
                 ax_rfs.set_xlabel('RFS.time')
                 ax_rfs.set_ylabel('누적 생존함수')
             elif plot_type == 2:
-                ax_rfs.set_title(f'{mode}_RFS')
+                ax_rfs.set_title('')
                 ax_rfs.set_xlabel('Time(Days)', fontweight='bold', fontsize=12)
                 ax_rfs.set_ylabel('Relapse-Free Survival', fontweight='bold', fontsize=12)
                 ax_rfs.spines['top'].set_visible(False)
@@ -355,7 +358,6 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', plot_ty
                 handles_rfs.append(StepLine2D([0], [0], color=color_map[group]))
                 labels_rfs.append(group)
             for group in groups:
-                # 십자가(+) 마커 추가 (사진처럼 -+- 모양이 되도록 실선 속성 추가)
                 handles_rfs.append(mlines.Line2D([], [], color=color_map[group], marker='+', linestyle='-', lw=1.5, mew=1, ms=6))
                 if plot_type == 1:
                     labels_rfs.append(f'{group}-중도절단')
@@ -379,7 +381,6 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', plot_ty
                     plt.setp(legend.get_title(), fontweight='bold')
                 
             plt.tight_layout()
-            # 기존 결과 대체 형식 (timestamp 제거) 및 덮어쓰기 강제
             km_plot_path_rfs = os.path.join(save_dir, f'{file_prefix}Signature_{mode}_RFS_KM.png')
             if os.path.exists(km_plot_path_rfs):
                 try: os.remove(km_plot_path_rfs)
@@ -387,9 +388,12 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', plot_ty
             plt.savefig(km_plot_path_rfs)
             plt.close()
 
-def analyze_cox_regression(df, mode, save_dir, group_col='SignatureGroup', file_prefix=''):
+def analyze_cox_regression(df, mode, save_dir, group_col='SignatureGroup', file_prefix='', gene_vars=None):
+    if gene_vars is None:
+        gene_vars = []
+        
     age_col = 'age_at_initial_pathologic_diagnosis' if mode == "LUAD" else 'age'
-    cols = ['OS.time', 'OS', group_col, age_col, 'gender', 'pathologic_stage', 'number_pack_years_smoked']
+    cols = ['OS.time', 'OS', group_col, age_col, 'gender', 'pathologic_stage', 'number_pack_years_smoked'] + gene_vars
     
     valid_cols = [c for c in cols if c in df.columns]
     if group_col not in valid_cols or 'OS' not in valid_cols:
@@ -400,6 +404,7 @@ def analyze_cox_regression(df, mode, save_dir, group_col='SignatureGroup', file_
     if df_cox.empty: 
         return pd.DataFrame()
     
+    # gene_vars(연속형)는 명목형 더미 변환 타겟에서 제외되므로 연속형 데이터로 자동 피팅됩니다.
     dummy_cols = [c for c in [group_col, 'gender', 'pathologic_stage'] if c in df_cox.columns]
     df_cox_dummy = pd.get_dummies(df_cox, columns=dummy_cols, drop_first=True)
     cph = CoxPHFitter()
@@ -414,10 +419,9 @@ def analyze_cox_regression(df, mode, save_dir, group_col='SignatureGroup', file_
         })
         plt.figure(figsize=(10, 6))
         cph.plot()
-        # Cox 플롯 제목에 mode(LUAD/LUSC) 추가
         plt.title(f'Cox Regression - Forest Plot - Signature ({mode})') 
         plt.tight_layout()
-        # 기존 결과 대체 형식 (timestamp 제거) 및 덮어쓰기 강제
+        
         cox_plot_path = os.path.join(save_dir, f'{file_prefix}Signature_{mode}_Cox.png')
         if os.path.exists(cox_plot_path):
             try: os.remove(cox_plot_path)
@@ -434,16 +438,13 @@ def analyze_cox_regression(df, mode, save_dir, group_col='SignatureGroup', file_
 if __name__ == "__main__":
     super_dir = os.path.dirname(os.path.abspath(__file__))
     
-    # 분석할 시그니처 유전자 리스트 업데이트
+    # 분석할 시그니처 유전자 리스트 업데이트 (원하시는 EMT-ECM 축 유전자로 변경 가능)
     sig_genes = ["LOXL2", "ITGB1", "PLAUR", "SNAI1", "VEGFC"]
     
     # 여기서 플롯 출력 타입을 지정합니다. 
     # 1: 기존 한글 스타일(범례에 P-value 포함) / 2: 영문 스타일(그래프 내부에 P-value 삽입)
     CURRENT_PLOT_TYPE = 2
-    
-    # ★ 새로 추가된 변수: 출력되는 모든 파일명 맨 앞에 붙일 텍스트를 지정합니다.
-    # 예: "MY_TEST_" 라고 입력하면 "MY_TEST_Signature_LUAD_..." 형식으로 저장됩니다. 비워두면 기존과 동일합니다.
-    CUSTOM_FILE_PREFIX = ""
+    CUSTOM_FILE_PREFIX = "multi_modified_"
     
     for mode in ['LUAD', 'LUSC']:
         print(f"\n{'='*60}")
@@ -463,14 +464,12 @@ if __name__ == "__main__":
 
         if isinstance(sys.stdout, PrintLogger):
             sys.stdout.flush()
-        # 기존 결과 대체 형식 (timestamp 제거)
         sys.stdout = PrintLogger(os.path.join(result_dir, f"{CUSTOM_FILE_PREFIX}result_signature_{mode}.txt"))
         
-        # 1. 마스터 데이터 로드 및 시그니처 생성 (sav 파일 경로 추가 전달)
+        # 1. 마스터 데이터 로드 및 시그니처 생성
         merged_df, _ = pyreadstat.read_sav(master_sav_path)
         merged_df = get_signature_group(merged_df, sig_genes, master_sav_path)
         
-        # 동적으로 생성된 변수명 지정
         gene_name_list = '_'.join(sig_genes)
         group_col_name = f'SignatureGroup_{gene_name_list}'
         score_col_name = f'SignatureScore_{gene_name_list}'
@@ -482,21 +481,25 @@ if __name__ == "__main__":
         # 2. 통계 및 그래프 생성
         df_table1 = analyze_chi_square(merged_df, target_col=group_col_name)
         
+        # [수정됨] 암종별로 통제(교란) 변수로 사용할 연속형 유전자 발현량(gene_vars) 분리
         if mode == "LUAD":
-            corr_vars = [score_col_name, 'number_pack_years_smoked', 'KrasExpression', 'TP53Expression', 'ALKExpression', 'BRAFExpression', 'age_at_initial_pathologic_diagnosis']
+            gene_vars = ['TP53Expression', 'ALKExpression']
+            corr_vars = [score_col_name, 'number_pack_years_smoked', 'age_at_initial_pathologic_diagnosis'] + gene_vars
         else:
-            corr_vars = [score_col_name, 'number_pack_years_smoked', 'TP53Expression', 'CDKN2AExpression', 'SOX2Expression', 'PIK3CAExpression', 'NOTCH1Expression', 'age']
+            gene_vars = ['SOX2Expression', 'PIK3CAExpression', 'NOTCH1Expression']
+            corr_vars = [score_col_name, 'number_pack_years_smoked', 'age'] + gene_vars
             
         df_table2 = analyze_bivariate_correlation(merged_df, gene_list=corr_vars)
         
-        # 다변량 분석 (GLM / OLS) - Table 4 반환으로 변경됨
-        df_table4 = analyze_glm_multivariate(merged_df, mode, expr_col=score_col_name, group_col=group_col_name)
+        # 다변량 분석에 gene_vars를 함께 전달하여 연속형 변수로 회귀분석 수행
+        df_table4 = analyze_glm_multivariate(merged_df, mode, expr_col=score_col_name, group_col=group_col_name, gene_vars=gene_vars)
         
-        # 생존 & Cox 분석 (plot_type 및 file_prefix 전달)
         analyze_kaplan_meier(merged_df, mode, plot_base_dir, group_col=group_col_name, plot_type=CURRENT_PLOT_TYPE, file_prefix=CUSTOM_FILE_PREFIX)
-        df_table3 = analyze_cox_regression(merged_df, mode, plot_base_dir, group_col=group_col_name, file_prefix=CUSTOM_FILE_PREFIX)
         
-        # 3. 엑셀 저장 - 기존 결과 대체 형식 (timestamp 제거) 및 덮어쓰기 강제
+        # 생존 Cox 분석에도 gene_vars 추가 반영
+        df_table3 = analyze_cox_regression(merged_df, mode, plot_base_dir, group_col=group_col_name, file_prefix=CUSTOM_FILE_PREFIX, gene_vars=gene_vars)
+        
+        # 3. 엑셀 저장
         excel_save_path = os.path.join(result_dir, f"{CUSTOM_FILE_PREFIX}Signature_{mode}_Tables.xlsx")
         if os.path.exists(excel_save_path):
             try: os.remove(excel_save_path)
