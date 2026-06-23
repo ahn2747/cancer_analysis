@@ -393,10 +393,10 @@ def analyze_cox_regression(df, mode, save_dir, group_col='SignatureGroup', file_
         gene_vars = []
         
     age_col = 'age_at_initial_pathologic_diagnosis' if mode == "LUAD" else 'age'
-    cols = ['OS.time', 'OS', group_col, age_col, 'gender', 'pathologic_stage', 'number_pack_years_smoked'] + gene_vars
+    cols = ['RFS.time', 'RFS', group_col, age_col, 'gender', 'pathologic_stage', 'number_pack_years_smoked'] + gene_vars
     
     valid_cols = [c for c in cols if c in df.columns]
-    if group_col not in valid_cols or 'OS' not in valid_cols:
+    if group_col not in valid_cols or 'RFS' not in valid_cols:
         print(f"  [경고] 필수 컬럼이 없어 Cox 분석을 건너뜁니다.")
         return pd.DataFrame()
         
@@ -410,7 +410,7 @@ def analyze_cox_regression(df, mode, save_dir, group_col='SignatureGroup', file_
     cph = CoxPHFitter()
     
     try:
-        cph.fit(df_cox_dummy, duration_col='OS.time', event_col='OS')
+        cph.fit(df_cox_dummy, duration_col='RFS.time', event_col='RFS')
         summary = cph.summary
         df_table3 = pd.DataFrame({
             'Clinical Variable': summary.index,
@@ -444,7 +444,7 @@ if __name__ == "__main__":
     # 여기서 플롯 출력 타입을 지정합니다. 
     # 1: 기존 한글 스타일(범례에 P-value 포함) / 2: 영문 스타일(그래프 내부에 P-value 삽입)
     CURRENT_PLOT_TYPE = 2
-    CUSTOM_FILE_PREFIX = "multi_modified_"
+    CUSTOM_FILE_PREFIX = "RFS_multi_"
     
     for mode in ['LUAD', 'LUSC']:
         print(f"\n{'='*60}")

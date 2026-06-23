@@ -148,7 +148,7 @@ def download_gene_data(driver, gene, cancer_type):
         return None
 
 def main():
-    gene_list = ["LOXL2", "ITGB1", "PLAUR", "SNAI1", "VEGFC"]
+    gene_list = ["BRCA1", "BRCA2", "TP53", "EGFR", "KRAS", "ALK", "ROS1", "MET", "RET", "NTRK1"]
     significant_genes = []
     
     print("=== 웹 스크래핑 및 자동 다운로드를 시작합니다 ===\n")
