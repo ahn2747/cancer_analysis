@@ -239,7 +239,7 @@ if __name__ == "__main__":
     # CHIP 파일 설정 (ANALYSIS_MODE가 "chip"일 때만 사용됩니다)
     CHIP_FILE_NAME = "Human_Gene_Symbol_with_Remapping_MSigDB.v2026.1.Hs.chip"
     
-    CUSTOM_FILE_PREFIX = f"SMAD7_2차_{ANALYSIS_MODE}_" 
+    CUSTOM_FILE_PREFIX = f"Signature_2차_{ANALYSIS_MODE}_" 
     
     if isinstance(sys.stdout, PrintLogger):
         sys.stdout.flush()
@@ -249,11 +249,11 @@ if __name__ == "__main__":
     print(f"          자동화 GSEA 시작 (모드: {ANALYSIS_MODE.upper()})")
     print(f"{'='*60}")
     
-    mode = 'LUAD' 
+    mode = 'LUSC' 
     expr_file_path = os.path.join(super_dir, "database", f"TCGA_{mode}_RNAseq_Expression.csv")
     clin_file_path = os.path.join(super_dir, "database", '(LUAD) lung adenocarcinoma.sav' if mode == 'LUAD' else '(LUSC) lung squamous cell carcinoma.sav')
-    group_column_name = "SMAD7group"
-    genes_to_remove = [] 
+    group_column_name = "SignatureGroup_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC"
+    genes_to_remove = ["LOXL2", "ITGB1", "PLAUR", "SNAI1", "VEGFC"] 
     
     if not os.path.exists(expr_file_path):
         print(f"\n[오류] 발현량 파일을 찾을 수 없습니다: {expr_file_path}")
