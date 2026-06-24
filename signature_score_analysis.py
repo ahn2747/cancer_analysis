@@ -388,15 +388,19 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', plot_ty
             plt.savefig(km_plot_path_rfs)
             plt.close()
 
-def analyze_cox_regression(df, mode, save_dir, group_col='SignatureGroup', file_prefix='', gene_vars=None):
-    if gene_vars is None:
-        gene_vars = []
+def analyze_cox_regression(df, mode, save_dir, group_col='SignatureGroup', file_prefix='', categorical_vars=None, continuous_vars=None):
+    # 1. 분석에 사용할 변수들을 명목형(Categorical)과 연속형(Continuous)으로 명확히 구분
+    if categorical_vars is None:
+        categorical_vars = [group_col, 'gender', 'pathologic_stage']
+    if continuous_vars is None:
+        age_col = 'age_at_initial_pathologic_diagnosis' if mode == "LUAD" else 'age'
+        continuous_vars = [age_col, 'number_pack_years_smoked']
         
-    age_col = 'age_at_initial_pathologic_diagnosis' if mode == "LUAD" else 'age'
-    cols = ['RFS.time', 'RFS', group_col, age_col, 'gender', 'pathologic_stage', 'number_pack_years_smoked'] + gene_vars
+    survival_cols = ['OS.time', 'OS']
+    cols = survival_cols + categorical_vars + continuous_vars
     
     valid_cols = [c for c in cols if c in df.columns]
-    if group_col not in valid_cols or 'RFS' not in valid_cols:
+    if group_col not in valid_cols or 'OS' not in valid_cols:
         print(f"  [경고] 필수 컬럼이 없어 Cox 분석을 건너뜁니다.")
         return pd.DataFrame()
         
@@ -404,13 +408,14 @@ def analyze_cox_regression(df, mode, save_dir, group_col='SignatureGroup', file_
     if df_cox.empty: 
         return pd.DataFrame()
     
-    # gene_vars(연속형)는 명목형 더미 변환 타겟에서 제외되므로 연속형 데이터로 자동 피팅됩니다.
-    dummy_cols = [c for c in [group_col, 'gender', 'pathologic_stage'] if c in df_cox.columns]
+    # 2. 명목형 변수들만 명시적으로 선택하여 더미 변환 (연속형은 원형 그대로 유지)
+    dummy_cols = [c for c in categorical_vars if c in df_cox.columns]
     df_cox_dummy = pd.get_dummies(df_cox, columns=dummy_cols, drop_first=True)
+    
     cph = CoxPHFitter()
     
     try:
-        cph.fit(df_cox_dummy, duration_col='RFS.time', event_col='RFS')
+        cph.fit(df_cox_dummy, duration_col='OS.time', event_col='OS')
         summary = cph.summary
         df_table3 = pd.DataFrame({
             'Clinical Variable': summary.index,
@@ -444,7 +449,7 @@ if __name__ == "__main__":
     # 여기서 플롯 출력 타입을 지정합니다. 
     # 1: 기존 한글 스타일(범례에 P-value 포함) / 2: 영문 스타일(그래프 내부에 P-value 삽입)
     CURRENT_PLOT_TYPE = 2
-    CUSTOM_FILE_PREFIX = "RFS_multi_"
+    CUSTOM_FILE_PREFIX = ""
     
     for mode in ['LUAD', 'LUSC']:
         print(f"\n{'='*60}")
@@ -483,10 +488,10 @@ if __name__ == "__main__":
         
         # [수정됨] 암종별로 통제(교란) 변수로 사용할 연속형 유전자 발현량(gene_vars) 분리
         if mode == "LUAD":
-            gene_vars = []
+            gene_vars = ['KrasExpression', 'TP53Expression', 'ALKExpression', 'BRAFExpression']
             corr_vars = [score_col_name, 'number_pack_years_smoked', 'age_at_initial_pathologic_diagnosis'] + gene_vars
         else:
-            gene_vars = []
+            gene_vars = ['TP53Expression', 'CDKN2AExpression', 'SOX2Expression', 'PIK3CAExpression', 'NOTCH1Expression']
             corr_vars = [score_col_name, 'number_pack_years_smoked', 'age'] + gene_vars
             
         df_table2 = analyze_bivariate_correlation(merged_df, gene_list=corr_vars)
@@ -496,8 +501,19 @@ if __name__ == "__main__":
         
         analyze_kaplan_meier(merged_df, mode, plot_base_dir, group_col=group_col_name, plot_type=CURRENT_PLOT_TYPE, file_prefix=CUSTOM_FILE_PREFIX)
         
-        # 생존 Cox 분석에도 gene_vars 추가 반영
-        df_table3 = analyze_cox_regression(merged_df, mode, plot_base_dir, group_col=group_col_name, file_prefix=CUSTOM_FILE_PREFIX, gene_vars=gene_vars)
+        # [수정됨] Cox 생존 분석 시 명목형/연속형 변수를 명확히 분리하여 주입
+        age_col = 'age_at_initial_pathologic_diagnosis' if mode == "LUAD" else 'age'
+        
+        cox_categorical = [group_col_name, 'gender', 'pathologic_stage']
+        cox_continuous = [age_col, 'number_pack_years_smoked'] + gene_vars
+        
+        df_table3 = analyze_cox_regression(
+            merged_df, mode, plot_base_dir, 
+            group_col=group_col_name, 
+            file_prefix=CUSTOM_FILE_PREFIX, 
+            categorical_vars=cox_categorical, 
+            continuous_vars=cox_continuous
+        )
         
         # 3. 엑셀 저장
         excel_save_path = os.path.join(result_dir, f"{CUSTOM_FILE_PREFIX}Signature_{mode}_Tables.xlsx")
