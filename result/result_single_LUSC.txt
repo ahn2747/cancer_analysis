@@ -1,91 +1,83 @@
-
+'D:\coding\medin\input_LUSC_csv' 폴더에 병합할 CSV 파일이 없습니다.
+[LUSC] 마스터 파일(SAV)에 이미 존재하는 유전자로 분석하려면 이름을 입력하세요
+(여러 개는 쉼표 구분, 없으면 그냥 엔터): 
 [XRCC3 유전자 분석 시작]
---- 1. 데이터 처리 및 병합 시작 (Target: XRCC3) ---
-  [진단 로그] 1-1. OncoLnc CSV 파일 로드 시도 중...
-  [진단 로그] 1-1. CSV 파일 로드 완료.
-  [진단 로그] 1-2. 마스터 SAV 파일 로드 시도 중 (pyreadstat)...
-  [진단 로그] 1-2. SAV 파일 로드 완료.
-  [진단 로그] 1-3. 두 데이터프레임 병합(Merge) 진행 중...
-  [진단 로그] 1-3. 병합 완료.
-  [진단 로그] 1-4. 병합본을 마스터 SAV 파일로 저장 진행 중...
-  [진단 로그] 1-4. SAV 파일 물리적 저장 완료.
-  [진단 로그] 1-5. 백업용 CSV 파일 저장 진행 중...
-  [진단 로그] 1-5. 백업 CSV 저장 완료.
+--- 1. 기존 데이터 로드 (Target: XRCC3, 병합 과정 건너뜀) ---
 --- 2-1. 예후 분석 (Chi-square Test) ---
 [XRCC3group vs ageG]
-XRCC3group  High  Low   전체
-ageG                      
-0.0          109   79  188
-1.0          134  165  299
-전체           243  244  487
-Chi-square: 7.4814, p-value: 0.006
+XRCC3group     High  Low   전체
+ageG                         
+0.0         1   109   79  189
+1.0         0   134  165  299
+전체          1   243  244  488
+Chi-square: 9.5749, p-value: 0.008
 
 [XRCC3group vs gender]
-XRCC3group  High  Low   전체
-gender                    
-               1    0    1
-FEMALE        53   73  126
-MALE         190  171  361
-전체           244  244  488
-Chi-square: 5.1746, p-value: 0.075
+XRCC3group     High  Low   전체
+gender                       
+            0     1    0    1
+FEMALE      0    53   73  126
+MALE        1   190  171  362
+전체          1   244  244  489
+Chi-square: 5.5340, p-value: 0.237
 
 [XRCC3group vs pathologic_stage]
-XRCC3group        High  Low   전체
-pathologic_stage                
-1.0                103  134  237
-2.0                 82   74  156
-3.0                 53   30   83
-4.0                  3    4    7
-전체                 241  242  483
-Chi-square: 10.9794, p-value: 0.012
+XRCC3group           High  Low   전체
+pathologic_stage                   
+1.0               1   103  134  238
+2.0               0    82   74  156
+3.0               0    53   30   83
+4.0               0     3    4    7
+전체                1   241  242  484
+Chi-square: 12.0214, p-value: 0.061
 
 [XRCC3group vs pathologic_M]
-XRCC3group    High  Low   전체
-pathologic_M                
-0.0            201  199  400
-1.0              3    4    7
-전체             204  203  407
-Chi-square: 0.0000, p-value: 0.995
+XRCC3group       High  Low   전체
+pathologic_M                   
+0.0           1   201  199  401
+1.0           0     3    4    7
+전체            1   204  203  408
+Chi-square: 0.1683, p-value: 0.919
 
 [XRCC3group vs pathologic_N]
-XRCC3group    High  Low   전체
-pathologic_N                
-0.0            142  168  310
-1.0             70   56  126
-2.0             26   14   40
-3.0              2    3    5
-전체             240  241  481
-Chi-square: 7.5342, p-value: 0.057
+XRCC3group       High  Low   전체
+pathologic_N                   
+0.0           1   142  168  311
+1.0           0    70   56  126
+2.0           0    26   14   40
+3.0           0     2    3    5
+전체            1   240  241  482
+Chi-square: 8.0941, p-value: 0.231
 
 [XRCC3group vs pathologic_T]
-XRCC3group    High  Low   전체
-pathologic_T                
-1.0             42   66  108
-2.0            149  137  286
-3.0             41   29   70
-4.0             11   12   23
-전체             243  244  487
-Chi-square: 7.9354, p-value: 0.047
+XRCC3group       High  Low   전체
+pathologic_T                   
+1.0           1    42   66  109
+2.0           0   149  137  286
+3.0           0    41   29   70
+4.0           0    11   12   23
+전체            1   243  244  488
+Chi-square: 11.3878, p-value: 0.077
 
 [XRCC3group vs SmokingStatus]
-XRCC3group     High  Low   전체
-SmokingStatus                
-0.0              39   37   76
-1.0             205  207  412
-전체              244  244  488
-Chi-square: 0.0156, p-value: 0.901
+XRCC3group        High  Low   전체
+SmokingStatus                   
+0.0            0    39   37   76
+1.0            1   205  207  413
+전체             1   244  244  489
+Chi-square: 0.2468, p-value: 0.884
 
 --- 2-2. 이변량 상관 분석 (Pearson 행렬) ---
 [Pearson 상관계수 행렬]
-                          XRCC3expression  number_pack_years_smoked  TP53Expression  CDKN2AExpression  SOX2Expression  PIK3CAExpression  NOTCH1Expression    age
-XRCC3expression                     1.000                    -0.022          -0.012             0.074           0.131            -0.017             0.047 -0.118
-number_pack_years_smoked           -0.022                     1.000          -0.008            -0.020          -0.040             0.020             0.004  0.039
-TP53Expression                     -0.012                    -0.008           1.000            -0.018           0.067             0.066             0.092 -0.039
-CDKN2AExpression                    0.074                    -0.020          -0.018             1.000          -0.006            -0.026            -0.072 -0.002
-SOX2Expression                      0.131                    -0.040           0.067            -0.006           1.000             0.555             0.013 -0.145
-PIK3CAExpression                   -0.017                     0.020           0.066            -0.026           0.555             1.000            -0.035 -0.034
-NOTCH1Expression                    0.047                     0.004           0.092            -0.072           0.013            -0.035             1.000  0.005
-age                                -0.118                     0.039          -0.039            -0.002          -0.145            -0.034             0.005  1.000
+                          XRCC3expression  number_pack_years_smoked    age  TP53Expression  CDKN2AExpression  SOX2Expression  PIK3CAExpression  NOTCH1Expression
+XRCC3expression                     1.000                    -0.022 -0.118          -0.012             0.074           0.131            -0.017             0.047
+number_pack_years_smoked           -0.022                     1.000  0.039          -0.008            -0.020          -0.040             0.020             0.004
+age                                -0.118                     0.039  1.000          -0.039            -0.002          -0.145            -0.034             0.005
+TP53Expression                     -0.012                    -0.008 -0.039           1.000            -0.018           0.067             0.066             0.092
+CDKN2AExpression                    0.074                    -0.020 -0.002          -0.018             1.000          -0.006            -0.026            -0.072
+SOX2Expression                      0.131                    -0.040 -0.145           0.067            -0.006           1.000             0.555             0.013
+PIK3CAExpression                   -0.017                     0.020 -0.034           0.066            -0.026           0.555             1.000            -0.035
+NOTCH1Expression                    0.047                     0.004  0.005           0.092            -0.072           0.013            -0.035             1.000
 
 
 --- 2-3. 다변량 일반선형모형 (GLM / OLS) - 4개 개별 모델 분석 ---
@@ -97,7 +89,7 @@ Dep. Variable:        XRCC3expression   R-squared:                       0.035
 Model:                            OLS   Adj. R-squared:                  0.021
 Method:                 Least Squares   F-statistic:                     2.425
 Date:                Wed, 24 Jun 2026   Prob (F-statistic):             0.0258
-Time:                        16:05:37   Log-Likelihood:                -2982.9
+Time:                        16:23:51   Log-Likelihood:                -2982.9
 No. Observations:                 409   AIC:                             5980.
 Df Residuals:                     402   BIC:                             6008.
 Df Model:                           6                                         
@@ -129,7 +121,7 @@ Dep. Variable:        XRCC3expression   R-squared:                       0.033
 Model:                            OLS   Adj. R-squared:                  0.019
 Method:                 Least Squares   F-statistic:                     2.336
 Date:                Wed, 24 Jun 2026   Prob (F-statistic):             0.0314
-Time:                        16:05:37   Log-Likelihood:                -3003.8
+Time:                        16:23:51   Log-Likelihood:                -3003.8
 No. Observations:                 412   AIC:                             6022.
 Df Residuals:                     405   BIC:                             6050.
 Df Model:                           6                                         
@@ -161,7 +153,7 @@ Dep. Variable:        XRCC3expression   R-squared:                       0.036
 Model:                            OLS   Adj. R-squared:                  0.022
 Method:                 Least Squares   F-statistic:                     2.510
 Date:                Wed, 24 Jun 2026   Prob (F-statistic):             0.0214
-Time:                        16:05:37   Log-Likelihood:                -2968.3
+Time:                        16:23:51   Log-Likelihood:                -2968.3
 No. Observations:                 407   AIC:                             5951.
 Df Residuals:                     400   BIC:                             5979.
 Df Model:                           6                                         
@@ -193,7 +185,7 @@ Dep. Variable:        XRCC3expression   R-squared:                       0.034
 Model:                            OLS   Adj. R-squared:                  0.023
 Method:                 Least Squares   F-statistic:                     3.034
 Date:                Wed, 24 Jun 2026   Prob (F-statistic):             0.0177
-Time:                        16:05:37   Log-Likelihood:                -2528.1
+Time:                        16:23:51   Log-Likelihood:                -2528.1
 No. Observations:                 346   AIC:                             5066.
 Df Residuals:                     341   BIC:                             5085.
 Df Model:                           4                                         
@@ -218,25 +210,31 @@ Notes:
 
 
 --- 2-4. Kaplan-Meier 생존분석 ---
-  [OS Log-rank Test] p-value: 0.0326
+  [OS Log-rank Test] p-value: 0.0809
 Kaplan-Meier (OS) 이미지 저장 완료: 'D:\coding\medin\plot\XRCC3_LUSC_OS_KM.png'
-  [RFS Log-rank Test] p-value: 0.1892
+  [RFS Log-rank Test] p-value: 0.1228
 Kaplan-Meier (RFS) 이미지 저장 완료: 'D:\coding\medin\plot\XRCC3_LUSC_RFS_KM.png'
 
 --- 2-5. Cox 회귀분석 ---
-                          exp(coef)         p
-covariate                                    
-age                        1.021329  0.027346
-number_pack_years_smoked   1.000177  0.939581
-XRCC3group_Low             1.287444  0.098877
-gender_MALE                1.249947  0.211677
-pathologic_stage_2.0       1.036878  0.838635
-pathologic_stage_3.0       1.410747  0.090850
-pathologic_stage_4.0       2.941847  0.021538
+                              exp(coef)         p
+covariate                                        
+age                            1.021099  0.033429
+number_pack_years_smoked       1.000598  0.797356
+TP53Expression                 0.999971  0.645708
+CDKN2AExpression               1.000003  0.969979
+SOX2Expression                 0.999969  0.164823
+PIK3CAExpression               1.000090  0.534482
+NOTCH1Expression               1.000012  0.744569
+XRCC3group_High           505182.941277  0.993241
+XRCC3group_Low            649083.756176  0.993112
+gender_MALE                    1.259498  0.208339
+pathologic_stage_2.0           1.088406  0.639012
+pathologic_stage_3.0           1.456717  0.067668
+pathologic_stage_4.0           2.991738  0.020172
 Cox Forest Plot 저장 완료: 'D:\coding\medin\plot\XRCC3_LUSC_Cox.png'
 
 ✅ 논문용 표 엑셀 파일 저장 완료: 'D:\coding\medin\result\XRCC3_LUSC_Tables.xlsx'
-'LUSC_50_50_XRCC3.csv' 분석 완료 및 completed_csv 폴더로 이동됨.
+'XRCC3' 기존 데이터 재분석 및 결과 출력 완료.
 
 ============================================================
 

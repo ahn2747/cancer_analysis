@@ -427,10 +427,10 @@ def analyze_cox_regression(target, df, mode, save_dir, group_col='gene_group', c
     
     # 1. 분석에 사용할 변수들을 명목형(Categorical)과 연속형(Continuous)으로 명확히 구분
     if categorical_vars is None:
-        categorical_vars = [group_col, 'gender', 'pathologic_stage']
+        categorical_vars = [group_col, 'gender']
     if continuous_vars is None:
         age_col = 'age_at_initial_pathologic_diagnosis' if mode == "LUAD" else 'age'
-        continuous_vars = [age_col, 'number_pack_years_smoked']
+        continuous_vars = [age_col, 'number_pack_years_smoked', 'pathologic_stage']
         
     survival_cols = ['OS.time', 'OS']
     cols = survival_cols + categorical_vars + continuous_vars
