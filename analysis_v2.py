@@ -422,20 +422,34 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
             plt.close()
             print(f"Kaplan-Meier (RFS) 이미지 저장 완료: '{km_plot_path_rfs}'\n")
 
-def analyze_cox_regression(target, df, mode, save_dir, group_col='gene_group'):
+def analyze_cox_regression(target, df, mode, save_dir, group_col='gene_group', categorical_vars=None, continuous_vars=None):
     print("--- 2-5. Cox 회귀분석 ---")
-    age_col = 'age_at_initial_pathologic_diagnosis' if mode == "LUAD" else 'age'
-    cols = ['OS.time', 'OS', group_col, age_col, 'gender', 'pathologic_stage', 'number_pack_years_smoked']
+    
+    # 1. 분석에 사용할 변수들을 명목형(Categorical)과 연속형(Continuous)으로 명확히 구분
+    if categorical_vars is None:
+        categorical_vars = [group_col, 'gender', 'pathologic_stage']
+    if continuous_vars is None:
+        age_col = 'age_at_initial_pathologic_diagnosis' if mode == "LUAD" else 'age'
+        continuous_vars = [age_col, 'number_pack_years_smoked']
+        
+    survival_cols = ['OS.time', 'OS']
+    cols = survival_cols + categorical_vars + continuous_vars
     
     valid_cols = [c for c in cols if c in df.columns]
+    if group_col not in valid_cols or 'OS' not in valid_cols:
+        print("  [경고] 필수 컬럼이 없어 Cox 분석을 건너뜁니다.")
+        return pd.DataFrame()
+        
     df_cox = df[valid_cols].dropna()
     
     if df_cox.empty:
         print("  [경고] 결측치 제거 후 Cox 분석할 데이터가 없습니다.")
         return pd.DataFrame()
         
-    dummy_cols = [c for c in [group_col, 'gender', 'pathologic_stage'] if c in df_cox.columns]
+    # 2. 명목형 변수들만 명시적으로 선택하여 더미 변환 (연속형은 원형 그대로 유지)
+    dummy_cols = [c for c in categorical_vars if c in df_cox.columns]
     df_cox_dummy = pd.get_dummies(df_cox, columns=dummy_cols, drop_first=True)
+    
     cph = CoxPHFitter()
     
     df_table3 = pd.DataFrame()
@@ -543,10 +557,13 @@ if __name__ == "__main__":
             # 2. 분석 및 엑셀 표 데이터 생성
             df_table1 = analyze_chi_square(merged_df, target_col=group_col_name)
             
+            # [수정됨] 암종별로 통제(교란) 변수로 사용할 연속형 유전자 발현량(gene_vars) 분리
             if mode == "LUAD":
-                target_genes_for_corr = [expr_col_name, 'number_pack_years_smoked', 'KrasExpression', 'TP53Expression', 'ALKExpression', 'BRAFExpression', 'age_at_initial_pathologic_diagnosis']
+                gene_vars = ['KrasExpression', 'TP53Expression', 'ALKExpression', 'BRAFExpression']
+                target_genes_for_corr = [expr_col_name, 'number_pack_years_smoked', 'age_at_initial_pathologic_diagnosis'] + gene_vars
             else:
-                target_genes_for_corr = [expr_col_name, 'number_pack_years_smoked', 'TP53Expression', 'CDKN2AExpression', 'SOX2Expression', 'PIK3CAExpression', 'NOTCH1Expression', 'age']
+                gene_vars = ['TP53Expression', 'CDKN2AExpression', 'SOX2Expression', 'PIK3CAExpression', 'NOTCH1Expression']
+                target_genes_for_corr = [expr_col_name, 'number_pack_years_smoked', 'age'] + gene_vars
             
             df_table2 = analyze_bivariate_correlation(merged_df, gene_list=target_genes_for_corr)
             
@@ -555,7 +572,18 @@ if __name__ == "__main__":
             
             # 생존 & Cox 분석 (plot_type 전달)
             analyze_kaplan_meier(target_gene, merged_df, mode, plot_base_dir, group_col=group_col_name, plot_type=CURRENT_PLOT_TYPE)
-            df_table3 = analyze_cox_regression(target_gene, merged_df, mode, plot_base_dir, group_col=group_col_name)
+            
+            # [수정됨] Cox 생존 분석 시 명목형/연속형 변수를 명확히 분리하여 주입
+            age_col = 'age_at_initial_pathologic_diagnosis' if mode == "LUAD" else 'age'
+            cox_categorical = [group_col_name, 'gender', 'pathologic_stage']
+            cox_continuous = [age_col, 'number_pack_years_smoked'] + gene_vars
+            
+            df_table3 = analyze_cox_regression(
+                target_gene, merged_df, mode, plot_base_dir, 
+                group_col=group_col_name,
+                categorical_vars=cox_categorical, 
+                continuous_vars=cox_continuous
+            )
             
             # 3. 분석 결과를 Excel 파일로 예쁘게 저장 (Table 4 추가)
             # 기존 결과 대체 형식 (timestamp 제거) 및 덮어쓰기 강제
