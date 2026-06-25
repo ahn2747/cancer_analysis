@@ -283,7 +283,7 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
             color = color_map[group]
             kmf.fit(time, event_observed=event)
             kmf.plot_survival_function(ax=ax_os, ci_show=False, color=color,
-                                       show_censors=True, censor_styles={'marker': '+', 'mew': 1, 'ms': 6, 'mec': color})
+                                    show_censors=True, censor_styles={'marker': '+', 'mew': 1, 'ms': 6, 'mec': color})
             
     if plot_type == 1:
         ax_os.set_title(f'{mode}_OS 생존함수')
@@ -321,7 +321,7 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
         if len(groups) == 2:
             mask0 = (df_km[group_col] == groups[0])
             res_os = logrank_test(df_km.loc[mask0, 'OS.time'], df_km.loc[~mask0, 'OS.time'],
-                                  event_observed_A=df_km.loc[mask0, 'OS'], event_observed_B=df_km.loc[~mask0, 'OS'])
+                                event_observed_A=df_km.loc[mask0, 'OS'], event_observed_B=df_km.loc[~mask0, 'OS'])
         else:
             res_os = multivariate_logrank_test(df_km['OS.time'], df_km[group_col], df_km['OS'])
             
@@ -368,7 +368,7 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
                     color = color_map[group]
                     kmf.fit(time, event_observed=event)
                     kmf.plot_survival_function(ax=ax_rfs, ci_show=False, color=color,
-                                               show_censors=True, censor_styles={'marker': '+', 'mew': 1, 'ms': 6, 'mec': color})
+                                            show_censors=True, censor_styles={'marker': '+', 'mew': 1, 'ms': 6, 'mec': color})
                     
             if plot_type == 1:
                 ax_rfs.set_title(f'{mode}_RFS 생존함수')
@@ -407,7 +407,7 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
                 if len(rfs_groups) == 2:
                     mask0 = (df_rfs[group_col] == rfs_groups[0])
                     res_rfs = logrank_test(df_rfs.loc[mask0, 'RFS.time'], df_rfs.loc[~mask0, 'RFS.time'],
-                                           event_observed_A=df_rfs.loc[mask0, 'RFS'], event_observed_B=df_rfs.loc[~mask0, 'RFS'])
+                                        event_observed_A=df_rfs.loc[mask0, 'RFS'], event_observed_B=df_rfs.loc[~mask0, 'RFS'])
                 else:
                     res_rfs = multivariate_logrank_test(df_rfs['RFS.time'], df_rfs[group_col], df_rfs['RFS'])
                     
@@ -577,7 +577,7 @@ if __name__ == "__main__":
             # =========================================================
             # [변수 선언 및 전처리부] 상관분석(Correlation) 설정
             # =========================================================
-            # 1. 연속형 변수 세팅 (이진화 불필요)
+            # 1. 연속형 변수 세팅 (이진화 불필요) 및 2. 범주형(문자열) 변수 세팅 (이진화 필요)
             if mode == "LUAD":
                 gene_vars = ['KrasExpression', 'TP53Expression', 'ALKExpression', 'BRAFExpression']
                 corr_continuous = [expr_col_name, 'number_pack_years_smoked', 'age_at_initial_pathologic_diagnosis'] + gene_vars
@@ -598,6 +598,9 @@ if __name__ == "__main__":
                     )
                     corr_processed_binary.append(bin_col_name)
                     print(f"  [안내] {mut_var} 데이터를 이진수(0=WT, 1=Mut)로 변환 완료.")
+                else:
+                # 범인 색출용 경고등!
+                    print(f"  🚨 [초적색 경보] 데이터에 '{mut_var}' 컬럼이 아예 존재하지 않습니다!! SAV 파일을 확인하십시오.")
             
             # 4. 최종 상관분석 투입 리스트 통합
             final_corr_genes = corr_continuous + corr_processed_binary
