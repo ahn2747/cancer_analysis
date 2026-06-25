@@ -119,15 +119,14 @@ def analyze_chi_square(df, target_col='gene_group', row_vars=None):
     return df_table1
 
 def analyze_bivariate_correlation(df, gene_list):
-    print("--- 2-2. 이변량 상관 분석 (Pearson 행렬) ---")
+    print("--- 2-2. 이변량 상관 분석 (Pearson 행렬 - SPSS Pairwise 방식) ---")
     valid_genes = [g for g in gene_list if g in df.columns]
     if len(valid_genes) < 2:
         return pd.DataFrame()
         
-    valid_data = df[valid_genes].dropna()
-    
-    pearson_matrix = valid_data.corr(method='pearson')
-    print("[Pearson 상관계수 행렬]")
+    # Pandas의 corr() 함수는 기본적으로 Pairwise Deletion을 수행합니다.
+    pearson_matrix = df[valid_genes].corr(method='pearson')
+    print("[Pearson 상관계수 행렬 (SPSS Pairwise 방식)]")
     print(pearson_matrix.round(3))
     print("\n")
     
@@ -140,9 +139,16 @@ def analyze_bivariate_correlation(df, gene_list):
                 row_r.append("1")
                 row_p.append("")
             else:
-                r_val, p_val = stats.pearsonr(valid_data[i], valid_data[j])
-                row_r.append(f"{r_val:.3f}")
-                row_p.append(f"{p_val:.3f}" if p_val >= 0.001 else "<0.001")
+                # [핵심 수정] SPSS 방식처럼 두 변수(i, j)만 쏙 뽑아서 결측치가 없는 쌍만 남김
+                pair_data = df[[i, j]].dropna()
+                
+                if len(pair_data) > 1: # 계산 가능한 최소 2명 이상일 때만
+                    r_val, p_val = stats.pearsonr(pair_data[i], pair_data[j])
+                    row_r.append(f"{r_val:.3f}")
+                    row_p.append(f"{p_val:.3f}" if p_val >= 0.001 else "<0.001")
+                else:
+                    row_r.append("N/A")
+                    row_p.append("N/A")
         table2_data.append(row_r)
         table2_data.append(row_p)
         
@@ -598,9 +604,6 @@ if __name__ == "__main__":
                     )
                     corr_processed_binary.append(bin_col_name)
                     print(f"  [안내] {mut_var} 데이터를 이진수(0=WT, 1=Mut)로 변환 완료.")
-                else:
-                # 범인 색출용 경고등!
-                    print(f"  🚨 [초적색 경보] 데이터에 '{mut_var}' 컬럼이 아예 존재하지 않습니다!! SAV 파일을 확인하십시오.")
             
             # 4. 최종 상관분석 투입 리스트 통합
             final_corr_genes = corr_continuous + corr_processed_binary
