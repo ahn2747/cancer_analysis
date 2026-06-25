@@ -574,14 +574,37 @@ if __name__ == "__main__":
             # 2. 분석 및 엑셀 표 데이터 생성
             df_table1 = analyze_chi_square(merged_df, target_col=group_col_name)
             
+            # =========================================================
+            # [변수 선언 및 전처리부] 상관분석(Correlation) 설정
+            # =========================================================
+            # 1. 연속형 변수 세팅 (이진화 불필요)
             if mode == "LUAD":
-                gene_vars = ['KrasExpression', 'EGFR', 'TP53Expression', 'ALKExpression', 'BRAFExpression']
-                target_genes_for_corr = [expr_col_name, 'number_pack_years_smoked', 'age_at_initial_pathologic_diagnosis'] + gene_vars
+                gene_vars = ['KrasExpression', 'TP53Expression', 'ALKExpression', 'BRAFExpression']
+                corr_continuous = [expr_col_name, 'number_pack_years_smoked', 'age_at_initial_pathologic_diagnosis'] + gene_vars
+                corr_binary_targets = ['EGFR']
             else:
                 gene_vars = ['TP53Expression', 'CDKN2AExpression', 'SOX2Expression', 'PIK3CAExpression', 'NOTCH1Expression']
-                target_genes_for_corr = [expr_col_name, 'number_pack_years_smoked', 'age'] + gene_vars
+                corr_continuous = [expr_col_name, 'number_pack_years_smoked', 'age'] + gene_vars
+                corr_binary_targets = []
             
-            df_table2 = analyze_bivariate_correlation(merged_df, gene_list=target_genes_for_corr)
+            corr_processed_binary = []
+            
+            # 3. 이진화(Binarization) 일괄 수행
+            for mut_var in corr_binary_targets:
+                if mut_var in merged_df.columns:
+                    bin_col_name = f"{mut_var}_Mut_Binary"
+                    merged_df[bin_col_name] = merged_df[mut_var].apply(
+                        lambda x: 0 if pd.isna(x) or str(x).strip().lower() == 'none' else 1
+                    )
+                    corr_processed_binary.append(bin_col_name)
+                    print(f"  [안내] {mut_var} 데이터를 이진수(0=WT, 1=Mut)로 변환 완료.")
+            
+            # 4. 최종 상관분석 투입 리스트 통합
+            final_corr_genes = corr_continuous + corr_processed_binary
+            
+            # 상관분석 실행
+            df_table2 = analyze_bivariate_correlation(merged_df, gene_list=final_corr_genes)
+            # =========================================================
             
             df_table4 = analyze_glm_multivariate(merged_df, mode, expr_col=expr_col_name, group_col=group_col_name)
             
