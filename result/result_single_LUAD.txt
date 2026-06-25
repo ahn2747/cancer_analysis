@@ -91,7 +91,7 @@ Dep. Variable:        XRCC3expression   R-squared:                       0.035
 Model:                            OLS   Adj. R-squared:                  0.017
 Method:                 Least Squares   F-statistic:                     1.953
 Date:                Fri, 26 Jun 2026   Prob (F-statistic):             0.0720
-Time:                        02:29:35   Log-Likelihood:                -2194.1
+Time:                        02:59:33   Log-Likelihood:                -2194.1
 No. Observations:                 330   AIC:                             4402.
 Df Residuals:                     323   BIC:                             4429.
 Df Model:                           6                                         
@@ -123,7 +123,7 @@ Dep. Variable:        XRCC3expression   R-squared:                       0.052
 Model:                            OLS   Adj. R-squared:                  0.034
 Method:                 Least Squares   F-statistic:                     2.951
 Date:                Fri, 26 Jun 2026   Prob (F-statistic):            0.00809
-Time:                        02:29:35   Log-Likelihood:                -2210.3
+Time:                        02:59:33   Log-Likelihood:                -2210.3
 No. Observations:                 333   AIC:                             4435.
 Df Residuals:                     326   BIC:                             4461.
 Df Model:                           6                                         
@@ -155,7 +155,7 @@ Dep. Variable:        XRCC3expression   R-squared:                       0.041
 Model:                            OLS   Adj. R-squared:                  0.023
 Method:                 Least Squares   F-statistic:                     2.288
 Date:                Fri, 26 Jun 2026   Prob (F-statistic):             0.0354
-Time:                        02:29:35   Log-Likelihood:                -2180.0
+Time:                        02:59:33   Log-Likelihood:                -2180.0
 No. Observations:                 328   AIC:                             4374.
 Df Residuals:                     321   BIC:                             4401.
 Df Model:                           6                                         
@@ -189,7 +189,7 @@ Dep. Variable:        XRCC3expression   R-squared:                       0.015
 Model:                            OLS   Adj. R-squared:                 -0.002
 Method:                 Least Squares   F-statistic:                    0.8563
 Date:                Fri, 26 Jun 2026   Prob (F-statistic):              0.491
-Time:                        02:29:35   Log-Likelihood:                -1547.8
+Time:                        02:59:33   Log-Likelihood:                -1547.8
 No. Observations:                 236   AIC:                             3106.
 Df Residuals:                     231   BIC:                             3123.
 Df Model:                           4                                         
@@ -211,8 +211,6 @@ Kurtosis:                       4.475   Cond. No.                         528.
 
 Notes:
 [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
-
-
 --- 2-4. Kaplan-Meier 생존분석 및 Table 5 추출 ---
   [OS Log-rank Test] Chi-square: 3.473, p-value: 0.062
 Kaplan-Meier (OS) 이미지 저장 완료: 'D:\coding\medin\plot\XRCC3_LUAD_OS_KM.png'
@@ -335,7 +333,7 @@ Dep. Variable:        XRCC3expression   R-squared:                       0.035
 Model:                            OLS   Adj. R-squared:                  0.021
 Method:                 Least Squares   F-statistic:                     2.425
 Date:                Fri, 26 Jun 2026   Prob (F-statistic):             0.0258
-Time:                        02:29:38   Log-Likelihood:                -2982.9
+Time:                        02:59:36   Log-Likelihood:                -2982.9
 No. Observations:                 409   AIC:                             5980.
 Df Residuals:                     402   BIC:                             6008.
 Df Model:                           6                                         
@@ -367,7 +365,7 @@ Dep. Variable:        XRCC3expression   R-squared:                       0.033
 Model:                            OLS   Adj. R-squared:                  0.019
 Method:                 Least Squares   F-statistic:                     2.336
 Date:                Fri, 26 Jun 2026   Prob (F-statistic):             0.0314
-Time:                        02:29:38   Log-Likelihood:                -3003.8
+Time:                        02:59:36   Log-Likelihood:                -3003.8
 No. Observations:                 412   AIC:                             6022.
 Df Residuals:                     405   BIC:                             6050.
 Df Model:                           6                                         
@@ -399,7 +397,7 @@ Dep. Variable:        XRCC3expression   R-squared:                       0.036
 Model:                            OLS   Adj. R-squared:                  0.022
 Method:                 Least Squares   F-statistic:                     2.510
 Date:                Fri, 26 Jun 2026   Prob (F-statistic):             0.0214
-Time:                        02:29:38   Log-Likelihood:                -2968.3
+Time:                        02:59:36   Log-Likelihood:                -2968.3
 No. Observations:                 407   AIC:                             5951.
 Df Residuals:                     400   BIC:                             5979.
 Df Model:                           6                                         
@@ -431,7 +429,7 @@ Dep. Variable:        XRCC3expression   R-squared:                       0.034
 Model:                            OLS   Adj. R-squared:                  0.023
 Method:                 Least Squares   F-statistic:                     3.034
 Date:                Fri, 26 Jun 2026   Prob (F-statistic):             0.0177
-Time:                        02:29:38   Log-Likelihood:                -2528.1
+Time:                        02:59:36   Log-Likelihood:                -2528.1
 No. Observations:                 346   AIC:                             5066.
 Df Residuals:                     341   BIC:                             5085.
 Df Model:                           4                                         
@@ -453,12 +451,10 @@ Kurtosis:                      15.179   Cond. No.                         785.
 
 Notes:
 [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
-
-
 --- 2-4. Kaplan-Meier 생존분석 및 Table 5 추출 ---
-  [OS Log-rank Test] Chi-square: 5.029, p-value: 0.081
+  [OS Log-rank Test] Chi-square: 4.565, p-value: 0.033
 Kaplan-Meier (OS) 이미지 저장 완료: 'D:\coding\medin\plot\XRCC3_LUSC_OS_KM.png'
-  [RFS Log-rank Test] Chi-square: 4.195, p-value: 0.123
+  [RFS Log-rank Test] Chi-square: 1.724, p-value: 0.189
 Kaplan-Meier (RFS) 이미지 저장 완료: 'D:\coding\medin\plot\XRCC3_LUSC_RFS_KM.png'
 
 --- 2-5. Cox 회귀분석 ---

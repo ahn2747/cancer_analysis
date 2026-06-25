@@ -46,11 +46,11 @@ def load_and_merge_data(target, onco_file, clin_file):
     print("  [진단 로그] 1-1. CSV 파일 로드 완료.")
     
     print("  [진단 로그] 1-2. 마스터 SAV 파일 로드 시도 중 (pyreadstat)...")
-    # [핵심 수정] SPSS 사용자 정의 결측치(User-Missing)를 NaN으로 완벽 변환 (999, -99 등)
+    # [핵심] SPSS 사용자 정의 결측치(User-Missing)를 NaN으로 완벽 변환 (999, -99 등)
     df_clin, meta = pyreadstat.read_sav(clin_file, user_missing=True)
     print("  [진단 로그] 1-2. SAV 파일 로드 완료.")
     
-    # [중요 복구] 기존 SAV 파일에 동일한 유전자 컬럼이 있다면 충돌 방지를 위해 먼저 삭제 (x, y 접미사 생성 방지)
+    # [중요] 기존 SAV 파일에 동일한 유전자 컬럼이 있다면 충돌 방지를 위해 먼저 삭제 (x, y 접미사 생성 방지)
     new_cols = [f'{target}expression', f'{target}group']
     cols_to_drop = [col for col in new_cols if col in df_clin.columns]
     if cols_to_drop:
@@ -61,7 +61,7 @@ def load_and_merge_data(target, onco_file, clin_file):
     df_merged = pd.merge(df_clin, df_onco, on='sampleID', how='left')
     print("  [진단 로그] 1-3. 병합 완료.")
     
-    # [중요 복구] 병합된 최신 데이터를 다시 SAV와 CSV로 물리적으로 저장
+    # [중요] 병합된 최신 데이터를 다시 SAV와 CSV로 물리적으로 저장
     print("  [진단 로그] 1-4. 병합본을 마스터 SAV 파일로 저장 진행 중...")
     pyreadstat.write_sav(df_merged, clin_file)
     print("  [진단 로그] 1-4. SAV 파일 물리적 저장 완료.")
@@ -91,29 +91,27 @@ def analyze_chi_square(df, target_col='gene_group', row_vars=None):
         
     table1_data = []
     
-    # [핵심 수술] 결측치로 취급할 가짜 범주 텍스트 리스트
+    # 결측치로 취급할 가짜 범주 텍스트 리스트
     na_strings = ['not reported', '[not available]', 'unknown', 'na', 'n/a', '', 'none']
     
     for var in row_vars:
         if var not in df.columns:
             continue
         
-        # 1. 가짜 범주를 NaN으로 변환 후 순수 데이터만 추출
+        # 가짜 범주를 NaN으로 변환 후 순수 데이터만 추출
         df_clean = df[[var, target_col]].copy()
         df_clean[var] = df_clean[var].apply(lambda x: np.nan if pd.isna(x) or str(x).strip().lower() in na_strings else x)
         df_clean = df_clean.dropna()
         
-        # 2. 범주가 1개뿐이거나 환자가 없으면 카이제곱 검정 불가 -> 건너뜀
         if df_clean[var].nunique() <= 1 or df_clean[target_col].nunique() <= 1:
             continue
 
         crosstab_stat = pd.crosstab(df_clean[var], df_clean[target_col])
         
         try:
-            # [핵심 수술] 파이썬의 과잉 친절(Yates 연속성 보정)을 끄고 순정 Pearson 카이제곱 계산 (SPSS와 100% 일치)
+            # 파이썬의 과잉 친절(Yates 연속성 보정)을 끄고 순정 Pearson 카이제곱 계산
             chi2, p_val, dof, expected = stats.chi2_contingency(crosstab_stat, correction=False)
             
-            # 3. [조기 경보 시스템] 기대 빈도 5 미만 셀 감지 (P-value 신뢰도 하락)
             min_expected = expected.min()
             warning_msg = ""
             if min_expected < 5:
@@ -148,16 +146,15 @@ def analyze_bivariate_correlation(df, gene_list):
     if len(valid_genes) < 2:
         return pd.DataFrame()
         
-    # [중요 추가] "Not Reported" 등 문자열 찌꺼기를 완벽한 결측치(NaN)로 강제 변환
+    # "Not Reported" 등 문자열 찌꺼기를 완벽한 결측치(NaN)로 강제 변환
     df_numeric = df[valid_genes].apply(pd.to_numeric, errors='coerce')
     
-    # Pandas의 corr() 함수는 기본적으로 Pairwise Deletion을 수행합니다.
     pearson_matrix = df_numeric.corr(method='pearson')
     print("[Pearson 상관계수 행렬 (SPSS Pairwise 방식)]")
     print(pearson_matrix.round(3))
     print("\n")
     
-    # 엑셀 표(Table 2) 조립 로직 (논문용 콤팩트 출력: R, P-value 2행 구조)
+    # 논문용 콤팩트 출력: R, P-value 2행 구조
     table2_data = []
     for i in valid_genes:
         row_r = [i, 'R']
@@ -167,10 +164,7 @@ def analyze_bivariate_correlation(df, gene_list):
                 row_r.append("1")
                 row_p.append("")
             else:
-                # 두 변수(i, j)만 쏙 뽑아서 결측치가 없는 쌍만 남김 (Pairwise Deletion)
                 pair_data = df_numeric[[i, j]].dropna()
-                
-                # [중요 방어] 계산 가능한 2명 이상이면서, 두 변수 모두 분산이 0이 아닐 때만 계산
                 if len(pair_data) > 1 and pair_data[i].nunique() > 1 and pair_data[j].nunique() > 1:
                     r_val, p_val = stats.pearsonr(pair_data[i], pair_data[j])
                     row_r.append(f"{r_val:.3f}")
@@ -206,14 +200,12 @@ def analyze_glm_multivariate(df, mode, expr_col='target_expression', group_col='
         valid_base_vars = [v for v in base_vars if v in df.columns]
         
         if target_var not in df.columns:
-            print(f"  [경고] '{target_var}' 컬럼이 없어 {model_name} 모델 분석을 건너뜁니다.")
             continue
             
         vars_to_use = [expr_col] + valid_base_vars + [target_var]
         df_clean = df[vars_to_use].dropna()
         
         if df_clean.empty:
-            print(f"  [경고] 결측치 제거 후 {model_name} 모델 분석할 데이터가 없습니다.")
             continue
             
         predictors = []
@@ -253,7 +245,6 @@ def analyze_glm_multivariate(df, mode, expr_col='target_expression', group_col='
         except Exception as e:
             print(f"{model_name} 다변량 분석 중 오류 발생: {e}\n")
             
-    print("\n")
     if not all_table4_data:
         return pd.DataFrame()
         
@@ -265,26 +256,23 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
         print("  [경고] KM 생존 분석에 필요한 데이터가 없습니다.")
         return pd.DataFrame()
         
-    df_km = df.dropna(subset=[group_col, 'OS.time', 'OS'])
+    df_km = df.copy()
+    
+    # [핵심] 선생님 지시: 결측치 처리 원복 & High/Low만 명확히 필터링
+    df_km = df_km[df_km[group_col].isin(['High', 'Low'])]
+    df_km = df_km.dropna(subset=['OS.time', 'OS'])
+    
     if df_km.empty:
         return pd.DataFrame()
         
-    # Table 5 데이터를 담을 리스트
     table5_data = []
 
-    # 한글 폰트 및 스타일 설정
     plt.rcParams['font.family'] = 'Malgun Gothic'
     plt.rcParams['axes.unicode_minus'] = False
     
     kmf = KaplanMeierFitter()
     
-    raw_groups = df_km[group_col].unique()
-    groups = []
-    if 'High' in raw_groups: groups.append('High')
-    if 'Low' in raw_groups: groups.append('Low')
-    for g in sorted(raw_groups):
-        if g not in groups:
-            groups.append(g)
+    groups = ['High', 'Low'] if all(g in df_km[group_col].values for g in ['High', 'Low']) else df_km[group_col].unique()
             
     colors = ['#00a2e8', '#b51a5e']  
     color_map = {'High': '#00a2e8', 'Low': '#b51a5e'}
@@ -352,11 +340,11 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
                 labels_os.append(f'{group}-censored')
             
     if len(groups) > 1:
-        # [수정] 2그룹인 경우 OncoLnc/R과 동일한 방식을 사용하기 위해 logrank_test 명시적 호출
         if len(groups) == 2:
             mask0 = (df_km[group_col] == groups[0])
-            res_os = logrank_test(df_km.loc[mask0, 'OS.time'], df_km.loc[~mask0, 'OS.time'],
-                                event_observed_A=df_km.loc[mask0, 'OS'], event_observed_B=df_km.loc[~mask0, 'OS'])
+            mask1 = (df_km[group_col] == groups[1])
+            res_os = logrank_test(df_km.loc[mask0, 'OS.time'], df_km.loc[mask1, 'OS.time'],
+                                event_observed_A=df_km.loc[mask0, 'OS'], event_observed_B=df_km.loc[mask1, 'OS'])
         else:
             res_os = multivariate_logrank_test(df_km['OS.time'], df_km[group_col], df_km['OS'])
             
@@ -364,7 +352,6 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
         chi2_os = res_os.test_statistic
         p_str_os = f"{p_val_os:.3f}" if p_val_os >= 0.001 else "<0.001"
         
-        # Table 5 데이터 저장
         table5_data.append(["Overall Survival (OS)", mode, target, f"{chi2_os:.3f}", p_str_os])
         print(f"  [OS Log-rank Test] Chi-square: {chi2_os:.3f}, p-value: {p_str_os}")
         
@@ -390,7 +377,12 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
         
     # ---------------- RFS 분석 ----------------
     if 'RFS.time' in df.columns and 'RFS' in df.columns:
-        df_rfs = df.dropna(subset=[group_col, 'RFS.time', 'RFS']) # df_km 대신 원본에서 독립적으로 subset 구성
+        df_rfs = df.copy()
+        
+        # 선생님 지시: 결측치 처리 원복 & High/Low만 명확히 필터링
+        df_rfs = df_rfs[df_rfs[group_col].isin(['High', 'Low'])]
+        df_rfs = df_rfs.dropna(subset=['RFS.time', 'RFS'])
+        
         if not df_rfs.empty:
             plt.figure(figsize=(8, 6)) 
             ax_rfs = plt.gca()
@@ -438,11 +430,11 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
                     
             rfs_groups = df_rfs[group_col].unique()
             if len(rfs_groups) > 1:
-                # [수정] 2그룹인 경우 logrank_test 명시적 호출
                 if len(rfs_groups) == 2:
                     mask0 = (df_rfs[group_col] == rfs_groups[0])
-                    res_rfs = logrank_test(df_rfs.loc[mask0, 'RFS.time'], df_rfs.loc[~mask0, 'RFS.time'],
-                                        event_observed_A=df_rfs.loc[mask0, 'RFS'], event_observed_B=df_rfs.loc[~mask0, 'RFS'])
+                    mask1 = (df_rfs[group_col] == rfs_groups[1])
+                    res_rfs = logrank_test(df_rfs.loc[mask0, 'RFS.time'], df_rfs.loc[mask1, 'RFS.time'],
+                                        event_observed_A=df_rfs.loc[mask0, 'RFS'], event_observed_B=df_rfs.loc[mask1, 'RFS'])
                 else:
                     res_rfs = multivariate_logrank_test(df_rfs['RFS.time'], df_rfs[group_col], df_rfs['RFS'])
                     
@@ -450,7 +442,6 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
                 chi2_rfs = res_rfs.test_statistic
                 p_str_rfs = f"{p_val_rfs:.3f}" if p_val_rfs >= 0.001 else "<0.001"
                 
-                # Table 5 데이터 저장
                 table5_data.append(["Relapse-Free Survival (RFS)", mode, target, f"{chi2_rfs:.3f}", p_str_rfs])
                 print(f"  [RFS Log-rank Test] Chi-square: {chi2_rfs:.3f}, p-value: {p_str_rfs}")
                 
@@ -474,7 +465,6 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
             plt.close()
             print(f"Kaplan-Meier (RFS) 이미지 저장 완료: '{km_plot_path_rfs}'\n")
 
-    # 수집된 Table 5 데이터를 DataFrame으로 변환 반환
     df_table5 = pd.DataFrame(table5_data, columns=["Survival Type", "Cancer Type", "Target", "Chi-square", "P-value"])
     return df_table5
 
@@ -594,12 +584,10 @@ if __name__ == "__main__":
             
             print(f"\n[{target_gene} 유전자 분석 시작]")
             
-            # 1. 병합 또는 기존 데이터 로드
             if csv_file:
                 merged_df = load_and_merge_data(target=target_gene, onco_file=csv_file, clin_file=master_sav_path)
             else:
                 print(f"--- 1. 기존 데이터 로드 (Target: {target_gene}, 병합 과정 건너뜀) ---")
-                # [핵심 수정] 기존 데이터 로드 시에도 SPSS 결측치 완벽 처리 적용
                 merged_df, _ = pyreadstat.read_sav(master_sav_path, user_missing=True)
             
             if group_col_name not in merged_df.columns:
@@ -607,13 +595,9 @@ if __name__ == "__main__":
                 print("="*60)
                 continue
             
-            # 2. 분석 및 엑셀 표 데이터 생성
+            # 분석 파트
             df_table1 = analyze_chi_square(merged_df, target_col=group_col_name)
             
-            # =========================================================
-            # [변수 선언 및 전처리부] 상관분석(Correlation) 설정
-            # =========================================================
-            # 1. 연속형 변수 세팅 (이진화 불필요) 및 2. 범주형(문자열) 변수 세팅 (이진화 필요)
             if mode == "LUAD":
                 gene_vars = ['KrasExpression', 'TP53Expression', 'ALKExpression', 'BRAFExpression']
                 corr_continuous = [expr_col_name, 'number_pack_years_smoked', 'age_at_initial_pathologic_diagnosis'] + gene_vars
@@ -625,22 +609,13 @@ if __name__ == "__main__":
             
             corr_processed_binary = []
             
-            # 3. 이진화(Binarization) 일괄 수행 (정밀 필터링 적용)
             def encode_mutation(val):
                 if pd.isna(val):
                     return np.nan
-                
                 v_str = str(val).strip().lower()
-                
-                # 1) 완벽한 야생형 (0)
-                if v_str in ['none', 'wt', 'wildtype']:
-                    return 0
-                # 2) 알 수 없는 결측치 문자열 (NaN 처리하여 쌍별 분석에서 완벽히 제외)
-                elif v_str in ['not reported', '[not available]', 'unknown', 'na', 'n/a', '']:
-                    return np.nan
-                # 3) 그 외 명확한 돌연변이 (1)
-                else:
-                    return 1
+                if v_str in ['none', 'wt', 'wildtype']: return 0
+                elif v_str in ['not reported', '[not available]', 'unknown', 'na', 'n/a', '']: return np.nan
+                else: return 1
 
             for mut_var in corr_binary_targets:
                 if mut_var in merged_df.columns:
@@ -649,16 +624,12 @@ if __name__ == "__main__":
                     corr_processed_binary.append(bin_col_name)
                     print(f"  [안내] {mut_var} 데이터를 이진수(0=WT, 1=Mut, 제외=NaN)로 정밀 변환 완료.")
             
-            # 4. 최종 상관분석 투입 리스트 통합
             final_corr_genes = corr_continuous + corr_processed_binary
             
-            # 상관분석 실행
             df_table2 = analyze_bivariate_correlation(merged_df, gene_list=final_corr_genes)
-            # =========================================================
             
             df_table4 = analyze_glm_multivariate(merged_df, mode, expr_col=expr_col_name, group_col=group_col_name)
             
-            # [수정] Table 5 데이터를 받아옴
             df_table5 = analyze_kaplan_meier(target_gene, merged_df, mode, plot_base_dir, group_col=group_col_name, plot_type=CURRENT_PLOT_TYPE)
             
             age_col = 'age_at_initial_pathologic_diagnosis' if mode == "LUAD" else 'age'
@@ -672,7 +643,6 @@ if __name__ == "__main__":
                 continuous_vars=cox_continuous
             )
             
-            # 3. 분석 결과를 Excel 파일로 예쁘게 저장 (Table 5 추가)
             excel_save_path = os.path.join(result_dir, f"{target_gene}_{mode}_Tables.xlsx")
             if os.path.exists(excel_save_path):
                 try: os.remove(excel_save_path)
