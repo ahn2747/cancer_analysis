@@ -91,20 +91,43 @@ def analyze_chi_square(df, target_col='gene_group', row_vars=None):
         
     table1_data = []
     
+    # [핵심 수술] 결측치로 취급할 가짜 범주 텍스트 리스트
+    na_strings = ['not reported', '[not available]', 'unknown', 'na', 'n/a', '', 'none']
+    
     for var in row_vars:
         if var not in df.columns:
             continue
-        crosstab_stat = pd.crosstab(df[var], df[target_col])
+        
+        # 1. 가짜 범주를 NaN으로 변환 후 순수 데이터만 추출
+        df_clean = df[[var, target_col]].copy()
+        df_clean[var] = df_clean[var].apply(lambda x: np.nan if pd.isna(x) or str(x).strip().lower() in na_strings else x)
+        df_clean = df_clean.dropna()
+        
+        # 2. 범주가 1개뿐이거나 환자가 없으면 카이제곱 검정 불가 -> 건너뜀
+        if df_clean[var].nunique() <= 1 or df_clean[target_col].nunique() <= 1:
+            continue
+
+        crosstab_stat = pd.crosstab(df_clean[var], df_clean[target_col])
+        
         try:
-            chi2, p_val, dof, expected = stats.chi2_contingency(crosstab_stat)
+            # [핵심 수술] 파이썬의 과잉 친절(Yates 연속성 보정)을 끄고 순정 Pearson 카이제곱 계산 (SPSS와 100% 일치)
+            chi2, p_val, dof, expected = stats.chi2_contingency(crosstab_stat, correction=False)
+            
+            # 3. [조기 경보 시스템] 기대 빈도 5 미만 셀 감지 (P-value 신뢰도 하락)
+            min_expected = expected.min()
+            warning_msg = ""
+            if min_expected < 5:
+                warning_msg = f" (⚠️경고: 최소 기대빈도 {min_expected:.1f}<5)"
+                
             p_val_formatted = f"{p_val:.3f}" if p_val >= 0.001 else "<0.001"
         except ValueError:
             p_val_formatted = "N/A"
+            warning_msg = ""
             
-        crosstab_print = pd.crosstab(df[var], df[target_col], margins=True, margins_name="전체")
+        crosstab_print = pd.crosstab(df_clean[var], df_clean[target_col], margins=True, margins_name="전체")
         print(f"[{target_col} vs {var}]")
         print(crosstab_print)
-        print(f"Chi-square: {chi2:.4f}, p-value: {p_val_formatted}\n")
+        print(f"Chi-square: {chi2:.4f}, p-value: {p_val_formatted}{warning_msg}\n")
         
         table1_data.append([var] + [""] * len(target_cats) + [""])
         
