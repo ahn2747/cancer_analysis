@@ -67,7 +67,7 @@ SmokingStatus
 전체             1   244  244  489
 Chi-square: 1.1835, p-value: 0.553
 
---- 2-2. 이변량 상관 분석 (Pearson 행렬 - SPSS Pairwise 방식) ---
+--- 2-2. 이변량 상관 분석 (Pearson 행렬 - SPSS 쌍별 제외(Pairwise) 완벽 구현) ---
 [Pearson 상관계수 행렬 (SPSS Pairwise 방식)]
                           SMAD7expression  number_pack_years_smoked    age  TP53Expression  CDKN2AExpression  SOX2Expression  PIK3CAExpression  NOTCH1Expression
 SMAD7expression                     1.000                     0.035  0.103          -0.016            -0.118          -0.305            -0.225             0.113
@@ -89,7 +89,7 @@ Dep. Variable:        SMAD7expression   R-squared:                       0.019
 Model:                            OLS   Adj. R-squared:                  0.004
 Method:                 Least Squares   F-statistic:                     1.286
 Date:                Fri, 26 Jun 2026   Prob (F-statistic):              0.263
-Time:                        01:53:18   Log-Likelihood:                -2888.7
+Time:                        02:10:51   Log-Likelihood:                -2888.7
 No. Observations:                 409   AIC:                             5791.
 Df Residuals:                     402   BIC:                             5819.
 Df Model:                           6                                         
@@ -121,7 +121,7 @@ Dep. Variable:        SMAD7expression   R-squared:                       0.026
 Model:                            OLS   Adj. R-squared:                  0.012
 Method:                 Least Squares   F-statistic:                     1.819
 Date:                Fri, 26 Jun 2026   Prob (F-statistic):             0.0939
-Time:                        01:53:18   Log-Likelihood:                -2907.2
+Time:                        02:10:51   Log-Likelihood:                -2907.2
 No. Observations:                 412   AIC:                             5828.
 Df Residuals:                     405   BIC:                             5857.
 Df Model:                           6                                         
@@ -153,7 +153,7 @@ Dep. Variable:        SMAD7expression   R-squared:                       0.025
 Model:                            OLS   Adj. R-squared:                  0.010
 Method:                 Least Squares   F-statistic:                     1.704
 Date:                Fri, 26 Jun 2026   Prob (F-statistic):              0.119
-Time:                        01:53:18   Log-Likelihood:                -2873.6
+Time:                        02:10:51   Log-Likelihood:                -2873.6
 No. Observations:                 407   AIC:                             5761.
 Df Residuals:                     400   BIC:                             5789.
 Df Model:                           6                                         
@@ -185,7 +185,7 @@ Dep. Variable:        SMAD7expression   R-squared:                       0.022
 Model:                            OLS   Adj. R-squared:                  0.010
 Method:                 Least Squares   F-statistic:                     1.877
 Date:                Fri, 26 Jun 2026   Prob (F-statistic):              0.114
-Time:                        01:53:18   Log-Likelihood:                -2451.3
+Time:                        02:10:52   Log-Likelihood:                -2451.3
 No. Observations:                 346   AIC:                             4913.
 Df Residuals:                     341   BIC:                             4932.
 Df Model:                           4                                         

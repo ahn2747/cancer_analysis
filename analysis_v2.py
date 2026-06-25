@@ -46,7 +46,8 @@ def load_and_merge_data(target, onco_file, clin_file):
     print("  [진단 로그] 1-1. CSV 파일 로드 완료.")
     
     print("  [진단 로그] 1-2. 마스터 SAV 파일 로드 시도 중 (pyreadstat)...")
-    df_clin, meta = pyreadstat.read_sav(clin_file)
+    # [핵심 수정] SPSS 사용자 정의 결측치(User-Missing)를 NaN으로 완벽 변환 (999, -99 등)
+    df_clin, meta = pyreadstat.read_sav(clin_file, user_missing=True)
     print("  [진단 로그] 1-2. SAV 파일 로드 완료.")
     
     # [중요 복구] 기존 SAV 파일에 동일한 유전자 컬럼이 있다면 충돌 방지를 위해 먼저 삭제 (x, y 접미사 생성 방지)
@@ -119,30 +120,35 @@ def analyze_chi_square(df, target_col='gene_group', row_vars=None):
     return df_table1
 
 def analyze_bivariate_correlation(df, gene_list):
-    print("--- 2-2. 이변량 상관 분석 (Pearson 행렬 - SPSS Pairwise 방식) ---")
+    print("--- 2-2. 이변량 상관 분석 (Pearson 행렬 - SPSS 쌍별 제외(Pairwise) 완벽 구현) ---")
     valid_genes = [g for g in gene_list if g in df.columns]
     if len(valid_genes) < 2:
         return pd.DataFrame()
         
+    # [중요 추가] "Not Reported" 등 문자열 찌꺼기를 완벽한 결측치(NaN)로 강제 변환
+    df_numeric = df[valid_genes].apply(pd.to_numeric, errors='coerce')
+    
     # Pandas의 corr() 함수는 기본적으로 Pairwise Deletion을 수행합니다.
-    pearson_matrix = df[valid_genes].corr(method='pearson')
+    pearson_matrix = df_numeric.corr(method='pearson')
     print("[Pearson 상관계수 행렬 (SPSS Pairwise 방식)]")
     print(pearson_matrix.round(3))
     print("\n")
     
+    # 엑셀 표(Table 2) 조립 로직 (논문용 콤팩트 출력: R, P-value 2행 구조)
     table2_data = []
     for i in valid_genes:
         row_r = [i, 'R']
-        row_p = ['', 'P']
+        row_p = ['', 'P-value']
         for j in valid_genes:
             if i == j:
                 row_r.append("1")
                 row_p.append("")
             else:
-                # [핵심 수정] SPSS 방식처럼 두 변수(i, j)만 쏙 뽑아서 결측치가 없는 쌍만 남김
-                pair_data = df[[i, j]].dropna()
+                # 두 변수(i, j)만 쏙 뽑아서 결측치가 없는 쌍만 남김 (Pairwise Deletion)
+                pair_data = df_numeric[[i, j]].dropna()
                 
-                if len(pair_data) > 1: # 계산 가능한 최소 2명 이상일 때만
+                # [중요 방어] 계산 가능한 2명 이상이면서, 두 변수 모두 분산이 0이 아닐 때만 계산
+                if len(pair_data) > 1 and pair_data[i].nunique() > 1 and pair_data[j].nunique() > 1:
                     r_val, p_val = stats.pearsonr(pair_data[i], pair_data[j])
                     row_r.append(f"{r_val:.3f}")
                     row_p.append(f"{p_val:.3f}" if p_val >= 0.001 else "<0.001")
@@ -570,7 +576,8 @@ if __name__ == "__main__":
                 merged_df = load_and_merge_data(target=target_gene, onco_file=csv_file, clin_file=master_sav_path)
             else:
                 print(f"--- 1. 기존 데이터 로드 (Target: {target_gene}, 병합 과정 건너뜀) ---")
-                merged_df, _ = pyreadstat.read_sav(master_sav_path)
+                # [핵심 수정] 기존 데이터 로드 시에도 SPSS 결측치 완벽 처리 적용
+                merged_df, _ = pyreadstat.read_sav(master_sav_path, user_missing=True)
             
             if group_col_name not in merged_df.columns:
                 print(f"  [경고] 병합 후 '{group_col_name}' 데이터가 없습니다. 이 유전자는 분석을 건너뜁니다.")
@@ -595,15 +602,29 @@ if __name__ == "__main__":
             
             corr_processed_binary = []
             
-            # 3. 이진화(Binarization) 일괄 수행
+            # 3. 이진화(Binarization) 일괄 수행 (정밀 필터링 적용)
+            def encode_mutation(val):
+                if pd.isna(val):
+                    return np.nan
+                
+                v_str = str(val).strip().lower()
+                
+                # 1) 완벽한 야생형 (0)
+                if v_str in ['none', 'wt', 'wildtype']:
+                    return 0
+                # 2) 알 수 없는 결측치 문자열 (NaN 처리하여 쌍별 분석에서 완벽히 제외)
+                elif v_str in ['not reported', '[not available]', 'unknown', 'na', 'n/a', '']:
+                    return np.nan
+                # 3) 그 외 명확한 돌연변이 (1)
+                else:
+                    return 1
+
             for mut_var in corr_binary_targets:
                 if mut_var in merged_df.columns:
                     bin_col_name = f"{mut_var}_Mut_Binary"
-                    merged_df[bin_col_name] = merged_df[mut_var].apply(
-                        lambda x: 0 if pd.isna(x) or str(x).strip().lower() == 'none' else 1
-                    )
+                    merged_df[bin_col_name] = merged_df[mut_var].apply(encode_mutation)
                     corr_processed_binary.append(bin_col_name)
-                    print(f"  [안내] {mut_var} 데이터를 이진수(0=WT, 1=Mut)로 변환 완료.")
+                    print(f"  [안내] {mut_var} 데이터를 이진수(0=WT, 1=Mut, 제외=NaN)로 정밀 변환 완료.")
             
             # 4. 최종 상관분석 투입 리스트 통합
             final_corr_genes = corr_continuous + corr_processed_binary
