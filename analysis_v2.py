@@ -4,7 +4,7 @@ import pyreadstat
 import scipy.stats as stats
 import statsmodels.formula.api as smf
 from lifelines import KaplanMeierFitter, CoxPHFitter
-from lifelines.statistics import multivariate_logrank_test
+from lifelines.statistics import logrank_test, multivariate_logrank_test
 import matplotlib.pyplot as plt
 import os
 import sys
@@ -73,7 +73,7 @@ def load_and_merge_data(target, onco_file, clin_file):
     return df_merged
 
 # =====================================================================
-# 2. 기초 및 다변량 분석 파이프라인 (원본 로직 복구)
+# 2. 기초 및 다변량 분석 파이프라인
 # =====================================================================
 def analyze_chi_square(df, target_col='gene_group', row_vars=None):
     print("--- 2-1. 예후 분석 (Chi-square Test) ---")
@@ -124,7 +124,6 @@ def analyze_bivariate_correlation(df, gene_list):
     if len(valid_genes) < 2:
         return pd.DataFrame()
         
-    # [기존 로직 완벽 복구] 상관관계 분석 변수 전체에 대해 한 번에 결측치 제거 (Listwise Deletion)
     valid_data = df[valid_genes].dropna()
     
     pearson_matrix = valid_data.corr(method='pearson')
@@ -169,14 +168,12 @@ def analyze_glm_multivariate(df, mode, expr_col='target_expression', group_col='
     all_table4_data = []
     
     for model_name, target_var in target_vars:
-        # 베이스 변수 중 존재하는 것만 필터링
         valid_base_vars = [v for v in base_vars if v in df.columns]
         
         if target_var not in df.columns:
             print(f"  [경고] '{target_var}' 컬럼이 없어 {model_name} 모델 분석을 건너뜁니다.")
             continue
             
-        # 종속변수(Y)와 현재 모델에 필요한 독립변수(X)들만 모아서 결측치 제거
         vars_to_use = [expr_col] + valid_base_vars + [target_var]
         df_clean = df[vars_to_use].dropna()
         
@@ -184,7 +181,6 @@ def analyze_glm_multivariate(df, mode, expr_col='target_expression', group_col='
             print(f"  [경고] 결측치 제거 후 {model_name} 모델 분석할 데이터가 없습니다.")
             continue
             
-        # Formula 작성 (Group 변수는 순환 논리 방지를 위해 제외)
         predictors = []
         if age_var in valid_base_vars: predictors.append(age_var)
         if 'gender' in valid_base_vars: predictors.append("C(gender)")
@@ -198,7 +194,6 @@ def analyze_glm_multivariate(df, mode, expr_col='target_expression', group_col='
             print(f"\n[Model: {model_name}]")
             print(model.summary())
             
-            # Table 4 데이터 수집
             all_table4_data.append({"Variable": f"=== [ Model: {model_name} ] ===", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""})
             all_table4_data.append({"Variable": "Dependent Variable (Y)", "Coefficient": expr_col, "95% CI Lower": "", "95% CI Upper": "", "P-value": ""})
             all_table4_data.append({"Variable": "Model Formula", "Coefficient": formula, "95% CI Lower": "", "95% CI Upper": "", "P-value": ""})
@@ -230,22 +225,24 @@ def analyze_glm_multivariate(df, mode, expr_col='target_expression', group_col='
     return pd.DataFrame(all_table4_data)
 
 def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plot_type=1):
-    print("--- 2-4. Kaplan-Meier 생존분석 ---")
+    print("--- 2-4. Kaplan-Meier 생존분석 및 Table 5 추출 ---")
     if group_col not in df.columns or 'OS.time' not in df.columns or 'OS' not in df.columns:
         print("  [경고] KM 생존 분석에 필요한 데이터가 없습니다.")
-        return
+        return pd.DataFrame()
         
     df_km = df.dropna(subset=[group_col, 'OS.time', 'OS'])
     if df_km.empty:
-        return
+        return pd.DataFrame()
         
+    # Table 5 데이터를 담을 리스트
+    table5_data = []
+
     # 한글 폰트 및 스타일 설정
     plt.rcParams['font.family'] = 'Malgun Gothic'
     plt.rcParams['axes.unicode_minus'] = False
     
     kmf = KaplanMeierFitter()
     
-    # 범례 순서 고정: High가 위(파란색), Low가 아래(빨간색)
     raw_groups = df_km[group_col].unique()
     groups = []
     if 'High' in raw_groups: groups.append('High')
@@ -254,13 +251,12 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
         if g not in groups:
             groups.append(g)
             
-    colors = ['#00a2e8', '#b51a5e']  # High=파랑, Low=자주색
+    colors = ['#00a2e8', '#b51a5e']  
     color_map = {'High': '#00a2e8', 'Low': '#b51a5e'}
     for i, g in enumerate(groups):
         if g not in color_map:
             color_map[g] = colors[i % len(colors)]
     
-    # SPSS 방식 범례(Legend) 핸들 커스텀 설정
     import matplotlib.lines as mlines
     from matplotlib.legend_handler import HandlerLine2D
     
@@ -269,7 +265,6 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
         
     class StepHandler(HandlerLine2D):
         def create_artists(self, legend, orig_handle, xdescent, ydescent, width, height, fontsize, trans):
-            # 사진과 완벽히 일치하는 _|‾| (위로 꺾이고 오른쪽으로 가다가 아래로 꺾이는) 모양
             xdata = [0, width*0.35, width*0.35, width*0.85, width*0.85]
             ydata = [height*0.2, height*0.2, height*0.8, height*0.8, height*0.2]
             line = mlines.Line2D(xdata, ydata, color=orig_handle.get_color(), lw=1.5)
@@ -277,7 +272,7 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
             return [line]
 
     # ---------------- OS 분석 ----------------
-    plt.figure(figsize=(8, 6)) # 가로세로 비율을 사진과 동일하게(4:3) 설정
+    plt.figure(figsize=(8, 6))
     ax_os = plt.gca()
     
     for group in groups:
@@ -311,12 +306,10 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
     labels_os = []
     for group in groups:
         if group in color_map:
-            # 커스텀 _|‾| 꺾인 선 마커 추가
             handles_os.append(StepLine2D([0], [0], color=color_map[group]))
             labels_os.append(group)
     for group in groups:
         if group in color_map:
-            # 십자가(+) 마커 추가 (사진처럼 -+- 모양이 되도록 실선 속성 추가)
             handles_os.append(mlines.Line2D([], [], color=color_map[group], marker='+', linestyle='-', lw=1.5, mew=1, ms=6))
             if plot_type == 1:
                 labels_os.append(f'{group}-중도절단')
@@ -324,22 +317,34 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
                 labels_os.append(f'{group}-censored')
             
     if len(groups) > 1:
-        res_os = multivariate_logrank_test(df_km['OS.time'], df_km[group_col], df_km['OS'])
+        # [수정] 2그룹인 경우 OncoLnc/R과 동일한 방식을 사용하기 위해 logrank_test 명시적 호출
+        if len(groups) == 2:
+            mask0 = (df_km[group_col] == groups[0])
+            res_os = logrank_test(df_km.loc[mask0, 'OS.time'], df_km.loc[~mask0, 'OS.time'],
+                                  event_observed_A=df_km.loc[mask0, 'OS'], event_observed_B=df_km.loc[~mask0, 'OS'])
+        else:
+            res_os = multivariate_logrank_test(df_km['OS.time'], df_km[group_col], df_km['OS'])
+            
         p_val_os = res_os.p_value
-        print(f"  [OS Log-rank Test] p-value: {p_val_os:.4f}")
+        chi2_os = res_os.test_statistic
+        p_str_os = f"{p_val_os:.3f}" if p_val_os >= 0.001 else "<0.001"
+        
+        # Table 5 데이터 저장
+        table5_data.append(["Overall Survival (OS)", mode, target, f"{chi2_os:.3f}", p_str_os])
+        print(f"  [OS Log-rank Test] Chi-square: {chi2_os:.3f}, p-value: {p_str_os}")
+        
         if plot_type == 1:
-            ax_os.legend(handles=handles_os, labels=labels_os, title=f'{group_col}\nLog-rank p={p_val_os:.3f}', handler_map={StepLine2D: StepHandler()})
+            ax_os.legend(handles=handles_os, labels=labels_os, title=f'{group_col}\nLog-rank p={p_str_os}', handler_map={StepLine2D: StepHandler()})
         elif plot_type == 2:
             legend = ax_os.legend(handles=handles_os, labels=labels_os, title=group_col, handler_map={StepLine2D: StepHandler()}, frameon=False, loc='upper right')
             plt.setp(legend.get_title(), fontweight='bold')
-            ax_os.text(0.05, 0.05, f"P = {p_val_os:.3f}", transform=ax_os.transAxes, fontsize=16, fontweight='bold')
+            ax_os.text(0.05, 0.05, f"P = {p_str_os}", transform=ax_os.transAxes, fontsize=16, fontweight='bold')
     else:
         legend = ax_os.legend(handles=handles_os, labels=labels_os, title=group_col, handler_map={StepLine2D: StepHandler()}, frameon=(plot_type==1))
         if plot_type == 2:
             plt.setp(legend.get_title(), fontweight='bold')
             
     plt.tight_layout()
-    # 기존 결과 대체 형식 (timestamp 제거) 및 덮어쓰기 강제
     km_plot_path_os = os.path.join(save_dir, f'{target}_{mode}_OS_KM.png')
     if os.path.exists(km_plot_path_os):
         try: os.remove(km_plot_path_os)
@@ -350,9 +355,9 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
         
     # ---------------- RFS 분석 ----------------
     if 'RFS.time' in df.columns and 'RFS' in df.columns:
-        df_rfs = df_km.dropna(subset=['RFS.time', 'RFS'])
+        df_rfs = df.dropna(subset=[group_col, 'RFS.time', 'RFS']) # df_km 대신 원본에서 독립적으로 subset 구성
         if not df_rfs.empty:
-            plt.figure(figsize=(8, 6)) # 가로세로 비율을 사진과 동일하게(4:3) 설정
+            plt.figure(figsize=(8, 6)) 
             ax_rfs = plt.gca()
             
             for group in groups:
@@ -398,22 +403,34 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
                     
             rfs_groups = df_rfs[group_col].unique()
             if len(rfs_groups) > 1:
-                res_rfs = multivariate_logrank_test(df_rfs['RFS.time'], df_rfs[group_col], df_rfs['RFS'])
+                # [수정] 2그룹인 경우 logrank_test 명시적 호출
+                if len(rfs_groups) == 2:
+                    mask0 = (df_rfs[group_col] == rfs_groups[0])
+                    res_rfs = logrank_test(df_rfs.loc[mask0, 'RFS.time'], df_rfs.loc[~mask0, 'RFS.time'],
+                                           event_observed_A=df_rfs.loc[mask0, 'RFS'], event_observed_B=df_rfs.loc[~mask0, 'RFS'])
+                else:
+                    res_rfs = multivariate_logrank_test(df_rfs['RFS.time'], df_rfs[group_col], df_rfs['RFS'])
+                    
                 p_val_rfs = res_rfs.p_value
-                print(f"  [RFS Log-rank Test] p-value: {p_val_rfs:.4f}")
+                chi2_rfs = res_rfs.test_statistic
+                p_str_rfs = f"{p_val_rfs:.3f}" if p_val_rfs >= 0.001 else "<0.001"
+                
+                # Table 5 데이터 저장
+                table5_data.append(["Relapse-Free Survival (RFS)", mode, target, f"{chi2_rfs:.3f}", p_str_rfs])
+                print(f"  [RFS Log-rank Test] Chi-square: {chi2_rfs:.3f}, p-value: {p_str_rfs}")
+                
                 if plot_type == 1:
-                    ax_rfs.legend(handles=handles_rfs, labels=labels_rfs, title=f'{group_col}\nLog-rank p={p_val_rfs:.3f}', handler_map={StepLine2D: StepHandler()})
+                    ax_rfs.legend(handles=handles_rfs, labels=labels_rfs, title=f'{group_col}\nLog-rank p={p_str_rfs}', handler_map={StepLine2D: StepHandler()})
                 elif plot_type == 2:
                     legend = ax_rfs.legend(handles=handles_rfs, labels=labels_rfs, title=group_col, handler_map={StepLine2D: StepHandler()}, frameon=False, loc='upper right')
                     plt.setp(legend.get_title(), fontweight='bold')
-                    ax_rfs.text(0.05, 0.05, f"P = {p_val_rfs:.3f}", transform=ax_rfs.transAxes, fontsize=16, fontweight='bold')
+                    ax_rfs.text(0.05, 0.05, f"P = {p_str_rfs}", transform=ax_rfs.transAxes, fontsize=16, fontweight='bold')
             else:
                 legend = ax_rfs.legend(handles=handles_rfs, labels=labels_rfs, title=group_col, handler_map={StepLine2D: StepHandler()}, frameon=(plot_type==1))
                 if plot_type == 2:
                     plt.setp(legend.get_title(), fontweight='bold')
                     
             plt.tight_layout()
-            # 기존 결과 대체 형식 (timestamp 제거) 및 덮어쓰기 강제
             km_plot_path_rfs = os.path.join(save_dir, f'{target}_{mode}_RFS_KM.png')
             if os.path.exists(km_plot_path_rfs):
                 try: os.remove(km_plot_path_rfs)
@@ -422,10 +439,13 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
             plt.close()
             print(f"Kaplan-Meier (RFS) 이미지 저장 완료: '{km_plot_path_rfs}'\n")
 
+    # 수집된 Table 5 데이터를 DataFrame으로 변환 반환
+    df_table5 = pd.DataFrame(table5_data, columns=["Survival Type", "Cancer Type", "Target", "Chi-square", "P-value"])
+    return df_table5
+
 def analyze_cox_regression(target, df, mode, save_dir, group_col='gene_group', categorical_vars=None, continuous_vars=None):
     print("--- 2-5. Cox 회귀분석 ---")
     
-    # 1. 분석에 사용할 변수들을 명목형(Categorical)과 연속형(Continuous)으로 명확히 구분
     if categorical_vars is None:
         categorical_vars = [group_col, 'gender']
     if continuous_vars is None:
@@ -446,7 +466,6 @@ def analyze_cox_regression(target, df, mode, save_dir, group_col='gene_group', c
         print("  [경고] 결측치 제거 후 Cox 분석할 데이터가 없습니다.")
         return pd.DataFrame()
         
-    # 2. 명목형 변수들만 명시적으로 선택하여 더미 변환 (연속형은 원형 그대로 유지)
     dummy_cols = [c for c in categorical_vars if c in df_cox.columns]
     df_cox_dummy = pd.get_dummies(df_cox, columns=dummy_cols, drop_first=True)
     
@@ -468,7 +487,6 @@ def analyze_cox_regression(target, df, mode, save_dir, group_col='gene_group', c
         cph.plot()
         plt.title(f'Cox Regression - Forest Plot - {target}({mode})')
         plt.tight_layout()
-        # 기존 결과 대체 형식 (timestamp 제거) 및 덮어쓰기 강제
         cox_plot_path = os.path.join(save_dir, f'{target}_{mode}_Cox.png')
         if os.path.exists(cox_plot_path):
             try: os.remove(cox_plot_path)
@@ -513,7 +531,7 @@ if __name__ == "__main__":
 
         if isinstance(sys.stdout, PrintLogger):
             sys.stdout.flush()
-        # 기존 결과 대체 형식 (timestamp 제거)
+        
         result_txt_path = os.path.join(result_dir, f"result_single_{mode}.txt")
         sys.stdout = PrintLogger(result_txt_path)
 
@@ -548,7 +566,6 @@ if __name__ == "__main__":
                 print(f"--- 1. 기존 데이터 로드 (Target: {target_gene}, 병합 과정 건너뜀) ---")
                 merged_df, _ = pyreadstat.read_sav(master_sav_path)
             
-            # 방어 코드 추가 (KeyError 방지)
             if group_col_name not in merged_df.columns:
                 print(f"  [경고] 병합 후 '{group_col_name}' 데이터가 없습니다. 이 유전자는 분석을 건너뜁니다.")
                 print("="*60)
@@ -557,7 +574,6 @@ if __name__ == "__main__":
             # 2. 분석 및 엑셀 표 데이터 생성
             df_table1 = analyze_chi_square(merged_df, target_col=group_col_name)
             
-            # [수정됨] 암종별로 통제(교란) 변수로 사용할 연속형 유전자 발현량(gene_vars) 분리
             if mode == "LUAD":
                 gene_vars = ['KrasExpression', 'TP53Expression', 'ALKExpression', 'BRAFExpression']
                 target_genes_for_corr = [expr_col_name, 'number_pack_years_smoked', 'age_at_initial_pathologic_diagnosis'] + gene_vars
@@ -567,13 +583,11 @@ if __name__ == "__main__":
             
             df_table2 = analyze_bivariate_correlation(merged_df, gene_list=target_genes_for_corr)
             
-            # 다변량 분석 (GLM / OLS) - Table 4 반환
             df_table4 = analyze_glm_multivariate(merged_df, mode, expr_col=expr_col_name, group_col=group_col_name)
             
-            # 생존 & Cox 분석 (plot_type 전달)
-            analyze_kaplan_meier(target_gene, merged_df, mode, plot_base_dir, group_col=group_col_name, plot_type=CURRENT_PLOT_TYPE)
+            # [수정] Table 5 데이터를 받아옴
+            df_table5 = analyze_kaplan_meier(target_gene, merged_df, mode, plot_base_dir, group_col=group_col_name, plot_type=CURRENT_PLOT_TYPE)
             
-            # [수정됨] Cox 생존 분석 시 명목형/연속형 변수를 명확히 분리하여 주입
             age_col = 'age_at_initial_pathologic_diagnosis' if mode == "LUAD" else 'age'
             cox_categorical = [group_col_name, 'gender', 'pathologic_stage']
             cox_continuous = [age_col, 'number_pack_years_smoked'] + gene_vars
@@ -585,8 +599,7 @@ if __name__ == "__main__":
                 continuous_vars=cox_continuous
             )
             
-            # 3. 분석 결과를 Excel 파일로 예쁘게 저장 (Table 4 추가)
-            # 기존 결과 대체 형식 (timestamp 제거) 및 덮어쓰기 강제
+            # 3. 분석 결과를 Excel 파일로 예쁘게 저장 (Table 5 추가)
             excel_save_path = os.path.join(result_dir, f"{target_gene}_{mode}_Tables.xlsx")
             if os.path.exists(excel_save_path):
                 try: os.remove(excel_save_path)
@@ -600,9 +613,10 @@ if __name__ == "__main__":
                     df_table3.to_excel(writer, sheet_name='Table 3 (Cox)', index=False)
                 if not df_table4.empty:
                     df_table4.to_excel(writer, sheet_name='Table 4 (Multivariate OLS)', index=False)
+                if not df_table5.empty:
+                    df_table5.to_excel(writer, sheet_name='Table 5 (KM Log-rank)', index=False)
             print(f"✅ 논문용 표 엑셀 파일 저장 완료: '{excel_save_path}'")
             
-            # 처리 완료 파일 이동 또는 패스
             if csv_file:
                 completed_path = os.path.join(completed_csv_dir, file_name)
                 shutil.move(csv_file, completed_path)
