@@ -634,7 +634,7 @@ if __name__ == "__main__":
             
             age_col = 'age_at_initial_pathologic_diagnosis' if mode == "LUAD" else 'age'
             cox_categorical = [group_col_name, 'gender', 'pathologic_stage']
-            cox_continuous = [age_col, 'number_pack_years_smoked'] + gene_vars
+            cox_continuous = [age_col, 'number_pack_years_smoked']
             
             df_table3 = analyze_cox_regression(
                 target_gene, merged_df, mode, plot_base_dir, 
