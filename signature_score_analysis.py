@@ -414,16 +414,23 @@ def analyze_cox_regression(df, mode, save_dir, group_col='SignatureGroup', file_
     
     cph = CoxPHFitter()
     
+    df_table3 = pd.DataFrame()
     try:
         cph.fit(df_cox_dummy, duration_col='OS.time', event_col='OS')
+        # 콘솔 출력에도 95% CI가 보이도록 추가
+        print(cph.summary[['exp(coef)', 'exp(coef) lower 95%', 'exp(coef) upper 95%', 'p']])
+        
         summary = cph.summary
+        # 엑셀 표(Table 3)에 95% CI 하한선과 상한선을 논문 포맷으로 조립
         df_table3 = pd.DataFrame({
             'Clinical Variable': summary.index,
             'Hazard Ratio (HR)': summary['exp(coef)'].round(3),
+            '95% CI Lower': summary['exp(coef) lower 95%'].round(3),
+            '95% CI Upper': summary['exp(coef) upper 95%'].round(3),
             'P-value': summary['p'].apply(lambda x: f"{x:.3f}" if x >= 0.001 else "<0.001")
         })
+        
         plt.figure(figsize=(10, 6))
-        cph.plot()
         plt.title(f'Cox Regression - Forest Plot - Signature ({mode})') 
         plt.tight_layout()
         

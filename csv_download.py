@@ -148,7 +148,7 @@ def download_gene_data(driver, gene, cancer_type):
         return None
 
 def main():
-    gene_list = ["ECT2"]
+    gene_list = ["CCND2"]
     significant_genes = []
     
     print("=== 웹 스크래핑 및 자동 다운로드를 시작합니다 ===\n")
