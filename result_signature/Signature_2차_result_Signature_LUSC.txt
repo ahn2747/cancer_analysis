@@ -1,0 +1,125 @@
+--- 1. 기존 데이터 로드 및 Signature 계산 ---
+  [진단 로그] 마스터 SAV 파일에 시그니처 점수/그룹 변수를 성공적으로 저장했습니다.
+--- 2-1. 임상 특성 예후 분석 (Chi-square Test) ---
+[SignatureGroup vs ageG]
+SignatureGroup  High  Low   전체
+ageG                          
+0.0               89  100  189
+1.0              155  144  299
+전체               244  244  488
+Chi-square: 1.0449, p-value: 0.307
+
+[SignatureGroup vs gender]
+SignatureGroup  High  Low   전체
+gender                        
+FEMALE            67   59  126
+MALE             177  185  362
+전체               244  244  488
+Chi-square: 0.6847, p-value: 0.408
+
+[SignatureGroup vs pathologic_stage]
+SignatureGroup    High  Low   전체
+pathologic_stage                
+1.0                119  119  238
+2.0                 79   77  156
+3.0                 37   46   83
+4.0                  6    1    7
+전체                 241  243  484
+Chi-square: 4.5648, p-value: 0.207 (⚠️경고: 최소 기대빈도 3.5<5)
+
+[SignatureGroup vs pathologic_M]
+SignatureGroup  High  Low   전체
+pathologic_M                  
+0.0              196  205  401
+1.0                6    1    7
+전체               202  206  408
+Chi-square: 3.7346, p-value: 0.053 (⚠️경고: 최소 기대빈도 3.5<5)
+
+[SignatureGroup vs pathologic_N]
+SignatureGroup  High  Low   전체
+pathologic_N                  
+0.0              163  148  311
+1.0               60   66  126
+2.0               15   25   40
+3.0                1    4    5
+전체               239  243  482
+Chi-square: 5.2764, p-value: 0.153 (⚠️경고: 최소 기대빈도 2.5<5)
+
+[SignatureGroup vs pathologic_T]
+SignatureGroup  High  Low   전체
+pathologic_T                  
+1.0               50   59  109
+2.0              142  144  286
+3.0               37   33   70
+4.0               15    8   23
+전체               244  244  488
+Chi-square: 3.1161, p-value: 0.374
+
+[SignatureGroup vs SmokingStatus]
+SignatureGroup  High  Low   전체
+SmokingStatus                 
+0.0               38   38   76
+1.0              206  207  413
+전체               244  245  489
+Chi-square: 0.0004, p-value: 0.985
+
+--- 2-2. 이변량 상관 분석 (Pearson 행렬) ---
+[Pearson 상관계수 행렬 (SPSS Pairwise 방식)]
+                          SignatureScore  number_pack_years_smoked    age  TP53Expression  CDKN2AExpression  SOX2Expression  PIK3CAExpression  NOTCH1Expression
+SignatureScore                     1.000                     0.026  0.020          -0.092            -0.020          -0.447            -0.245            -0.088
+number_pack_years_smoked           0.026                     1.000  0.045          -0.012            -0.021          -0.040             0.018             0.001
+age                                0.020                     0.045  1.000          -0.045            -0.012          -0.116            -0.025            -0.012
+TP53Expression                    -0.092                    -0.012 -0.045           1.000            -0.011           0.058             0.050             0.196
+CDKN2AExpression                  -0.020                    -0.021 -0.012          -0.011             1.000          -0.004            -0.014            -0.074
+SOX2Expression                    -0.447                    -0.040 -0.116           0.058            -0.004           1.000             0.528             0.004
+PIK3CAExpression                  -0.245                     0.018 -0.025           0.050            -0.014           0.528             1.000            -0.032
+NOTCH1Expression                  -0.088                     0.001 -0.012           0.196            -0.074           0.004            -0.032             1.000
+
+
+--- 2-3. 다변량 일반선형모형 (GLM / OLS) ---
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:         SignatureScore   R-squared:                       0.017
+Model:                            OLS   Adj. R-squared:                  0.002
+Method:                 Least Squares   F-statistic:                     1.164
+Date:                Sun, 28 Jun 2026   Prob (F-statistic):              0.325
+Time:                        22:38:20   Log-Likelihood:                -435.28
+No. Observations:                 410   AIC:                             884.6
+Df Residuals:                     403   BIC:                             912.7
+Df Model:                           6                                         
+Covariance Type:            nonrobust                                         
+==============================================================================================
+                                 coef    std err          t      P>|t|      [0.025      0.975]
+----------------------------------------------------------------------------------------------
+Intercept                     -0.4665      0.302     -1.545      0.123      -1.060       0.127
+C(gender)[T.MALE]             -0.0275      0.080     -0.343      0.732      -0.185       0.130
+C(pathologic_stage)[T.2.0]     0.1600      0.079      2.015      0.045       0.004       0.316
+C(pathologic_stage)[T.3.0]     0.1439      0.099      1.451      0.148      -0.051       0.339
+C(pathologic_stage)[T.4.0]     0.3065      0.294      1.044      0.297      -0.271       0.884
+age                            0.0055      0.004      1.281      0.201      -0.003       0.014
+number_pack_years_smoked       0.0006      0.001      0.513      0.608      -0.002       0.003
+==============================================================================
+Omnibus:                      168.035   Durbin-Watson:                   1.982
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              633.624
+Skew:                           1.845   Prob(JB):                    2.57e-138
+Kurtosis:                       7.845   Cond. No.                         769.
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+
+--- 2-4. Kaplan-Meier 생존분석 ---
+  [OS Log-rank Test] Chi-square: 11.186, p-value: <0.001
+--- 2-5. Cox 회귀분석 ---
+                          exp(coef)  exp(coef) lower 95%  exp(coef) upper 95%         p
+covariate                                                                              
+ageG                       1.325693             0.964364             1.822405  0.082480
+number_pack_years_smoked   0.999554             0.994938             1.004191  0.850081
+pathologic_stage           1.205840             1.007463             1.443280  0.041247
+SignatureGroup_Low         0.629291             0.467627             0.846843  0.002233
+gender_MALE                1.282676             0.906694             1.814567  0.159561
+Cox Forest Plot 이미지 저장 완료: 'D:\coding\medin\plot_signature\Signature_2차_Signature_LUSC_Cox_Forest_Plot.png'\n
+✅ 논문용 시그니처 표 엑셀 파일 저장 완료: 'D:\coding\medin\result_signature\Signature_2차_Signature_LUSC_Tables.xlsx'
+============================================================
+\n=== 모든 Signature 생물통계 파이프라인이 성공적으로 완료되었습니다 ===
