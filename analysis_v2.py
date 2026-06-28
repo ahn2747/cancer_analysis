@@ -637,8 +637,8 @@ if __name__ == "__main__":
             df_table5 = analyze_kaplan_meier(target_gene, merged_df, mode, plot_base_dir, group_col=group_col_name, plot_type=CURRENT_PLOT_TYPE)
             
             age_col = 'age_at_initial_pathologic_diagnosis' if mode == "LUAD" else 'age'
-            cox_categorical = [group_col_name, 'gender', 'pathologic_stage']
-            cox_continuous = [age_col, 'number_pack_years_smoked'] + gene_vars
+            cox_categorical = [group_col_name, 'gender']
+            cox_continuous = ['ageG', 'number_pack_years_smoked', 'pathologic_stage'] #+ gene_vars
             
             df_table3 = analyze_cox_regression(
                 target_gene, merged_df, mode, plot_base_dir, 

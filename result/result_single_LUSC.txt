@@ -88,7 +88,7 @@ Dep. Variable:        CCND2expression   R-squared:                       0.031
 Model:                            OLS   Adj. R-squared:                  0.017
 Method:                 Least Squares   F-statistic:                     2.156
 Date:                Sat, 27 Jun 2026   Prob (F-statistic):             0.0464
-Time:                        19:03:28   Log-Likelihood:                -3854.5
+Time:                        19:07:20   Log-Likelihood:                -3854.5
 No. Observations:                 410   AIC:                             7723.
 Df Residuals:                     403   BIC:                             7751.
 Df Model:                           6                                         
@@ -120,7 +120,7 @@ Dep. Variable:        CCND2expression   R-squared:                       0.040
 Model:                            OLS   Adj. R-squared:                  0.025
 Method:                 Least Squares   F-statistic:                     2.795
 Date:                Sat, 27 Jun 2026   Prob (F-statistic):             0.0113
-Time:                        19:03:28   Log-Likelihood:                -3879.6
+Time:                        19:07:20   Log-Likelihood:                -3879.6
 No. Observations:                 413   AIC:                             7773.
 Df Residuals:                     406   BIC:                             7801.
 Df Model:                           6                                         
@@ -152,7 +152,7 @@ Dep. Variable:        CCND2expression   R-squared:                       0.032
 Model:                            OLS   Adj. R-squared:                  0.017
 Method:                 Least Squares   F-statistic:                     2.201
 Date:                Sat, 27 Jun 2026   Prob (F-statistic):             0.0421
-Time:                        19:03:28   Log-Likelihood:                -3836.2
+Time:                        19:07:20   Log-Likelihood:                -3836.2
 No. Observations:                 408   AIC:                             7686.
 Df Residuals:                     401   BIC:                             7715.
 Df Model:                           6                                         
@@ -184,7 +184,7 @@ Dep. Variable:        CCND2expression   R-squared:                       0.028
 Model:                            OLS   Adj. R-squared:                  0.016
 Method:                 Least Squares   F-statistic:                     2.427
 Date:                Sat, 27 Jun 2026   Prob (F-statistic):             0.0477
-Time:                        19:03:28   Log-Likelihood:                -3266.1
+Time:                        19:07:20   Log-Likelihood:                -3266.1
 No. Observations:                 347   AIC:                             6542.
 Df Residuals:                     342   BIC:                             6561.
 Df Model:                           4                                         
@@ -215,18 +215,11 @@ Kaplan-Meier (RFS) 이미지 저장 완료: 'D:\coding\medin\plot\CCND2_LUSC_RFS
 --- 2-5. Cox 회귀분석 ---
                           exp(coef)  exp(coef) lower 95%  exp(coef) upper 95%         p
 covariate                                                                              
-age                        1.021003             1.001527             1.040856  0.034406
-number_pack_years_smoked   1.000626             0.996083             1.005190  0.787368
-TP53Expression             0.999984             0.999861             1.000106  0.794170
-CDKN2AExpression           0.999982             0.999822             1.000143  0.828311
-SOX2Expression             0.999964             0.999920             1.000009  0.118981
-PIK3CAExpression           1.000141             0.999858             1.000425  0.328877
-NOTCH1Expression           0.999998             0.999927             1.000068  0.945244
-CCND2group_Low             1.396506             1.028252             1.896644  0.032489
-gender_MALE                1.254642             0.875044             1.798912  0.217234
-pathologic_stage_2.0       1.083320             0.759590             1.545020  0.658603
-pathologic_stage_3.0       1.423767             0.953271             2.126480  0.084320
-pathologic_stage_4.0       3.030180             1.203815             7.627405  0.018582
+ageG                       1.319109             0.957439             1.817398  0.090275
+number_pack_years_smoked   1.000008             0.995396             1.004641  0.997381
+pathologic_stage           1.201944             1.003101             1.440203  0.046205
+CCND2group_Low             1.354058             1.006549             1.821545  0.045167
+gender_MALE                1.249313             0.883357             1.766877  0.208154
 Cox Forest Plot 저장 완료: 'D:\coding\medin\plot\CCND2_LUSC_Cox.png'
 
 ✅ 논문용 표 엑셀 파일 저장 완료: 'D:\coding\medin\result\CCND2_LUSC_Tables.xlsx'
