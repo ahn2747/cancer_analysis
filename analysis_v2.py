@@ -402,27 +402,40 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
 
 def analyze_cox_regression(target, df, mode, save_dir, group_col='gene_group', categorical_vars=None, continuous_vars=None):
     print("--- 2-5. Cox 회귀분석 ---")
-    if categorical_vars is None: categorical_vars = [group_col, 'gender']
+    
+    if categorical_vars is None:
+        categorical_vars = [group_col, 'gender']
     if continuous_vars is None:
         age_col = 'age_at_initial_pathologic_diagnosis' if mode == "LUAD" else 'age'
         continuous_vars = [age_col, 'number_pack_years_smoked', 'pathologic_stage']
         
-    cols = ['OS.time', 'OS'] + categorical_vars + continuous_vars
-    valid_cols = [c for c in cols if c in df.columns]
+    survival_cols = ['OS.time', 'OS']
+    cols = survival_cols + categorical_vars + continuous_vars
     
+    valid_cols = [c for c in cols if c in df.columns]
+    if group_col not in valid_cols or 'OS' not in valid_cols:
+        print("  [경고] 필수 컬럼이 없어 Cox 분석을 건너뜁니다.")
+        return pd.DataFrame()
+        
     df_cox = df[valid_cols].dropna()
-    if df_cox.empty: return pd.DataFrame()
+    
+    if df_cox.empty:
+        print("  [경고] 결측치 제거 후 Cox 분석할 데이터가 없습니다.")
+        return pd.DataFrame()
         
     dummy_cols = [c for c in categorical_vars if c in df_cox.columns]
     df_cox_dummy = pd.get_dummies(df_cox, columns=dummy_cols, drop_first=True)
     
     cph = CoxPHFitter()
+    
     df_table3 = pd.DataFrame()
     try:
         cph.fit(df_cox_dummy, duration_col='OS.time', event_col='OS')
+        # 콘솔 출력에도 95% CI가 보이도록 추가
         print(cph.summary[['exp(coef)', 'exp(coef) lower 95%', 'exp(coef) upper 95%', 'p']])
         
         summary = cph.summary
+        # 엑셀 표(Table 3)에 95% CI 하한선과 상한선을 논문 포맷으로 조립
         df_table3 = pd.DataFrame({
             'Clinical Variable': summary.index,
             'Hazard Ratio (HR)': summary['exp(coef)'].round(3),
@@ -431,16 +444,22 @@ def analyze_cox_regression(target, df, mode, save_dir, group_col='gene_group', c
             'P-value': summary['p'].apply(lambda x: f"{x:.3f}" if x >= 0.001 else "<0.001")
         })
         
-        plt.figure(figsize=(10, 6)); cph.plot()
+        plt.figure(figsize=(10, 6))
+        cph.plot()
         plt.title(f'Cox Regression - Forest Plot - {target}({mode})')
         plt.tight_layout()
         cox_plot_path = os.path.join(save_dir, f'{target}_{mode}_Cox.png')
-        plt.savefig(cox_plot_path); plt.close()
+        if os.path.exists(cox_plot_path):
+            try: os.remove(cox_plot_path)
+            except: pass
+        plt.savefig(cox_plot_path)
+        plt.close()
+        print(f"Cox Forest Plot 저장 완료: '{cox_plot_path}'\n")
+        
     except Exception as e:
         print(f"Cox 분석 중 오류 발생: {e}")
         
     return df_table3
-
 # =====================================================================
 # 3. 메인 실행 블록 (LUAD, LUSC 순차적 자동 실행)
 # =====================================================================
