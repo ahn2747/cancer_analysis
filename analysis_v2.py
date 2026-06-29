@@ -151,18 +151,23 @@ def analyze_bivariate_correlation(df, gene_list):
     col_names = ['Variable', 'Stat'] + valid_genes
     return pd.DataFrame(table2_data, columns=col_names)
 
-# [수술 완료] OLM 변수 블록화 및 자동 C() 래핑 적용
+# =====================================================================
+# [수술 완료] OLM 기본 분석 (Base Model) & 병기 결합(Stage Model) 스위치
+# =====================================================================
 def analyze_glm_multivariate(df, mode, expr_col='target_expression', categorical_vars=None, continuous_vars=None, target_stages=None):
-    print("--- 2-3. 다변량 일반선형모형 (GLM / OLS) - 블록화 적용 ---")
+    print("--- 2-3. 다변량 일반선형모형 (GLM / OLS) - Base 모델 및 병기 결합 ---")
     
     age_var = "age_at_initial_pathologic_diagnosis" if mode == "LUAD" else "age"
     
-    # 파라미터 미지정 시 기본값 세팅
     if categorical_vars is None:
         categorical_vars = ['gender']
     if continuous_vars is None:
-        continuous_vars = [age_var, 'number_pack_years_smoked', 'pathologic_stage']
-    if target_stages is None:
+        continuous_vars = [age_var, 'number_pack_years_smoked']
+        
+    # target_stages가 명시적으로 False면 빈 리스트 할당 (병기 루프 차단 옵션)
+    if target_stages is False:
+        target_stages = []
+    elif target_stages is None:
         target_stages = [
             ('Pathologic Stage', 'pathologic_stage'),
             ('Pathologic T', 'pathologic_T'),
@@ -172,51 +177,37 @@ def analyze_glm_multivariate(df, mode, expr_col='target_expression', categorical
     
     all_table4_data = []
     
-    for model_name, target_var in target_stages:
-        # 체크할 전체 컬럼
-        cols_to_check = [expr_col] + categorical_vars + continuous_vars + [target_var]
-        valid_cols = [c for c in cols_to_check if c in df.columns]
-        
-        if target_var not in valid_cols:
-            continue
+    # -------------------------------------------------------------
+    # 1. Base Model (병기가 제외된 기본 모델) 구성 및 분석
+    # -------------------------------------------------------------
+    base_cols_to_check = [expr_col] + categorical_vars + continuous_vars
+    base_valid_cols = [c for c in base_cols_to_check if c in df.columns]
+    
+    df_base = df[base_valid_cols].dropna()
+    
+    base_predictors = []
+    for var in continuous_vars:
+        if var in base_valid_cols: base_predictors.append(var)
+    for var in categorical_vars:
+        if var in base_valid_cols: base_predictors.append(f"C({var})")
             
-        df_clean = df[valid_cols].dropna()
-        if df_clean.empty:
-            continue
-            
-        predictors = []
-        
-        # 1. 연속형 변수 블록 투입
-        for var in continuous_vars:
-            if var in valid_cols:
-                predictors.append(var)
-                
-        # 2. 범주형 변수 블록 투입 (C() 래핑)
-        for var in categorical_vars:
-            if var in valid_cols:
-                predictors.append(f"C({var})")
-                
-        # 3. 모델 타겟 병기 변수 투입 (범주형)
-        predictors.append(f"C({target_var})")
-        
-        formula = f"{expr_col} ~ " + " + ".join(predictors)
-        
+    if not df_base.empty and base_predictors:
+        formula_base = f"{expr_col} ~ " + " + ".join(base_predictors)
         try:
-            model = smf.ols(formula=formula, data=df_clean).fit()
-            print(f"\n[Model: {model_name}]")
-            print(model.summary())
+            model_base = smf.ols(formula=formula_base, data=df_base).fit()
+            print(f"\n[Model: Base Model (No Stage)]")
+            print(model_base.summary())
             
             all_table4_data.extend([
-                {"Variable": f"=== [ Model: {model_name} ] ===", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                {"Variable": f"=== [ Model: Base Model (No Stage) ] ===", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
                 {"Variable": "Dependent Variable (Y)", "Coefficient": expr_col, "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
-                {"Variable": "Model Formula", "Coefficient": formula, "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
-                {"Variable": "R-squared", "Coefficient": f"{model.rsquared:.4f}", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
-                {"Variable": "Prob (F-statistic)", "Coefficient": f"{model.f_pvalue:.4e}", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                {"Variable": "Model Formula", "Coefficient": formula_base, "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                {"Variable": "R-squared", "Coefficient": f"{model_base.rsquared:.4f}", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                {"Variable": "Prob (F-statistic)", "Coefficient": f"{model_base.f_pvalue:.4e}", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
                 {"Variable": "--- [ Coefficients ] ---", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""}
             ])
             
-            coef, pvalues, conf_int = model.params, model.pvalues, model.conf_int()
-            
+            coef, pvalues, conf_int = model_base.params, model_base.pvalues, model_base.conf_int()
             for idx in coef.index:
                 all_table4_data.append({
                     "Variable": idx,
@@ -226,10 +217,58 @@ def analyze_glm_multivariate(df, mode, expr_col='target_expression', categorical
                     "P-value": f"{pvalues[idx]:.3f}" if pvalues[idx] >= 0.001 else "<0.001"
                 })
             all_table4_data.append({"Variable": "", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""})
-            
         except Exception as e:
-            print(f"{model_name} 다변량 분석 중 오류 발생: {e}\n")
+            print(f"기본 모델 분석 중 오류 발생: {e}\n")
+
+    # -------------------------------------------------------------
+    # 2. Stage Models (병기가 하나씩 추가되는 루프 모델)
+    # -------------------------------------------------------------
+    if target_stages:
+        for model_name, target_var in target_stages:
+            cols_to_check = base_cols_to_check + [target_var]
+            valid_cols = [c for c in cols_to_check if c in df.columns]
             
+            if target_var not in valid_cols:
+                continue
+                
+            df_stage = df[valid_cols].dropna()
+            if df_stage.empty:
+                continue
+                
+            stage_predictors = base_predictors.copy()
+            # 병기 변수는 정석대로 범주형(C) 래핑 투입
+            stage_predictors.append(f"C({target_var})")
+            
+            formula_stage = f"{expr_col} ~ " + " + ".join(stage_predictors)
+            
+            try:
+                model_stage = smf.ols(formula=formula_stage, data=df_stage).fit()
+                print(f"\n[Model: Base + {model_name}]")
+                print(model_stage.summary())
+                
+                all_table4_data.extend([
+                    {"Variable": f"=== [ Model: Base + {model_name} ] ===", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                    {"Variable": "Dependent Variable (Y)", "Coefficient": expr_col, "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                    {"Variable": "Model Formula", "Coefficient": formula_stage, "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                    {"Variable": "R-squared", "Coefficient": f"{model_stage.rsquared:.4f}", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                    {"Variable": "Prob (F-statistic)", "Coefficient": f"{model_stage.f_pvalue:.4e}", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                    {"Variable": "--- [ Coefficients ] ---", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""}
+                ])
+                
+                coef, pvalues, conf_int = model_stage.params, model_stage.pvalues, model_stage.conf_int()
+                for idx in coef.index:
+                    all_table4_data.append({
+                        "Variable": idx,
+                        "Coefficient": round(coef[idx], 4),
+                        "95% CI Lower": round(conf_int.loc[idx, 0], 4),
+                        "95% CI Upper": round(conf_int.loc[idx, 1], 4),
+                        "P-value": f"{pvalues[idx]:.3f}" if pvalues[idx] >= 0.001 else "<0.001"
+                    })
+                all_table4_data.append({"Variable": "", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""})
+                
+            except Exception as e:
+                print(f"{model_name} 다변량 분석 중 오류 발생: {e}\n")
+                
     return pd.DataFrame(all_table4_data)
 
 def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plot_type=1):
@@ -489,7 +528,7 @@ if __name__ == "__main__":
             df_table2 = analyze_bivariate_correlation(merged_df, gene_list=final_corr_genes)
             
             # ==============================================================
-            # [블록화 적용] OLM (다변량 일반선형모형) 변수 분리
+            # [블록화 적용] OLM 변수 분리 및 Stage 스위치 (True/False/None)
             # ==============================================================
             age_col = 'age_at_initial_pathologic_diagnosis' if mode == "LUAD" else 'age'
             glm_categorical = ['gender']
@@ -499,7 +538,8 @@ if __name__ == "__main__":
                 merged_df, mode, 
                 expr_col=expr_col_name, 
                 categorical_vars=glm_categorical, 
-                continuous_vars=glm_continuous
+                continuous_vars=glm_continuous,
+                target_stages=None  # 병기 분석을 완전히 끄고 Base 모델만 보려면 target_stages=False 로 변경하세요!
             )
             
             df_table5 = analyze_kaplan_meier(target_gene, merged_df, mode, plot_base_dir, group_col=group_col_name, plot_type=CURRENT_PLOT_TYPE)
