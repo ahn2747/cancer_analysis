@@ -39,17 +39,11 @@ def get_signature_group(df, gene_list, sav_path):
             z_scores[gene] = (val - val.mean()) / val.std()
     
     if not z_scores.empty:
-        # Z-score 평균을 Signature Score로 저장
         df['SignatureScore'] = z_scores.mean(axis=1)
-        
-        # Median을 기준으로 High / Low 그룹 분할
         median_score = df['SignatureScore'].median()
         df['SignatureGroup'] = np.where(df['SignatureScore'] > median_score, 'High', 'Low')
-        
-        # 결측치 보정: Z-score 계산이 불가능했던 행은 그룹도 NaN 처리
         df.loc[df['SignatureScore'].isna(), 'SignatureGroup'] = np.nan
         
-        # 마스터 SAV 파일에 'SignatureScore'와 'SignatureGroup' 컬럼 업데이트 (저장)
         try:
             pyreadstat.write_sav(df, sav_path)
             print(f"  [진단 로그] 마스터 SAV 파일에 시그니처 점수/그룹 변수를 성공적으로 저장했습니다.")
@@ -71,29 +65,23 @@ def analyze_chi_square(df, target_col='SignatureGroup', row_vars=None):
         target_cats = ['Group1', 'Group2']
         
     table1_data = []
-    
-    # [수정] 결측치로 취급할 가짜 범주 텍스트 리스트
     na_strings = ['not reported', '[not available]', 'unknown', 'na', 'n/a', '', 'none']
     
     for var in row_vars:
         if var not in df.columns:
             continue
         
-        # [수정] 가짜 범주를 NaN으로 변환 후 순수 데이터만 추출
         df_clean = df[[var, target_col]].copy()
         df_clean[var] = df_clean[var].apply(lambda x: np.nan if pd.isna(x) or str(x).strip().lower() in na_strings else x)
         df_clean = df_clean.dropna()
         
-        # [수정] 범주가 1개뿐이거나 환자가 없으면 건너뜀
         if df_clean[var].nunique() <= 1 or df_clean[target_col].nunique() <= 1:
             continue
 
         crosstab_stat = pd.crosstab(df_clean[var], df_clean[target_col])
         
         try:
-            # [수정] 파이썬의 과잉 친절(Yates 연속성 보정)을 끄고 순정 Pearson 카이제곱 계산
             chi2, p_val, dof, expected = stats.chi2_contingency(crosstab_stat, correction=False)
-            
             min_expected = expected.min()
             warning_msg = f" (⚠️경고: 최소 기대빈도 {min_expected:.1f}<5)" if min_expected < 5 else ""
             p_val_formatted = f"{p_val:.3f}" if p_val >= 0.001 else "<0.001"
@@ -119,23 +107,18 @@ def analyze_chi_square(df, target_col='SignatureGroup', row_vars=None):
     df_table1 = pd.DataFrame(table1_data, columns=col_names)
     return df_table1
 
-
 def analyze_bivariate_correlation(df, gene_list):
     print("--- 2-2. 이변량 상관 분석 (Pearson 행렬) ---")
-    
     valid_genes = [g for g in gene_list if g in df.columns]
     if len(valid_genes) < 2:
         return pd.DataFrame()
         
-    # [수정] "Not Reported" 등 문자열 찌꺼기를 완벽한 결측치(NaN)로 강제 변환
     df_numeric = df[valid_genes].apply(pd.to_numeric, errors='coerce')
-    
     pearson_matrix = df_numeric.corr(method='pearson')
     print("[Pearson 상관계수 행렬 (SPSS Pairwise 방식)]")
     print(pearson_matrix.round(3))
     print("\n")
     
-    # 엑셀 표(Table 2) 조립 로직 (논문용 콤팩트 출력: R, P-value 2행 구조)
     table2_data = []
     for i in valid_genes:
         row_r = [i, 'R']
@@ -145,9 +128,7 @@ def analyze_bivariate_correlation(df, gene_list):
                 row_r.append("1")
                 row_p.append("")
             else:
-                # [수정] 두 변수(i, j)만 쏙 뽑아서 결측치가 없는 쌍만 남김 (Pairwise Deletion)
                 pair_data = df_numeric[[i, j]].dropna()
-                
                 if len(pair_data) > 1 and pair_data[i].nunique() > 1 and pair_data[j].nunique() > 1:
                     r_val, p_val = stats.pearsonr(pair_data[i], pair_data[j])
                     row_r.append(f"{r_val:.3f}")
@@ -162,39 +143,114 @@ def analyze_bivariate_correlation(df, gene_list):
     df_table2 = pd.DataFrame(table2_data, columns=col_names)
     return df_table2
 
-
-def analyze_glm_multivariate(df, mode, expr_col='SignatureScore', group_col='SignatureGroup'):
-    print("--- 2-3. 다변량 일반선형모형 (GLM / OLS) ---")
+# =====================================================================
+# [수술 완료] 시그니처 OLM 모델 (Base Model 선행 및 Stage 스위치)
+# =====================================================================
+def analyze_glm_multivariate(df, mode, expr_col='SignatureScore', categorical_vars=None, continuous_vars=None, target_stages=None):
+    print("--- 2-3. 다변량 일반선형모형 (GLM / OLS) - Base 모델 및 병기 결합 ---")
+    
     age_var = "age_at_initial_pathologic_diagnosis" if mode == "LUAD" else "age"
-    vars_to_use = [expr_col, age_var, 'gender', 'pathologic_stage', 'number_pack_years_smoked']
     
-    df_clean = df[[v for v in vars_to_use if v in df.columns]].dropna()
-    if df_clean.empty:
-        return pd.DataFrame()
-        
-    formula = f"{expr_col} ~ {age_var} + C(gender) + C(pathologic_stage) + number_pack_years_smoked"
+    if categorical_vars is None: categorical_vars = ['gender']
+    if continuous_vars is None: continuous_vars = [age_var, 'number_pack_years_smoked']
     
-    try:
-        model = smf.ols(formula=formula, data=df_clean).fit()
-        print(model.summary())
-        print("\n")
-        
-        table4_data = []
-        table4_data.append({"Variable": "Dependent Variable", "Coefficient": expr_col, "P-value": ""})
-        table4_data.append({"Variable": "R-squared", "Coefficient": f"{model.rsquared:.4f}", "P-value": ""})
-        table4_data.append({"Variable": "---", "Coefficient": "---", "P-value": "---"})
-        
-        for idx in model.params.index:
-            table4_data.append({
-                "Variable": idx,
-                "Coefficient": round(model.params[idx], 4),
-                "P-value": f"{model.pvalues[idx]:.3f}" if model.pvalues[idx] >= 0.001 else "<0.001"
-            })
-        return pd.DataFrame(table4_data)
-        
-    except Exception as e:
-        print(f"다변량 OLS 분석 중 오류: {e}")
-        return pd.DataFrame()
+    if target_stages is False:
+        target_stages = []
+    elif target_stages is None:
+        target_stages = [
+            ('Pathologic Stage', 'pathologic_stage'),
+            ('Pathologic T', 'pathologic_T'),
+            ('Pathologic N', 'pathologic_N'),
+            ('Pathologic M', 'pathologic_M')
+        ]
+    
+    all_table4_data = []
+    
+    # -------------------------------------------------------------
+    # 1. Base Model 
+    # -------------------------------------------------------------
+    base_cols_to_check = [expr_col] + categorical_vars + continuous_vars
+    base_valid_cols = [c for c in base_cols_to_check if c in df.columns]
+    
+    df_base = df[base_valid_cols].dropna()
+    
+    base_predictors = []
+    for var in continuous_vars:
+        if var in base_valid_cols: base_predictors.append(var)
+    for var in categorical_vars:
+        if var in base_valid_cols: base_predictors.append(f"C({var})")
+            
+    if not df_base.empty and base_predictors:
+        formula_base = f"{expr_col} ~ " + " + ".join(base_predictors)
+        try:
+            model_base = smf.ols(formula=formula_base, data=df_base).fit()
+            print(f"\n[Model: Base Model (No Stage)]")
+            print(model_base.summary())
+            
+            all_table4_data.extend([
+                {"Variable": f"=== [ Model: Base Model (No Stage) ] ===", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                {"Variable": "Dependent Variable (Y)", "Coefficient": expr_col, "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                {"Variable": "Model Formula", "Coefficient": formula_base, "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                {"Variable": "R-squared", "Coefficient": f"{model_base.rsquared:.4f}", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                {"Variable": "Prob (F-statistic)", "Coefficient": f"{model_base.f_pvalue:.4e}", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                {"Variable": "--- [ Coefficients ] ---", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""}
+            ])
+            
+            coef, pvalues, conf_int = model_base.params, model_base.pvalues, model_base.conf_int()
+            for idx in coef.index:
+                all_table4_data.append({
+                    "Variable": idx, "Coefficient": round(coef[idx], 4),
+                    "95% CI Lower": round(conf_int.loc[idx, 0], 4), "95% CI Upper": round(conf_int.loc[idx, 1], 4),
+                    "P-value": f"{pvalues[idx]:.3f}" if pvalues[idx] >= 0.001 else "<0.001"
+                })
+            all_table4_data.append({"Variable": "", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""})
+        except Exception as e:
+            print(f"기본 모델 분석 중 오류 발생: {e}\n")
+
+    # -------------------------------------------------------------
+    # 2. Stage Models 
+    # -------------------------------------------------------------
+    if target_stages:
+        for model_name, target_var in target_stages:
+            cols_to_check = base_cols_to_check + [target_var]
+            valid_cols = [c for c in cols_to_check if c in df.columns]
+            
+            if target_var not in valid_cols: continue
+                
+            df_stage = df[valid_cols].dropna()
+            if df_stage.empty: continue
+                
+            stage_predictors = base_predictors.copy()
+            stage_predictors.append(f"C({target_var})")
+            
+            formula_stage = f"{expr_col} ~ " + " + ".join(stage_predictors)
+            
+            try:
+                model_stage = smf.ols(formula=formula_stage, data=df_stage).fit()
+                print(f"\n[Model: Base + {model_name}]")
+                print(model_stage.summary())
+                
+                all_table4_data.extend([
+                    {"Variable": f"=== [ Model: Base + {model_name} ] ===", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                    {"Variable": "Dependent Variable (Y)", "Coefficient": expr_col, "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                    {"Variable": "Model Formula", "Coefficient": formula_stage, "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                    {"Variable": "R-squared", "Coefficient": f"{model_stage.rsquared:.4f}", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                    {"Variable": "Prob (F-statistic)", "Coefficient": f"{model_stage.f_pvalue:.4e}", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                    {"Variable": "--- [ Coefficients ] ---", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""}
+                ])
+                
+                coef, pvalues, conf_int = model_stage.params, model_stage.pvalues, model_stage.conf_int()
+                for idx in coef.index:
+                    all_table4_data.append({
+                        "Variable": idx, "Coefficient": round(coef[idx], 4),
+                        "95% CI Lower": round(conf_int.loc[idx, 0], 4), "95% CI Upper": round(conf_int.loc[idx, 1], 4),
+                        "P-value": f"{pvalues[idx]:.3f}" if pvalues[idx] >= 0.001 else "<0.001"
+                    })
+                all_table4_data.append({"Variable": "", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""})
+            except Exception as e:
+                print(f"{model_name} 다변량 분석 중 오류 발생: {e}\n")
+                
+    return pd.DataFrame(all_table4_data)
 
 
 def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_prefix=""):
@@ -203,7 +259,6 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_pr
         return pd.DataFrame()
 
     df_km = df.copy()
-    # 3그룹 찌꺼기 완벽 차단 로직 (Only High/Low)
     df_km = df_km[df_km[group_col].isin(['High', 'Low'])]
     df_km = df_km.dropna(subset=['OS.time', 'OS'])
     
@@ -375,8 +430,7 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_pr
             plt.savefig(km_plot_path_rfs)
             plt.close()
 
-    df_table5 = pd.DataFrame(table5_data, columns=["Survival Type", "Cancer Type", "Target", "Chi-square", "P-value"])
-    return df_table5
+    return pd.DataFrame(table5_data, columns=["Survival Type", "Cancer Type", "Target", "Chi-square", "P-value"])
 
 
 def analyze_cox_regression(df, mode, save_dir, group_col='SignatureGroup', file_prefix="", categorical_vars=None, continuous_vars=None):
@@ -411,12 +465,10 @@ def analyze_cox_regression(df, mode, save_dir, group_col='SignatureGroup', file_
     try:
         cph.fit(df_cox_dummy, duration_col='OS.time', event_col='OS')
         
-        # [수정] 95% CI 하한선/상한선을 콘솔에 출력
         print(cph.summary[['exp(coef)', 'exp(coef) lower 95%', 'exp(coef) upper 95%', 'p']]) 
         
         summary = cph.summary
         
-        # [수정] 엑셀 표(Table 3)에 95% CI 하한/상한 추가
         df_table3 = pd.DataFrame({
             'Clinical Variable': summary.index,
             'Hazard Ratio (HR)': summary['exp(coef)'].round(3),
@@ -432,7 +484,7 @@ def analyze_cox_regression(df, mode, save_dir, group_col='SignatureGroup', file_
         cox_plot_path = os.path.join(save_dir, f'{file_prefix}Signature_{mode}_Cox_Forest_Plot.png')
         plt.savefig(cox_plot_path)
         plt.close()
-        print(f"Cox Forest Plot 이미지 저장 완료: '{cox_plot_path}'\\n")
+        print(f"Cox Forest Plot 이미지 저장 완료: '{cox_plot_path}'\n")
         
     except Exception as e:
          print(f"Cox 분석 중 오류 발생: {e}")
@@ -463,7 +515,7 @@ if __name__ == "__main__":
     expr_col_name = "SignatureScore"
 
     for mode in ['LUAD', 'LUSC']:
-        print(f"\\n{'='*60}")
+        print(f"\n{'='*60}")
         print(f"          {mode} Signature 자동화 분석 시작")
         print(f"{'='*60}")
 
@@ -481,8 +533,6 @@ if __name__ == "__main__":
         result_txt_path = os.path.join(result_dir, f"{CUSTOM_FILE_PREFIX}result_Signature_{mode}.txt")
         sys.stdout = PrintLogger(result_txt_path)
         
-        # 1. 기존 데이터 로드 (결측치 완벽 처리 옵션은 이미 get_signature_group 호출 전에 적용해야 하지만, pyreadstat.read_sav는 get_signature_group 안에서는 안쓰므로 메인에서 로드 후 전달하는 방식으로 수정 권장. 현재 코드는 그대로 둠.)
-        # 이 스크립트에서는 get_signature_group 안에서 df를 받아 처리하므로 마스터 파일을 여기서 로드해야합니다.
         print(f"--- 1. 기존 데이터 로드 및 Signature 계산 ---")
         df_clin, meta = pyreadstat.read_sav(master_sav_path, user_missing=True)
         merged_df = get_signature_group(df_clin, gene_list, master_sav_path)
@@ -525,16 +575,25 @@ if __name__ == "__main__":
         
         df_table2 = analyze_bivariate_correlation(merged_df, gene_list=final_corr_genes)
         
-        df_table4 = analyze_glm_multivariate(merged_df, mode, expr_col=expr_col_name, group_col=group_col_name)
+        # ==============================================================
+        # [블록화 적용] OLM 변수 분리 및 Stage 스위치 (True/False/None)
+        # ==============================================================
+        age_col = 'age_at_initial_pathologic_diagnosis' if mode == "LUAD" else 'age'
+        glm_categorical = ['gender']
+        glm_continuous = [age_col, 'number_pack_years_smoked']
         
-        # [수정] plot_type 파라미터를 제거하고 내부 로직만으로 작동하도록 함
+        df_table4 = analyze_glm_multivariate(
+            merged_df, mode, 
+            expr_col=expr_col_name, 
+            categorical_vars=glm_categorical, 
+            continuous_vars=glm_continuous,
+            target_stages=None  # 병기 분석을 끄고 Base 모델만 보려면 target_stages=False 옵션을 부여하세요.
+        )
+        
         df_table5 = analyze_kaplan_meier(merged_df, mode, plot_base_dir, group_col=group_col_name, file_prefix=CUSTOM_FILE_PREFIX)
         
-        # [수정됨] Cox 생존 분석 시 명목형/연속형 변수를 명확히 분리하여 주입
-        age_col = 'age_at_initial_pathologic_diagnosis' if mode == "LUAD" else 'age'
-        
-        cox_categorical = [group_col_name, 'gender']
-        cox_continuous = ['ageG', 'number_pack_years_smoked', 'pathologic_stage'] #+ gene_vars
+        cox_categorical = [group_col_name, 'gender', 'pathologic_stage']
+        cox_continuous = [age_col, 'number_pack_years_smoked'] + gene_vars
         
         df_table3 = analyze_cox_regression(
             merged_df, mode, plot_base_dir, 
@@ -564,4 +623,4 @@ if __name__ == "__main__":
         
         print("="*60)
         
-    print(f"\\n=== 모든 Signature 생물통계 파이프라인이 성공적으로 완료되었습니다 ===")
+    print(f"\n=== 모든 Signature 생물통계 파이프라인이 성공적으로 완료되었습니다 ===")

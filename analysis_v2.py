@@ -532,7 +532,7 @@ if __name__ == "__main__":
             # ==============================================================
             age_col = 'age_at_initial_pathologic_diagnosis' if mode == "LUAD" else 'age'
             glm_categorical = ['gender']
-            glm_continuous = [age_col, 'number_pack_years_smoked']
+            glm_continuous = [age_col, 'number_pack_years_smoked', 'pathologic_stage']
             
             df_table4 = analyze_glm_multivariate(
                 merged_df, mode, 
