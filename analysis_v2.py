@@ -31,7 +31,7 @@ class PrintLogger:
 warnings.filterwarnings('ignore')
 
 # =====================================================================
-# 1. 데이터 처리 및 병합 (원본 로직 복구: 중복 컬럼 방지 및 SAV/CSV 저장)
+# 1. 데이터 처리 및 병합
 # =====================================================================
 def load_and_merge_data(target, onco_file, clin_file):
     print(f"--- 1. 데이터 처리 및 병합 시작 (Target: {target}) ---")
@@ -46,11 +46,9 @@ def load_and_merge_data(target, onco_file, clin_file):
     print("  [진단 로그] 1-1. CSV 파일 로드 완료.")
     
     print("  [진단 로그] 1-2. 마스터 SAV 파일 로드 시도 중 (pyreadstat)...")
-    # [핵심] SPSS 사용자 정의 결측치(User-Missing)를 NaN으로 완벽 변환 (999, -99 등)
     df_clin, meta = pyreadstat.read_sav(clin_file, user_missing=True)
     print("  [진단 로그] 1-2. SAV 파일 로드 완료.")
     
-    # [중요] 기존 SAV 파일에 동일한 유전자 컬럼이 있다면 충돌 방지를 위해 먼저 삭제 (x, y 접미사 생성 방지)
     new_cols = [f'{target}expression', f'{target}group']
     cols_to_drop = [col for col in new_cols if col in df_clin.columns]
     if cols_to_drop:
@@ -61,7 +59,6 @@ def load_and_merge_data(target, onco_file, clin_file):
     df_merged = pd.merge(df_clin, df_onco, on='sampleID', how='left')
     print("  [진단 로그] 1-3. 병합 완료.")
     
-    # [중요] 병합된 최신 데이터를 다시 SAV와 CSV로 물리적으로 저장
     print("  [진단 로그] 1-4. 병합본을 마스터 SAV 파일로 저장 진행 중...")
     pyreadstat.write_sav(df_merged, clin_file)
     print("  [진단 로그] 1-4. SAV 파일 물리적 저장 완료.")
@@ -79,44 +76,31 @@ def load_and_merge_data(target, onco_file, clin_file):
 def analyze_chi_square(df, target_col='gene_group', row_vars=None):
     print("--- 2-1. 예후 분석 (Chi-square Test) ---")
     if target_col not in df.columns:
-        print(f"  [경고] '{target_col}' 컬럼이 존재하지 않습니다.")
         return pd.DataFrame()
         
     if row_vars is None:
         row_vars = ['ageG', 'gender', 'pathologic_stage', 'pathologic_M', 'pathologic_N', 'pathologic_T', 'SmokingStatus']
     
     target_cats = sorted(df[target_col].dropna().unique())
-    if len(target_cats) == 0:
-        target_cats = ['Group1', 'Group2']
+    if len(target_cats) == 0: target_cats = ['Group1', 'Group2']
         
     table1_data = []
-    
-    # 결측치로 취급할 가짜 범주 텍스트 리스트
     na_strings = ['not reported', '[not available]', 'unknown', 'na', 'n/a', '', 'none']
     
     for var in row_vars:
-        if var not in df.columns:
-            continue
+        if var not in df.columns: continue
         
-        # 가짜 범주를 NaN으로 변환 후 순수 데이터만 추출
         df_clean = df[[var, target_col]].copy()
         df_clean[var] = df_clean[var].apply(lambda x: np.nan if pd.isna(x) or str(x).strip().lower() in na_strings else x)
         df_clean = df_clean.dropna()
         
-        if df_clean[var].nunique() <= 1 or df_clean[target_col].nunique() <= 1:
-            continue
-
+        if df_clean[var].nunique() <= 1 or df_clean[target_col].nunique() <= 1: continue
         crosstab_stat = pd.crosstab(df_clean[var], df_clean[target_col])
         
         try:
-            # 파이썬의 과잉 친절(Yates 연속성 보정)을 끄고 순정 Pearson 카이제곱 계산
             chi2, p_val, dof, expected = stats.chi2_contingency(crosstab_stat, correction=False)
-            
             min_expected = expected.min()
-            warning_msg = ""
-            if min_expected < 5:
-                warning_msg = f" (⚠️경고: 최소 기대빈도 {min_expected:.1f}<5)"
-                
+            warning_msg = f" (⚠️경고: 최소 기대빈도 {min_expected:.1f}<5)" if min_expected < 5 else ""
             p_val_formatted = f"{p_val:.3f}" if p_val >= 0.001 else "<0.001"
         except ValueError:
             p_val_formatted = "N/A"
@@ -128,41 +112,32 @@ def analyze_chi_square(df, target_col='gene_group', row_vars=None):
         print(f"Chi-square: {chi2:.4f}, p-value: {p_val_formatted}{warning_msg}\n")
         
         table1_data.append([var] + [""] * len(target_cats) + [""])
-        
         for i, (idx, row) in enumerate(crosstab_stat.iterrows()):
             row_data = [f"  {idx}"]
-            for cat in target_cats:
-                row_data.append(row.get(cat, 0))
+            for cat in target_cats: row_data.append(row.get(cat, 0))
             row_data.append(p_val_formatted if i == 0 else "")
             table1_data.append(row_data)
 
     col_names = ['Clinical Characteristics'] + target_cats + ['P-value']
-    df_table1 = pd.DataFrame(table1_data, columns=col_names)
-    return df_table1
+    return pd.DataFrame(table1_data, columns=col_names)
 
 def analyze_bivariate_correlation(df, gene_list):
-    print("--- 2-2. 이변량 상관 분석 (Pearson 행렬 - SPSS 쌍별 제외(Pairwise) 완벽 구현) ---")
+    print("--- 2-2. 이변량 상관 분석 (Pearson 행렬 - SPSS Pairwise 방식) ---")
     valid_genes = [g for g in gene_list if g in df.columns]
-    if len(valid_genes) < 2:
-        return pd.DataFrame()
+    if len(valid_genes) < 2: return pd.DataFrame()
         
-    # "Not Reported" 등 문자열 찌꺼기를 완벽한 결측치(NaN)로 강제 변환
     df_numeric = df[valid_genes].apply(pd.to_numeric, errors='coerce')
-    
     pearson_matrix = df_numeric.corr(method='pearson')
     print("[Pearson 상관계수 행렬 (SPSS Pairwise 방식)]")
     print(pearson_matrix.round(3))
     print("\n")
     
-    # 논문용 콤팩트 출력: R, P-value 2행 구조
     table2_data = []
     for i in valid_genes:
-        row_r = [i, 'R']
-        row_p = ['', 'P-value']
+        row_r, row_p = [i, 'R'], ['', 'P-value']
         for j in valid_genes:
             if i == j:
-                row_r.append("1")
-                row_p.append("")
+                row_r.append("1"); row_p.append("")
             else:
                 pair_data = df_numeric[[i, j]].dropna()
                 if len(pair_data) > 1 and pair_data[i].nunique() > 1 and pair_data[j].nunique() > 1:
@@ -170,48 +145,58 @@ def analyze_bivariate_correlation(df, gene_list):
                     row_r.append(f"{r_val:.3f}")
                     row_p.append(f"{p_val:.3f}" if p_val >= 0.001 else "<0.001")
                 else:
-                    row_r.append("N/A")
-                    row_p.append("N/A")
-        table2_data.append(row_r)
-        table2_data.append(row_p)
+                    row_r.append("N/A"); row_p.append("N/A")
+        table2_data.append(row_r); table2_data.append(row_p)
         
     col_names = ['Variable', 'Stat'] + valid_genes
-    df_table2 = pd.DataFrame(table2_data, columns=col_names)
-    return df_table2
+    return pd.DataFrame(table2_data, columns=col_names)
 
-def analyze_glm_multivariate(df, mode, expr_col='target_expression', group_col='gene_group'):
-    print("--- 2-3. 다변량 일반선형모형 (GLM / OLS) - 4개 개별 모델 분석 ---")
-    if mode == "LUAD":
-        age_var = "age_at_initial_pathologic_diagnosis"
-    elif mode == "LUSC":
-        age_var = "age"
-        
-    base_vars = [age_var, 'gender', 'number_pack_years_smoked']
-    target_vars = [
-        ('Pathologic Stage', 'pathologic_stage'),
-        ('Pathologic T', 'pathologic_T'),
-        ('Pathologic N', 'pathologic_N'),
-        ('Pathologic M', 'pathologic_M')
-    ]
+# [수술 완료] OLM 변수 블록화 및 자동 C() 래핑 적용
+def analyze_glm_multivariate(df, mode, expr_col='target_expression', categorical_vars=None, continuous_vars=None, target_stages=None):
+    print("--- 2-3. 다변량 일반선형모형 (GLM / OLS) - 블록화 적용 ---")
+    
+    age_var = "age_at_initial_pathologic_diagnosis" if mode == "LUAD" else "age"
+    
+    # 파라미터 미지정 시 기본값 세팅
+    if categorical_vars is None:
+        categorical_vars = ['gender']
+    if continuous_vars is None:
+        continuous_vars = [age_var, 'number_pack_years_smoked', 'pathologic_stage']
+    if target_stages is None:
+        target_stages = [
+            ('Pathologic Stage', 'pathologic_stage'),
+            ('Pathologic T', 'pathologic_T'),
+            ('Pathologic N', 'pathologic_N'),
+            ('Pathologic M', 'pathologic_M')
+        ]
     
     all_table4_data = []
     
-    for model_name, target_var in target_vars:
-        valid_base_vars = [v for v in base_vars if v in df.columns]
+    for model_name, target_var in target_stages:
+        # 체크할 전체 컬럼
+        cols_to_check = [expr_col] + categorical_vars + continuous_vars + [target_var]
+        valid_cols = [c for c in cols_to_check if c in df.columns]
         
-        if target_var not in df.columns:
+        if target_var not in valid_cols:
             continue
             
-        vars_to_use = [expr_col] + valid_base_vars + [target_var]
-        df_clean = df[vars_to_use].dropna()
-        
+        df_clean = df[valid_cols].dropna()
         if df_clean.empty:
             continue
             
         predictors = []
-        if age_var in valid_base_vars: predictors.append(age_var)
-        if 'gender' in valid_base_vars: predictors.append("C(gender)")
-        if 'number_pack_years_smoked' in valid_base_vars: predictors.append("number_pack_years_smoked")
+        
+        # 1. 연속형 변수 블록 투입
+        for var in continuous_vars:
+            if var in valid_cols:
+                predictors.append(var)
+                
+        # 2. 범주형 변수 블록 투입 (C() 래핑)
+        for var in categorical_vars:
+            if var in valid_cols:
+                predictors.append(f"C({var})")
+                
+        # 3. 모델 타겟 병기 변수 투입 (범주형)
         predictors.append(f"C({target_var})")
         
         formula = f"{expr_col} ~ " + " + ".join(predictors)
@@ -221,16 +206,16 @@ def analyze_glm_multivariate(df, mode, expr_col='target_expression', group_col='
             print(f"\n[Model: {model_name}]")
             print(model.summary())
             
-            all_table4_data.append({"Variable": f"=== [ Model: {model_name} ] ===", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""})
-            all_table4_data.append({"Variable": "Dependent Variable (Y)", "Coefficient": expr_col, "95% CI Lower": "", "95% CI Upper": "", "P-value": ""})
-            all_table4_data.append({"Variable": "Model Formula", "Coefficient": formula, "95% CI Lower": "", "95% CI Upper": "", "P-value": ""})
-            all_table4_data.append({"Variable": "R-squared", "Coefficient": f"{model.rsquared:.4f}", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""})
-            all_table4_data.append({"Variable": "Prob (F-statistic)", "Coefficient": f"{model.f_pvalue:.4e}", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""})
-            all_table4_data.append({"Variable": "--- [ Coefficients ] ---", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""})
+            all_table4_data.extend([
+                {"Variable": f"=== [ Model: {model_name} ] ===", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                {"Variable": "Dependent Variable (Y)", "Coefficient": expr_col, "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                {"Variable": "Model Formula", "Coefficient": formula, "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                {"Variable": "R-squared", "Coefficient": f"{model.rsquared:.4f}", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                {"Variable": "Prob (F-statistic)", "Coefficient": f"{model.f_pvalue:.4e}", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
+                {"Variable": "--- [ Coefficients ] ---", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""}
+            ])
             
-            coef = model.params
-            pvalues = model.pvalues
-            conf_int = model.conf_int()
+            coef, pvalues, conf_int = model.params, model.pvalues, model.conf_int()
             
             for idx in coef.index:
                 all_table4_data.append({
@@ -245,115 +230,68 @@ def analyze_glm_multivariate(df, mode, expr_col='target_expression', group_col='
         except Exception as e:
             print(f"{model_name} 다변량 분석 중 오류 발생: {e}\n")
             
-    if not all_table4_data:
-        return pd.DataFrame()
-        
     return pd.DataFrame(all_table4_data)
 
 def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plot_type=1):
-    print("--- 2-4. Kaplan-Meier 생존분석 및 Table 5 추출 ---")
+    print("--- 2-4. Kaplan-Meier 생존분석 ---")
     if group_col not in df.columns or 'OS.time' not in df.columns or 'OS' not in df.columns:
-        print("  [경고] KM 생존 분석에 필요한 데이터가 없습니다.")
         return pd.DataFrame()
         
     df_km = df.copy()
-    
-    # [핵심] 선생님 지시: 결측치 처리 원복 & High/Low만 명확히 필터링
     df_km = df_km[df_km[group_col].isin(['High', 'Low'])]
     df_km = df_km.dropna(subset=['OS.time', 'OS'])
-    
-    if df_km.empty:
-        return pd.DataFrame()
+    if df_km.empty: return pd.DataFrame()
         
     table5_data = []
-
     plt.rcParams['font.family'] = 'Malgun Gothic'
     plt.rcParams['axes.unicode_minus'] = False
     
     kmf = KaplanMeierFitter()
-    
     groups = ['High', 'Low'] if all(g in df_km[group_col].values for g in ['High', 'Low']) else df_km[group_col].unique()
-            
-    colors = ['#00a2e8', '#b51a5e']  
     color_map = {'High': '#00a2e8', 'Low': '#b51a5e'}
-    for i, g in enumerate(groups):
-        if g not in color_map:
-            color_map[g] = colors[i % len(colors)]
     
     import matplotlib.lines as mlines
     from matplotlib.legend_handler import HandlerLine2D
-    
-    class StepLine2D(mlines.Line2D):
-        pass
-        
+    class StepLine2D(mlines.Line2D): pass
     class StepHandler(HandlerLine2D):
         def create_artists(self, legend, orig_handle, xdescent, ydescent, width, height, fontsize, trans):
-            xdata = [0, width*0.35, width*0.35, width*0.85, width*0.85]
-            ydata = [height*0.2, height*0.2, height*0.8, height*0.8, height*0.2]
+            xdata, ydata = [0, width*0.35, width*0.35, width*0.85, width*0.85], [height*0.2, height*0.2, height*0.8, height*0.8, height*0.2]
             line = mlines.Line2D(xdata, ydata, color=orig_handle.get_color(), lw=1.5)
             line.set_transform(trans)
             return [line]
 
-    # ---------------- OS 분석 ----------------
-    plt.figure(figsize=(8, 6))
-    ax_os = plt.gca()
-    
+    # OS 분석
+    plt.figure(figsize=(8, 6)); ax_os = plt.gca()
     for group in groups:
         mask = (df_km[group_col] == group)
-        time = df_km.loc[mask, 'OS.time'].dropna()
-        event = df_km.loc[mask, 'OS'].dropna()
+        time, event = df_km.loc[mask, 'OS.time'].dropna(), df_km.loc[mask, 'OS'].dropna()
         if len(time) > 0:
-            color = color_map[group]
             kmf.fit(time, event_observed=event)
-            kmf.plot_survival_function(ax=ax_os, ci_show=False, color=color,
-                                    show_censors=True, censor_styles={'marker': '+', 'mew': 1, 'ms': 6, 'mec': color})
+            kmf.plot_survival_function(ax=ax_os, ci_show=False, color=color_map[group], show_censors=True, censor_styles={'marker': '+', 'mew': 1, 'ms': 6, 'mec': color_map[group]})
             
     if plot_type == 1:
-        ax_os.set_title(f'{mode}_OS 생존함수')
-        ax_os.set_xlabel('OS.time')
-        ax_os.set_ylabel('누적 생존함수')
+        ax_os.set_title(f'{mode}_OS 생존함수'); ax_os.set_xlabel('OS.time'); ax_os.set_ylabel('누적 생존함수')
     elif plot_type == 2:
-        ax_os.set_title(f'{mode}_OS')
-        ax_os.set_xlabel('Time(Days)', fontweight='bold', fontsize=12)
-        ax_os.set_ylabel('Overall Survival', fontweight='bold', fontsize=12)
-        ax_os.spines['top'].set_visible(False)
-        ax_os.spines['right'].set_visible(False)
-
-    ax_os.grid(axis='y', color='lightgray', linestyle='-')
-    ax_os.set_facecolor('white')
+        ax_os.set_title(f'{mode}_OS'); ax_os.set_xlabel('Time(Days)', fontweight='bold', fontsize=12); ax_os.set_ylabel('Overall Survival', fontweight='bold', fontsize=12)
+        ax_os.spines['top'].set_visible(False); ax_os.spines['right'].set_visible(False)
+    ax_os.grid(axis='y', color='lightgray', linestyle='-'); ax_os.set_facecolor('white')
     for spine in ax_os.spines.values():
-        if spine.get_visible():
-            spine.set_color('black')
+        if spine.get_visible(): spine.set_color('black')
             
-    handles_os = []
-    labels_os = []
+    handles_os, labels_os = [], []
+    for group in groups: handles_os.append(StepLine2D([0], [0], color=color_map[group])); labels_os.append(group)
     for group in groups:
-        if group in color_map:
-            handles_os.append(StepLine2D([0], [0], color=color_map[group]))
-            labels_os.append(group)
-    for group in groups:
-        if group in color_map:
-            handles_os.append(mlines.Line2D([], [], color=color_map[group], marker='+', linestyle='-', lw=1.5, mew=1, ms=6))
-            if plot_type == 1:
-                labels_os.append(f'{group}-중도절단')
-            elif plot_type == 2:
-                labels_os.append(f'{group}-censored')
+        handles_os.append(mlines.Line2D([], [], color=color_map[group], marker='+', linestyle='-', lw=1.5, mew=1, ms=6))
+        labels_os.append(f'{group}-중도절단' if plot_type == 1 else f'{group}-censored')
             
     if len(groups) > 1:
         if len(groups) == 2:
-            mask0 = (df_km[group_col] == groups[0])
-            mask1 = (df_km[group_col] == groups[1])
-            res_os = logrank_test(df_km.loc[mask0, 'OS.time'], df_km.loc[mask1, 'OS.time'],
-                                event_observed_A=df_km.loc[mask0, 'OS'], event_observed_B=df_km.loc[mask1, 'OS'])
-        else:
-            res_os = multivariate_logrank_test(df_km['OS.time'], df_km[group_col], df_km['OS'])
-            
-        p_val_os = res_os.p_value
-        chi2_os = res_os.test_statistic
+            mask0, mask1 = (df_km[group_col] == groups[0]), (df_km[group_col] == groups[1])
+            res_os = logrank_test(df_km.loc[mask0, 'OS.time'], df_km.loc[mask1, 'OS.time'], event_observed_A=df_km.loc[mask0, 'OS'], event_observed_B=df_km.loc[mask1, 'OS'])
+        else: res_os = multivariate_logrank_test(df_km['OS.time'], df_km[group_col], df_km['OS'])
+        p_val_os, chi2_os = res_os.p_value, res_os.test_statistic
         p_str_os = f"{p_val_os:.3f}" if p_val_os >= 0.001 else "<0.001"
-        
         table5_data.append(["Overall Survival (OS)", mode, target, f"{chi2_os:.3f}", p_str_os])
-        print(f"  [OS Log-rank Test] Chi-square: {chi2_os:.3f}, p-value: {p_str_os}")
         
         if plot_type == 1:
             ax_os.legend(handles=handles_os, labels=labels_os, title=f'{group_col}\nLog-rank p={p_str_os}', handler_map={StepLine2D: StepHandler()})
@@ -363,87 +301,49 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
             ax_os.text(0.05, 0.05, f"P = {p_str_os}", transform=ax_os.transAxes, fontsize=16, fontweight='bold')
     else:
         legend = ax_os.legend(handles=handles_os, labels=labels_os, title=group_col, handler_map={StepLine2D: StepHandler()}, frameon=(plot_type==1))
-        if plot_type == 2:
-            plt.setp(legend.get_title(), fontweight='bold')
+        if plot_type == 2: plt.setp(legend.get_title(), fontweight='bold')
             
     plt.tight_layout()
     km_plot_path_os = os.path.join(save_dir, f'{target}_{mode}_OS_KM.png')
-    if os.path.exists(km_plot_path_os):
-        try: os.remove(km_plot_path_os)
-        except: pass
-    plt.savefig(km_plot_path_os)
-    plt.close()
-    print(f"Kaplan-Meier (OS) 이미지 저장 완료: '{km_plot_path_os}'")
+    plt.savefig(km_plot_path_os); plt.close()
         
-    # ---------------- RFS 분석 ----------------
+    # RFS 분석
     if 'RFS.time' in df.columns and 'RFS' in df.columns:
         df_rfs = df.copy()
-        
-        # 선생님 지시: 결측치 처리 원복 & High/Low만 명확히 필터링
-        df_rfs = df_rfs[df_rfs[group_col].isin(['High', 'Low'])]
-        df_rfs = df_rfs.dropna(subset=['RFS.time', 'RFS'])
+        df_rfs = df_rfs[df_rfs[group_col].isin(['High', 'Low'])].dropna(subset=['RFS.time', 'RFS'])
         
         if not df_rfs.empty:
-            plt.figure(figsize=(8, 6)) 
-            ax_rfs = plt.gca()
-            
+            plt.figure(figsize=(8, 6)); ax_rfs = plt.gca()
             for group in groups:
                 mask = (df_rfs[group_col] == group)
-                time = df_rfs.loc[mask, 'RFS.time'].dropna()
-                event = df_rfs.loc[mask, 'RFS'].dropna()
+                time, event = df_rfs.loc[mask, 'RFS.time'].dropna(), df_rfs.loc[mask, 'RFS'].dropna()
                 if len(time) > 0:
-                    color = color_map[group]
                     kmf.fit(time, event_observed=event)
-                    kmf.plot_survival_function(ax=ax_rfs, ci_show=False, color=color,
-                                            show_censors=True, censor_styles={'marker': '+', 'mew': 1, 'ms': 6, 'mec': color})
+                    kmf.plot_survival_function(ax=ax_rfs, ci_show=False, color=color_map[group], show_censors=True, censor_styles={'marker': '+', 'mew': 1, 'ms': 6, 'mec': color_map[group]})
                     
             if plot_type == 1:
-                ax_rfs.set_title(f'{mode}_RFS 생존함수')
-                ax_rfs.set_xlabel('RFS.time')
-                ax_rfs.set_ylabel('누적 생존함수')
+                ax_rfs.set_title(f'{mode}_RFS 생존함수'); ax_rfs.set_xlabel('RFS.time'); ax_rfs.set_ylabel('누적 생존함수')
             elif plot_type == 2:
-                ax_rfs.set_title(f'{mode}_RFS')
-                ax_rfs.set_xlabel('Time(Days)', fontweight='bold', fontsize=12)
-                ax_rfs.set_ylabel('Relapse-Free Survival', fontweight='bold', fontsize=12)
-                ax_rfs.spines['top'].set_visible(False)
-                ax_rfs.spines['right'].set_visible(False)
-
-            ax_rfs.grid(axis='y', color='lightgray', linestyle='-')
-            ax_rfs.set_facecolor('white')
+                ax_rfs.set_title(f'{mode}_RFS'); ax_rfs.set_xlabel('Time(Days)', fontweight='bold', fontsize=12); ax_rfs.set_ylabel('Relapse-Free Survival', fontweight='bold', fontsize=12)
+                ax_rfs.spines['top'].set_visible(False); ax_rfs.spines['right'].set_visible(False)
+            ax_rfs.grid(axis='y', color='lightgray', linestyle='-'); ax_rfs.set_facecolor('white')
             for spine in ax_rfs.spines.values():
-                if spine.get_visible():
-                    spine.set_color('black')
+                if spine.get_visible(): spine.set_color('black')
                 
-            handles_rfs = []
-            labels_rfs = []
+            handles_rfs, labels_rfs = [], []
+            for group in groups: handles_rfs.append(StepLine2D([0], [0], color=color_map[group])); labels_rfs.append(group)
             for group in groups:
-                if group in color_map:
-                    handles_rfs.append(StepLine2D([0], [0], color=color_map[group]))
-                    labels_rfs.append(group)
-            for group in groups:
-                if group in color_map:
-                    handles_rfs.append(mlines.Line2D([], [], color=color_map[group], marker='+', linestyle='-', lw=1.5, mew=1, ms=6))
-                    if plot_type == 1:
-                        labels_rfs.append(f'{group}-중도절단')
-                    elif plot_type == 2:
-                        labels_rfs.append(f'{group}-censored')
+                handles_rfs.append(mlines.Line2D([], [], color=color_map[group], marker='+', linestyle='-', lw=1.5, mew=1, ms=6))
+                labels_rfs.append(f'{group}-중도절단' if plot_type == 1 else f'{group}-censored')
                     
-            rfs_groups = df_rfs[group_col].unique()
-            if len(rfs_groups) > 1:
-                if len(rfs_groups) == 2:
-                    mask0 = (df_rfs[group_col] == rfs_groups[0])
-                    mask1 = (df_rfs[group_col] == rfs_groups[1])
-                    res_rfs = logrank_test(df_rfs.loc[mask0, 'RFS.time'], df_rfs.loc[mask1, 'RFS.time'],
-                                        event_observed_A=df_rfs.loc[mask0, 'RFS'], event_observed_B=df_rfs.loc[mask1, 'RFS'])
-                else:
-                    res_rfs = multivariate_logrank_test(df_rfs['RFS.time'], df_rfs[group_col], df_rfs['RFS'])
-                    
-                p_val_rfs = res_rfs.p_value
-                chi2_rfs = res_rfs.test_statistic
+            if len(groups) > 1:
+                if len(groups) == 2:
+                    mask0, mask1 = (df_rfs[group_col] == groups[0]), (df_rfs[group_col] == groups[1])
+                    res_rfs = logrank_test(df_rfs.loc[mask0, 'RFS.time'], df_rfs.loc[mask1, 'RFS.time'], event_observed_A=df_rfs.loc[mask0, 'RFS'], event_observed_B=df_rfs.loc[mask1, 'RFS'])
+                else: res_rfs = multivariate_logrank_test(df_rfs['RFS.time'], df_rfs[group_col], df_rfs['RFS'])
+                p_val_rfs, chi2_rfs = res_rfs.p_value, res_rfs.test_statistic
                 p_str_rfs = f"{p_val_rfs:.3f}" if p_val_rfs >= 0.001 else "<0.001"
-                
                 table5_data.append(["Relapse-Free Survival (RFS)", mode, target, f"{chi2_rfs:.3f}", p_str_rfs])
-                print(f"  [RFS Log-rank Test] Chi-square: {chi2_rfs:.3f}, p-value: {p_str_rfs}")
                 
                 if plot_type == 1:
                     ax_rfs.legend(handles=handles_rfs, labels=labels_rfs, title=f'{group_col}\nLog-rank p={p_str_rfs}', handler_map={StepLine2D: StepHandler()})
@@ -453,57 +353,37 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
                     ax_rfs.text(0.05, 0.05, f"P = {p_str_rfs}", transform=ax_rfs.transAxes, fontsize=16, fontweight='bold')
             else:
                 legend = ax_rfs.legend(handles=handles_rfs, labels=labels_rfs, title=group_col, handler_map={StepLine2D: StepHandler()}, frameon=(plot_type==1))
-                if plot_type == 2:
-                    plt.setp(legend.get_title(), fontweight='bold')
+                if plot_type == 2: plt.setp(legend.get_title(), fontweight='bold')
                     
             plt.tight_layout()
             km_plot_path_rfs = os.path.join(save_dir, f'{target}_{mode}_RFS_KM.png')
-            if os.path.exists(km_plot_path_rfs):
-                try: os.remove(km_plot_path_rfs)
-                except: pass
-            plt.savefig(km_plot_path_rfs)
-            plt.close()
-            print(f"Kaplan-Meier (RFS) 이미지 저장 완료: '{km_plot_path_rfs}'\n")
+            plt.savefig(km_plot_path_rfs); plt.close()
 
-    df_table5 = pd.DataFrame(table5_data, columns=["Survival Type", "Cancer Type", "Target", "Chi-square", "P-value"])
-    return df_table5
+    return pd.DataFrame(table5_data, columns=["Survival Type", "Cancer Type", "Target", "Chi-square", "P-value"])
 
 def analyze_cox_regression(target, df, mode, save_dir, group_col='gene_group', categorical_vars=None, continuous_vars=None):
     print("--- 2-5. Cox 회귀분석 ---")
-    
-    if categorical_vars is None:
-        categorical_vars = [group_col, 'gender']
+    if categorical_vars is None: categorical_vars = [group_col, 'gender']
     if continuous_vars is None:
         age_col = 'age_at_initial_pathologic_diagnosis' if mode == "LUAD" else 'age'
         continuous_vars = [age_col, 'number_pack_years_smoked', 'pathologic_stage']
         
-    survival_cols = ['OS.time', 'OS']
-    cols = survival_cols + categorical_vars + continuous_vars
-    
+    cols = ['OS.time', 'OS'] + categorical_vars + continuous_vars
     valid_cols = [c for c in cols if c in df.columns]
-    if group_col not in valid_cols or 'OS' not in valid_cols:
-        print("  [경고] 필수 컬럼이 없어 Cox 분석을 건너뜁니다.")
-        return pd.DataFrame()
-        
-    df_cox = df[valid_cols].dropna()
     
-    if df_cox.empty:
-        print("  [경고] 결측치 제거 후 Cox 분석할 데이터가 없습니다.")
-        return pd.DataFrame()
+    df_cox = df[valid_cols].dropna()
+    if df_cox.empty: return pd.DataFrame()
         
     dummy_cols = [c for c in categorical_vars if c in df_cox.columns]
     df_cox_dummy = pd.get_dummies(df_cox, columns=dummy_cols, drop_first=True)
     
     cph = CoxPHFitter()
-    
     df_table3 = pd.DataFrame()
     try:
         cph.fit(df_cox_dummy, duration_col='OS.time', event_col='OS')
-        # 콘솔 출력에도 95% CI가 보이도록 추가
         print(cph.summary[['exp(coef)', 'exp(coef) lower 95%', 'exp(coef) upper 95%', 'p']])
         
         summary = cph.summary
-        # 엑셀 표(Table 3)에 95% CI 하한선과 상한선을 논문 포맷으로 조립
         df_table3 = pd.DataFrame({
             'Clinical Variable': summary.index,
             'Hazard Ratio (HR)': summary['exp(coef)'].round(3),
@@ -512,18 +392,11 @@ def analyze_cox_regression(target, df, mode, save_dir, group_col='gene_group', c
             'P-value': summary['p'].apply(lambda x: f"{x:.3f}" if x >= 0.001 else "<0.001")
         })
         
-        plt.figure(figsize=(10, 6))
-        cph.plot()
+        plt.figure(figsize=(10, 6)); cph.plot()
         plt.title(f'Cox Regression - Forest Plot - {target}({mode})')
         plt.tight_layout()
         cox_plot_path = os.path.join(save_dir, f'{target}_{mode}_Cox.png')
-        if os.path.exists(cox_plot_path):
-            try: os.remove(cox_plot_path)
-            except: pass
-        plt.savefig(cox_plot_path)
-        plt.close()
-        print(f"Cox Forest Plot 저장 완료: '{cox_plot_path}'\n")
-        
+        plt.savefig(cox_plot_path); plt.close()
     except Exception as e:
         print(f"Cox 분석 중 오류 발생: {e}")
         
@@ -534,9 +407,6 @@ def analyze_cox_regression(target, df, mode, save_dir, group_col='gene_group', c
 # =====================================================================
 if __name__ == "__main__":
     super_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    # 여기서 플롯 출력 타입을 지정합니다. 
-    # 1: 기존 한글 스타일(범례에 P-value 포함) / 2: 영문 스타일(그래프 내부에 P-value 삽입)
     CURRENT_PLOT_TYPE = 2
     
     for mode in ['LUAD', 'LUSC']:
@@ -558,11 +428,8 @@ if __name__ == "__main__":
         for d in [input_csv_dir, completed_csv_dir, result_dir, plot_base_dir]:
             os.makedirs(d, exist_ok=True)
 
-        if isinstance(sys.stdout, PrintLogger):
-            sys.stdout.flush()
-        
-        result_txt_path = os.path.join(result_dir, f"result_single_{mode}.txt")
-        sys.stdout = PrintLogger(result_txt_path)
+        if isinstance(sys.stdout, PrintLogger): sys.stdout.flush()
+        sys.stdout = PrintLogger(os.path.join(result_dir, f"result_single_{mode}.txt"))
 
         target_csv_files = glob.glob(os.path.join(input_csv_dir, "*.csv"))
         analysis_targets = []
@@ -575,12 +442,9 @@ if __name__ == "__main__":
         else:
             print(f"'{input_csv_dir}' 폴더에 병합할 CSV 파일이 없습니다.")
             target_input = input(f"[{mode}] 마스터 파일(SAV)에 이미 존재하는 유전자로 분석하려면 이름을 입력하세요\n(여러 개는 쉼표 구분, 없으면 그냥 엔터): ").strip()
-            if not target_input:
-                print(f"[{mode}] 입력된 유전자가 없어 다음 암종으로 넘어갑니다.")
-                continue
+            if not target_input: continue
             for g in target_input.split(','):
-                if g.strip():
-                    analysis_targets.append((g.strip(), None, None))
+                if g.strip(): analysis_targets.append((g.strip(), None, None))
         
         for target_gene, csv_file, file_name in analysis_targets:
             group_col_name = f"{target_gene}group"
@@ -588,22 +452,18 @@ if __name__ == "__main__":
             
             print(f"\n[{target_gene} 유전자 분석 시작]")
             
-            if csv_file:
-                merged_df = load_and_merge_data(target=target_gene, onco_file=csv_file, clin_file=master_sav_path)
+            if csv_file: merged_df = load_and_merge_data(target=target_gene, onco_file=csv_file, clin_file=master_sav_path)
             else:
-                print(f"--- 1. 기존 데이터 로드 (Target: {target_gene}, 병합 과정 건너뜀) ---")
+                print(f"--- 1. 기존 데이터 로드 (Target: {target_gene}) ---")
                 merged_df, _ = pyreadstat.read_sav(master_sav_path, user_missing=True)
             
             if group_col_name not in merged_df.columns:
-                print(f"  [경고] 병합 후 '{group_col_name}' 데이터가 없습니다. 이 유전자는 분석을 건너뜁니다.")
-                print("="*60)
-                continue
+                print(f"  [경고] 병합 후 '{group_col_name}' 데이터가 없습니다."); continue
             
-            # 분석 파트
             df_table1 = analyze_chi_square(merged_df, target_col=group_col_name)
             
             if mode == "LUAD":
-                gene_vars = ['KrasExpression', 'TP53Expression', 'ALKExpression', 'BRAFExpression', 'EGFRExpression']
+                gene_vars = ['KrasExpression', 'TP53Expression', 'ALKExpression', 'BRAFExpression']
                 corr_continuous = [expr_col_name, 'number_pack_years_smoked', 'age_at_initial_pathologic_diagnosis'] + gene_vars
                 corr_binary_targets = ['EGFR']
             else:
@@ -612,10 +472,8 @@ if __name__ == "__main__":
                 corr_binary_targets = []
             
             corr_processed_binary = []
-            
             def encode_mutation(val):
-                if pd.isna(val):
-                    return np.nan
+                if pd.isna(val): return np.nan
                 v_str = str(val).strip().lower()
                 if v_str in ['none', 'wt', 'wildtype']: return 0
                 elif v_str in ['not reported', '[not available]', 'unknown', 'na', 'n/a', '']: return np.nan
@@ -626,19 +484,28 @@ if __name__ == "__main__":
                     bin_col_name = f"{mut_var}_Mut_Binary"
                     merged_df[bin_col_name] = merged_df[mut_var].apply(encode_mutation)
                     corr_processed_binary.append(bin_col_name)
-                    print(f"  [안내] {mut_var} 데이터를 이진수(0=WT, 1=Mut, 제외=NaN)로 정밀 변환 완료.")
             
             final_corr_genes = corr_continuous + corr_processed_binary
-            
             df_table2 = analyze_bivariate_correlation(merged_df, gene_list=final_corr_genes)
             
-            df_table4 = analyze_glm_multivariate(merged_df, mode, expr_col=expr_col_name, group_col=group_col_name)
+            # ==============================================================
+            # [블록화 적용] OLM (다변량 일반선형모형) 변수 분리
+            # ==============================================================
+            age_col = 'age_at_initial_pathologic_diagnosis' if mode == "LUAD" else 'age'
+            glm_categorical = ['gender']
+            glm_continuous = [age_col, 'number_pack_years_smoked']
+            
+            df_table4 = analyze_glm_multivariate(
+                merged_df, mode, 
+                expr_col=expr_col_name, 
+                categorical_vars=glm_categorical, 
+                continuous_vars=glm_continuous
+            )
             
             df_table5 = analyze_kaplan_meier(target_gene, merged_df, mode, plot_base_dir, group_col=group_col_name, plot_type=CURRENT_PLOT_TYPE)
             
-            age_col = 'age_at_initial_pathologic_diagnosis' if mode == "LUAD" else 'age'
-            cox_categorical = [group_col_name, 'gender']
-            cox_continuous = ['ageG', 'number_pack_years_smoked', 'pathologic_stage'] #+ gene_vars
+            cox_categorical = [group_col_name, 'gender', 'pathologic_stage']
+            cox_continuous = [age_col, 'number_pack_years_smoked'] + gene_vars
             
             df_table3 = analyze_cox_regression(
                 target_gene, merged_df, mode, plot_base_dir, 
@@ -648,28 +515,14 @@ if __name__ == "__main__":
             )
             
             excel_save_path = os.path.join(result_dir, f"{target_gene}_{mode}_Tables.xlsx")
-            if os.path.exists(excel_save_path):
-                try: os.remove(excel_save_path)
-                except: pass
             with pd.ExcelWriter(excel_save_path, engine='openpyxl') as writer:
-                if not df_table1.empty:
-                    df_table1.to_excel(writer, sheet_name='Table 1 (Chi-square)', index=False)
-                if not df_table2.empty:
-                    df_table2.to_excel(writer, sheet_name='Table 2 (Correlation)', index=False)
-                if not df_table3.empty:
-                    df_table3.to_excel(writer, sheet_name='Table 3 (Cox)', index=False)
-                if not df_table4.empty:
-                    df_table4.to_excel(writer, sheet_name='Table 4 (Multivariate OLS)', index=False)
-                if not df_table5.empty:
-                    df_table5.to_excel(writer, sheet_name='Table 5 (KM Log-rank)', index=False)
-            print(f"✅ 논문용 표 엑셀 파일 저장 완료: '{excel_save_path}'")
+                if not df_table1.empty: df_table1.to_excel(writer, sheet_name='Table 1 (Chi-square)', index=False)
+                if not df_table2.empty: df_table2.to_excel(writer, sheet_name='Table 2 (Correlation)', index=False)
+                if not df_table3.empty: df_table3.to_excel(writer, sheet_name='Table 3 (Cox)', index=False)
+                if not df_table4.empty: df_table4.to_excel(writer, sheet_name='Table 4 (Multivariate OLS)', index=False)
+                if not df_table5.empty: df_table5.to_excel(writer, sheet_name='Table 5 (KM Log-rank)', index=False)
             
             if csv_file:
-                completed_path = os.path.join(completed_csv_dir, file_name)
-                shutil.move(csv_file, completed_path)
-                print(f"'{file_name}' 분석 완료 및 completed_csv 폴더로 이동됨.\n")
-            else:
-                print(f"'{target_gene}' 기존 데이터 재분석 및 결과 출력 완료.\n")
-            print("="*60)
+                shutil.move(csv_file, os.path.join(completed_csv_dir, file_name))
             
         print(f"\n=== {mode} 파이프라인 완료 ===")
