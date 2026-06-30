@@ -88,7 +88,7 @@ Dep. Variable:         FAT1expression   R-squared:                       0.017
 Model:                            OLS   Adj. R-squared:                  0.006
 Method:                 Least Squares   F-statistic:                     1.575
 Date:                Tue, 30 Jun 2026   Prob (F-statistic):              0.180
-Time:                        15:37:13   Log-Likelihood:                -3397.8
+Time:                        15:56:02   Log-Likelihood:                -3397.8
 No. Observations:                 375   AIC:                             6806.
 Df Residuals:                     370   BIC:                             6825.
 Df Model:                           4                                         
@@ -120,7 +120,7 @@ Dep. Variable:         FAT1expression   R-squared:                       0.025
 Model:                            OLS   Adj. R-squared:                  0.007
 Method:                 Least Squares   F-statistic:                     1.353
 Date:                Tue, 30 Jun 2026   Prob (F-statistic):              0.224
-Time:                        15:37:13   Log-Likelihood:                -3396.2
+Time:                        15:56:02   Log-Likelihood:                -3396.2
 No. Observations:                 375   AIC:                             6808.
 Df Residuals:                     367   BIC:                             6840.
 Df Model:                           7                                         
@@ -153,7 +153,7 @@ Dep. Variable:         FAT1expression   R-squared:                       0.027
 Model:                            OLS   Adj. R-squared:                  0.008
 Method:                 Least Squares   F-statistic:                     1.437
 Date:                Tue, 30 Jun 2026   Prob (F-statistic):              0.189
-Time:                        15:37:13   Log-Likelihood:                -3350.3
+Time:                        15:56:02   Log-Likelihood:                -3350.3
 No. Observations:                 370   AIC:                             6717.
 Df Residuals:                     362   BIC:                             6748.
 Df Model:                           7                                         
@@ -186,7 +186,7 @@ Dep. Variable:         FAT1expression   R-squared:                       0.021
 Model:                            OLS   Adj. R-squared:                  0.005
 Method:                 Least Squares   F-statistic:                     1.317
 Date:                Tue, 30 Jun 2026   Prob (F-statistic):              0.257
-Time:                        15:37:13   Log-Likelihood:                -2876.1
+Time:                        15:56:02   Log-Likelihood:                -2876.1
 No. Observations:                 317   AIC:                             5764.
 Df Residuals:                     311   BIC:                             5787.
 Df Model:                           5                                         
@@ -213,20 +213,13 @@ Notes:
 --- 2-5. Cox 회귀분석 ---
                           exp(coef)  exp(coef) lower 95%  exp(coef) upper 95%         p
 covariate                                                                              
-age                        1.020521             1.001064             1.040357  0.038613
-number_pack_years_smoked   1.000855             0.996207             1.005525  0.718926
-TP53Expression             0.999983             0.999858             1.000109  0.795520
-CDKN2AExpression           0.999995             0.999831             1.000159  0.953516
-SOX2Expression             0.999971             0.999926             1.000017  0.219970
-PIK3CAExpression           1.000062             0.999773             1.000350  0.674377
-NOTCH1Expression           0.999992             0.999917             1.000066  0.827078
-FAT1group_H                1.594680             0.203635            12.488076  0.656738
-FAT1group_High             1.047873             0.618263             1.776005  0.862089
-FAT1group_Low              0.810172             0.469105             1.399213  0.450201
-gender_MALE                1.219054             0.850859             1.746580  0.280304
-pathologic_stage_2.0       1.067461             0.748052             1.523254  0.718955
-pathologic_stage_3.0       1.400015             0.938348             2.088822  0.099301
-pathologic_stage_4.0       3.290410             1.302263             8.313835  0.011788
+age                        1.020993             1.002175             1.040163  0.028604
+number_pack_years_smoked   1.000240             0.995583             1.004919  0.919578
+pathologic_stage           1.202251             1.002541             1.441742  0.046884
+FAT1group_H                1.596466             0.206972            12.314266  0.653585
+FAT1group_High             1.023904             0.610293             1.717828  0.928703
+FAT1group_Low              0.754827             0.451725             1.261305  0.282939
+gender_MALE                1.223509             0.864127             1.732356  0.255577
 Cox Forest Plot 저장 완료: 'D:\coding\medin\plot\FAT1_LUSC_Cox.png'
 
 

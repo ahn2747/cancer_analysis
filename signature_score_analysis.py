@@ -449,7 +449,21 @@ def analyze_cox_regression(df, mode, save_dir, group_col='SignatureGroup', file_
         print("  [경고] 필수 컬럼이 없어 Cox 분석을 건너뜁니다.")
         return pd.DataFrame()
         
-    df_cox = df[valid_cols].dropna()
+    # 바로 결측치를 제거하지 않고, 사본을 떠서 정제 작업을 먼저 수행
+    df_cox = df[valid_cols].copy()
+    
+    # [핵심 수술] Pandas가 결측치로 인식하지 못하는 가짜 공백 및 문자열 찌꺼기 완벽 정제
+    na_strings = ['not reported', '[not available]', 'unknown', 'na', 'n/a', '', 'none']
+    for col in valid_cols:
+        # 문자열(object) 또는 범주형 데이터일 경우에만 텍스트 검사
+        if df_cox[col].dtype == object or isinstance(df_cox[col].dtype, pd.CategoricalDtype):
+            # 1. 선생님의 아이디어: 정규식으로 완전 공백(Space) 문자열을 NaN으로 강제 치환
+            df_cox[col] = df_cox[col].replace(r'^\s*$', np.nan, regex=True)
+            # 2. 지정된 찌꺼기 텍스트를 NaN으로 치환 (대소문자 무시)
+            df_cox[col] = df_cox[col].apply(lambda x: np.nan if pd.isna(x) or str(x).strip().lower() in na_strings else x)
+    
+    # 찌꺼기가 완벽하게 NaN으로 치환된 후, 순수 데이터만 남기기
+    df_cox = df_cox.dropna()
     
     if df_cox.empty:
         print("  [경고] 결측치 제거 후 Cox 분석할 데이터가 없습니다.")
