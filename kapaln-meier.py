@@ -14,9 +14,8 @@ class StepLine2D(Line2D):
 class StepHandler(HandlerLine2D):
     def create_artists(self, legend, orig_handle, xdescent, ydescent, width, height, fontsize, trans):
         # 범례 안에 계단(step) 모양의 선을 그리기 위한 좌표 설정
-        x = [0, width / 2, width / 2, width]
-        y = [height / 2 + height / 4, height / 2 + height / 4, height / 2 - height / 4, height / 2 - height / 4]
-        line = plt.Line2D(x, y, 
+        xdata, ydata = [0, width*0.35, width*0.35, width*0.85, width*0.85], [height*0.2, height*0.2, height*0.8, height*0.8, height*0.2]
+        line = plt.Line2D(xdata, ydata, 
                           color=orig_handle.get_color(), 
                           linewidth=orig_handle.get_linewidth(),
                           linestyle=orig_handle.get_linestyle())
@@ -96,7 +95,7 @@ def analyze_custom_kaplan_meier(df, target, group_col, time_col, event_col, save
         p_text = f"P = {p_val:.3f}"
 
     # 4. 시각화 (Matplotlib)
-    fig, ax = plt.subplots(figsize=(6, 5))
+    fig, ax = plt.subplots(figsize=(8, 6))
     
     colors = {'High': '#00a2e8', 'Low': '#b51a5e'}
     kmf_dict = {}
@@ -108,14 +107,14 @@ def analyze_custom_kaplan_meier(df, target, group_col, time_col, event_col, save
             kmf.fit(data.loc[mask, time_col], data.loc[mask, event_col], label=group_name)
             
             # KM 곡선 및 중도절단(Censored) 표시 (십자 마커 사용 및 디테일 설정)
-            # TypeError 해결: censor_styles 안의 'color' 속성 제거 (메인 color를 자동으로 따라감)
             kmf.plot_survival_function(ax=ax, color=colors[group_name], ci_show=False, 
                                        show_censors=True, 
-                                       censor_styles={'marker': '+', 'mew': 1, 'ms': 6},
+                                       censor_styles={'marker': '+', 'mew': 1, 'ms': 6, 'mec': colors[group_name]},
                                        drawstyle='steps-post', linewidth=1.5)
             kmf_dict[group_name] = kmf
 
-    # 축 라벨 디자인
+    # 타이틀 및 축 라벨 디자인
+    ax.set_title(f'{cancer_type}_OS')
     ax.set_xlabel('Time(Days)', fontsize=12, fontweight='bold')
     
     # 이벤트 컬럼명을 기반으로 Y축 라벨 자동 유추
@@ -133,22 +132,36 @@ def analyze_custom_kaplan_meier(df, target, group_col, time_col, event_col, save
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
 
+    # [새로 추가된 그래프 포맷]
+    ax.grid(axis='y', color='lightgray', linestyle='-')
+    ax.set_facecolor('white')
+    for spine in ax.spines.values():
+        if spine.get_visible(): 
+            spine.set_color('black')
+
     # P-value 텍스트 그래프 내부(좌측 하단) 삽입
     ax.text(0.05, 0.05, p_text, transform=ax.transAxes, 
             fontsize=16, fontweight='bold', va='bottom', ha='left')
 
-    # 범례 커스텀 생성 (계단형 렌더러 적용)
+    # 범례 커스텀 생성 (계단형 렌더러 적용 및 Censored 마커 추가)
     custom_lines = []
     labels = []
+    
+    # 생존함수 계단형 선 범례 추가
     for g_name in ['High', 'Low']:
         if g_name in kmf_dict:
-            n_count = len(data[data[group_col] == g_name])
             custom_lines.append(StepLine2D([0], [0], color=colors[g_name], lw=1.5))
-            labels.append(f"{g_name} (n={n_count})")
+            labels.append(g_name)
+            
+    # 중도절단(Censored) 마커 범례 추가
+    for g_name in ['High', 'Low']:
+        if g_name in kmf_dict:
+            custom_lines.append(Line2D([], [], color=colors[g_name], marker='+', linestyle='-', lw=1.5, mew=1, ms=6))
+            labels.append(f'{g_name}-censored')
             
     leg = ax.legend(custom_lines, labels, 
                     handler_map={StepLine2D: StepHandler()},
-                    frameon=False, loc='upper right', title=f'{target}')
+                    frameon=False, loc='upper right', title=f'{target}group')
     
     # 범례 제목 볼드체 처리
     plt.setp(leg.get_title(), fontweight='bold')
