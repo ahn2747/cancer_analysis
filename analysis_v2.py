@@ -31,7 +31,7 @@ class PrintLogger:
 warnings.filterwarnings('ignore')
 
 # =====================================================================
-# 1. 데이터 처리 및 병합
+# 1. 데이터 처리 및 병합 (원본 로직 복구: 중복 컬럼 방지 및 SAV/CSV 저장)
 # =====================================================================
 def load_and_merge_data(target, onco_file, clin_file):
     print(f"--- 1. 데이터 처리 및 병합 시작 (Target: {target}) ---")
@@ -151,9 +151,6 @@ def analyze_bivariate_correlation(df, gene_list):
     col_names = ['Variable', 'Stat'] + valid_genes
     return pd.DataFrame(table2_data, columns=col_names)
 
-# =====================================================================
-# [수술 완료] OLM 기본 분석 (Base Model) & 병기 결합(Stage Model) 스위치
-# =====================================================================
 def analyze_glm_multivariate(df, mode, expr_col='target_expression', categorical_vars=None, continuous_vars=None, target_stages=None):
     print("--- 2-3. 다변량 일반선형모형 (GLM / OLS) - Base 모델 및 병기 결합 ---")
     
@@ -164,7 +161,6 @@ def analyze_glm_multivariate(df, mode, expr_col='target_expression', categorical
     if continuous_vars is None:
         continuous_vars = [age_var, 'number_pack_years_smoked']
         
-    # target_stages가 명시적으로 False면 빈 리스트 할당 (병기 루프 차단 옵션)
     if target_stages is False:
         target_stages = []
     elif target_stages is None:
@@ -178,7 +174,7 @@ def analyze_glm_multivariate(df, mode, expr_col='target_expression', categorical
     all_table4_data = []
     
     # -------------------------------------------------------------
-    # 1. Base Model (병기가 제외된 기본 모델) 구성 및 분석
+    # 1. Base Model 
     # -------------------------------------------------------------
     base_cols_to_check = [expr_col] + categorical_vars + continuous_vars
     base_valid_cols = [c for c in base_cols_to_check if c in df.columns]
@@ -221,7 +217,7 @@ def analyze_glm_multivariate(df, mode, expr_col='target_expression', categorical
             print(f"기본 모델 분석 중 오류 발생: {e}\n")
 
     # -------------------------------------------------------------
-    # 2. Stage Models (병기가 하나씩 추가되는 루프 모델)
+    # 2. Stage Models 
     # -------------------------------------------------------------
     if target_stages:
         for model_name, target_var in target_stages:
@@ -236,7 +232,6 @@ def analyze_glm_multivariate(df, mode, expr_col='target_expression', categorical
                 continue
                 
             stage_predictors = base_predictors.copy()
-            # 병기 변수는 정석대로 범주형(C) 래핑 투입
             stage_predictors.append(f"C({target_var})")
             
             formula_stage = f"{expr_col} ~ " + " + ".join(stage_predictors)
@@ -271,12 +266,27 @@ def analyze_glm_multivariate(df, mode, expr_col='target_expression', categorical
                 
     return pd.DataFrame(all_table4_data)
 
-def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plot_type=1):
+def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plot_type=1, exclude_samples=None, replace_groups=None, sample_id_col='sampleID'):
     print("--- 2-4. Kaplan-Meier 생존분석 ---")
     if group_col not in df.columns or 'OS.time' not in df.columns or 'OS' not in df.columns:
         return pd.DataFrame()
         
     df_km = df.copy()
+    
+    # --- [추가된 기능] 특정 sampleID 제거 및 값 변경 ---
+    if sample_id_col in df_km.columns:
+        if exclude_samples:
+            original_len = len(df_km)
+            df_km = df_km[~df_km[sample_id_col].isin(exclude_samples)]
+            if (original_len - len(df_km)) > 0:
+                print(f"  [안내] KM 분석에서 지정된 샘플 {original_len - len(df_km)}개를 제외했습니다.")
+                
+        if replace_groups:
+            for sid, col, new_val in replace_groups.items():
+                df_km.loc[df_km[sample_id_col] == sid, col] = new_val
+            print(f"  [안내] KM 분석에서 지정된 샘플 {len(replace_groups)}개의 그룹 값을 강제 변경했습니다.")
+    # ----------------------------------------------------
+
     df_km = df_km[df_km[group_col].isin(['High', 'Low'])]
     df_km = df_km.dropna(subset=['OS.time', 'OS'])
     if df_km.empty: return pd.DataFrame()
@@ -400,8 +410,11 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
 
     return pd.DataFrame(table5_data, columns=["Survival Type", "Cancer Type", "Target", "Chi-square", "P-value"])
 
-def analyze_cox_regression(target, df, mode, save_dir, group_col='gene_group', categorical_vars=None, continuous_vars=None, prefix=''):
-    print("--- 2-5. Cox 회귀분석 ---")
+# =====================================================================
+# [핵심 수술 적용됨] 결측치 완벽 차단 및 prefix/연속형 숫자화 강제 로직
+# =====================================================================
+def analyze_cox_regression(target, df, mode, save_dir, group_col='gene_group', categorical_vars=None, continuous_vars=None, prefix=""):
+    print(f"--- 2-5. Cox 회귀분석 ({prefix}) ---")
     if categorical_vars is None: categorical_vars = [group_col, 'gender']
     if continuous_vars is None:
         age_col = 'age_at_initial_pathologic_diagnosis' if mode == "LUAD" else 'age'
@@ -410,32 +423,34 @@ def analyze_cox_regression(target, df, mode, save_dir, group_col='gene_group', c
     cols = ['OS.time', 'OS'] + categorical_vars + continuous_vars
     valid_cols = [c for c in cols if c in df.columns]
     
-    # 바로 결측치를 제거하지 않고, 사본을 떠서 정제 작업을 먼저 수행
+    # 사본 떠서 정제 작업 진행
     df_cox = df[valid_cols].copy()
     
-    # [핵심 수술] Pandas가 결측치로 인식하지 못하는 가짜 공백 및 문자열 찌꺼기 완벽 정제
+    # [수술 1] Pandas가 결측치로 인식하지 못하는 가짜 공백 및 문자열 찌꺼기 완벽 정제 (정규식 도입)
     na_strings = ['not reported', '[not available]', 'unknown', 'na', 'n/a', '', 'none']
     for col in valid_cols:
-        # 문자열(object) 또는 범주형 데이터일 경우에만 텍스트 검사
         if df_cox[col].dtype == object or isinstance(df_cox[col].dtype, pd.CategoricalDtype):
-            # 1. 선생님의 아이디어: 정규식으로 완전 공백(Space) 문자열을 NaN으로 강제 치환
             df_cox[col] = df_cox[col].replace(r'^\s*$', np.nan, regex=True)
-            # 2. 지정된 찌꺼기 텍스트를 NaN으로 치환 (대소문자 무시)
             df_cox[col] = df_cox[col].apply(lambda x: np.nan if pd.isna(x) or str(x).strip().lower() in na_strings else x)
-
+            
+    # [수술 2] '연속형'으로 지정된 변수는 완벽한 계산을 위해 강제로 숫자형(Numeric)으로 변환 
+    # (선생님의 Table 3.1 트렌드 분석이 에러 없이 돌아가도록 하는 치트키입니다)
+    for col in continuous_vars:
+        if col in df_cox.columns:
+            df_cox[col] = pd.to_numeric(df_cox[col], errors='coerce')
     
-    # 찌꺼기가 완벽하게 NaN으로 치환된 후, 순수 데이터만 남기기
     df_cox = df_cox.dropna()
-
-    print(f"{df_cox}")
     
-    if df_cox.empty: return pd.DataFrame()
+    if df_cox.empty: 
+        print("  [경고] 결측치 제거 후 Cox 분석할 데이터가 없습니다.")
+        return pd.DataFrame()
         
     dummy_cols = [c for c in categorical_vars if c in df_cox.columns]
     df_cox_dummy = pd.get_dummies(df_cox, columns=dummy_cols, drop_first=True)
     
     cph = CoxPHFitter()
     df_table3 = pd.DataFrame()
+    
     try:
         cph.fit(df_cox_dummy, duration_col='OS.time', event_col='OS')
         print(cph.summary[['exp(coef)', 'exp(coef) lower 95%', 'exp(coef) upper 95%', 'p']])
@@ -545,9 +560,6 @@ if __name__ == "__main__":
             final_corr_genes = corr_continuous + corr_processed_binary
             df_table2 = analyze_bivariate_correlation(merged_df, gene_list=final_corr_genes)
             
-            # ==============================================================
-            # [블록화 적용] OLM 변수 분리 및 Stage 스위치 (True/False/None)
-            # ==============================================================
             age_col = 'age_at_initial_pathologic_diagnosis' if mode == "LUAD" else 'age'
             glm_categorical = ['gender']
             glm_continuous = [age_col, 'number_pack_years_smoked']
@@ -557,35 +569,53 @@ if __name__ == "__main__":
                 expr_col=expr_col_name, 
                 categorical_vars=glm_categorical, 
                 continuous_vars=glm_continuous,
-                target_stages=None  # 병기 분석을 완전히 끄고 Base 모델만 보려면 target_stages=False 로 변경하세요!
+                target_stages=None
             )
             
-            df_table5 = analyze_kaplan_meier(target_gene, merged_df, mode, plot_base_dir, group_col=group_col_name, plot_type=CURRENT_PLOT_TYPE)
+            # [추가된 기능 적용] KM 분석 시 제외할 샘플 리스트와 그룹을 강제 변경할 샘플 딕셔너리
+            # 예: exclude_list = ['TCGA-05-4244'], replace_dict = [('TCGA-38-4625', 'OS', 0)]
+            exclude_list = [] 
+            replace_dict = [] 
             
+            df_table5 = analyze_kaplan_meier(
+                target_gene, merged_df, mode, plot_base_dir, 
+                group_col=group_col_name, 
+                plot_type=CURRENT_PLOT_TYPE,
+                exclude_samples=exclude_list,
+                replace_groups=replace_dict
+            )
+            
+            # -------------------------------------------------------------
+            # [Table 3] 범주형(Categorical) 병기 투입 Cox 
+            # -------------------------------------------------------------
             cox_categorical = [group_col_name, 'gender', 'pathologic_stage']
-            cox_continuous = [age_col, 'number_pack_years_smoked'] #+ gene_vars
+            cox_continuous = [age_col, 'number_pack_years_smoked'] # + gene_vars
             
             df_table3 = analyze_cox_regression(
                 target_gene, merged_df, mode, plot_base_dir, 
                 group_col=group_col_name,
                 categorical_vars=cox_categorical, 
-                continuous_vars=cox_continuous
+                continuous_vars=cox_continuous,
+                prefix=""
             )
-
-            cox_categorical = [group_col_name, 'gender']
-            cox_continuous = [age_col, 'number_pack_years_smoked', 'pathologic_stage'] #+ gene_vars
+            
+            # -------------------------------------------------------------
+            # [Table 3.1] 연속형(Continuous) 트렌드 병기 투입 Cox 
+            # -------------------------------------------------------------
+            cox_categorical_2 = [group_col_name, 'gender']
+            cox_continuous_2 = [age_col, 'number_pack_years_smoked', 'pathologic_stage'] # + gene_vars
             
             df_table3_1 = analyze_cox_regression(
                 target_gene, merged_df, mode, plot_base_dir, 
                 group_col=group_col_name,
-                categorical_vars=cox_categorical, 
-                continuous_vars=cox_continuous,
-                prefix = "stage_continuous_"
+                categorical_vars=cox_categorical_2, 
+                continuous_vars=cox_continuous_2,
+                prefix="stage_continuous_"
             )
 
-            
-            CUSTOM_PREIFX = ""
-            excel_save_path = os.path.join(result_dir, f"{CUSTOM_PREIFX}_{target_gene}_{mode}_Tables.xlsx")
+            # Excel 파일로 통합 저장
+            CUSTOM_PREFIX = ""
+            excel_save_path = os.path.join(result_dir, f"{CUSTOM_PREFIX}{target_gene}_{mode}_Tables.xlsx")
             with pd.ExcelWriter(excel_save_path, engine='openpyxl') as writer:
                 if not df_table1.empty: df_table1.to_excel(writer, sheet_name='Table 1 (Chi-square)', index=False)
                 if not df_table2.empty: df_table2.to_excel(writer, sheet_name='Table 2 (Correlation)', index=False)
