@@ -400,7 +400,7 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
 
     return pd.DataFrame(table5_data, columns=["Survival Type", "Cancer Type", "Target", "Chi-square", "P-value"])
 
-def analyze_cox_regression(target, df, mode, save_dir, group_col='gene_group', categorical_vars=None, continuous_vars=None):
+def analyze_cox_regression(target, df, mode, save_dir, group_col='gene_group', categorical_vars=None, continuous_vars=None, prefix=''):
     print("--- 2-5. Cox 회귀분석 ---")
     if categorical_vars is None: categorical_vars = [group_col, 'gender']
     if continuous_vars is None:
@@ -452,7 +452,7 @@ def analyze_cox_regression(target, df, mode, save_dir, group_col='gene_group', c
         plt.figure(figsize=(10, 6)); cph.plot()
         plt.title(f'Cox Regression - Forest Plot - {target}({mode})')
         plt.tight_layout()
-        cox_plot_path = os.path.join(save_dir, f'{target}_{mode}_Cox.png')
+        cox_plot_path = os.path.join(save_dir, f'{prefix}{target}_{mode}_Cox.png')
         plt.savefig(cox_plot_path); plt.close()
     except Exception as e:
         print(f"Cox 분석 중 오류 발생: {e}")
@@ -562,8 +562,8 @@ if __name__ == "__main__":
             
             df_table5 = analyze_kaplan_meier(target_gene, merged_df, mode, plot_base_dir, group_col=group_col_name, plot_type=CURRENT_PLOT_TYPE)
             
-            cox_categorical = [group_col_name, 'gender']
-            cox_continuous = [age_col, 'number_pack_years_smoked', 'pathologic_stage'] #+ gene_vars
+            cox_categorical = [group_col_name, 'gender', 'pathologic_stage']
+            cox_continuous = [age_col, 'number_pack_years_smoked'] #+ gene_vars
             
             df_table3 = analyze_cox_regression(
                 target_gene, merged_df, mode, plot_base_dir, 
@@ -571,13 +571,26 @@ if __name__ == "__main__":
                 categorical_vars=cox_categorical, 
                 continuous_vars=cox_continuous
             )
+
+            cox_categorical = [group_col_name, 'gender']
+            cox_continuous = [age_col, 'number_pack_years_smoked', 'pathologic_stage'] #+ gene_vars
             
-            CUSTOM_PREIFX = "stage_continuous"
+            df_table3_1 = analyze_cox_regression(
+                target_gene, merged_df, mode, plot_base_dir, 
+                group_col=group_col_name,
+                categorical_vars=cox_categorical, 
+                continuous_vars=cox_continuous,
+                prefix = "stage_continuous_"
+            )
+
+            
+            CUSTOM_PREIFX = ""
             excel_save_path = os.path.join(result_dir, f"{CUSTOM_PREIFX}_{target_gene}_{mode}_Tables.xlsx")
             with pd.ExcelWriter(excel_save_path, engine='openpyxl') as writer:
                 if not df_table1.empty: df_table1.to_excel(writer, sheet_name='Table 1 (Chi-square)', index=False)
                 if not df_table2.empty: df_table2.to_excel(writer, sheet_name='Table 2 (Correlation)', index=False)
                 if not df_table3.empty: df_table3.to_excel(writer, sheet_name='Table 3 (Cox)', index=False)
+                if not df_table3_1.empty: df_table3_1.to_excel(writer, sheet_name='Table 3.1 (Cox)_stage_continuous', index=False)
                 if not df_table4.empty: df_table4.to_excel(writer, sheet_name='Table 4 (Multivariate OLS)', index=False)
                 if not df_table5.empty: df_table5.to_excel(writer, sheet_name='Table 5 (KM Log-rank)', index=False)
             
