@@ -88,7 +88,7 @@ Dep. Variable:        XRCC3expression   R-squared:                       0.028
 Model:                            OLS   Adj. R-squared:                  0.021
 Method:                 Least Squares   F-statistic:                     3.891
 Date:                Tue, 30 Jun 2026   Prob (F-statistic):            0.00921
-Time:                        17:14:16   Log-Likelihood:                -3005.0
+Time:                        18:54:19   Log-Likelihood:                -3005.0
 No. Observations:                 412   AIC:                             6018.
 Df Residuals:                     408   BIC:                             6034.
 Df Model:                           3                                         
@@ -117,7 +117,7 @@ Dep. Variable:        XRCC3expression   R-squared:                       0.035
 Model:                            OLS   Adj. R-squared:                  0.021
 Method:                 Least Squares   F-statistic:                     2.425
 Date:                Tue, 30 Jun 2026   Prob (F-statistic):             0.0258
-Time:                        17:14:16   Log-Likelihood:                -2982.9
+Time:                        18:54:19   Log-Likelihood:                -2982.9
 No. Observations:                 409   AIC:                             5980.
 Df Residuals:                     402   BIC:                             6008.
 Df Model:                           6                                         
@@ -149,7 +149,7 @@ Dep. Variable:        XRCC3expression   R-squared:                       0.033
 Model:                            OLS   Adj. R-squared:                  0.019
 Method:                 Least Squares   F-statistic:                     2.336
 Date:                Tue, 30 Jun 2026   Prob (F-statistic):             0.0314
-Time:                        17:14:16   Log-Likelihood:                -3003.8
+Time:                        18:54:19   Log-Likelihood:                -3003.8
 No. Observations:                 412   AIC:                             6022.
 Df Residuals:                     405   BIC:                             6050.
 Df Model:                           6                                         
@@ -181,7 +181,7 @@ Dep. Variable:        XRCC3expression   R-squared:                       0.036
 Model:                            OLS   Adj. R-squared:                  0.022
 Method:                 Least Squares   F-statistic:                     2.510
 Date:                Tue, 30 Jun 2026   Prob (F-statistic):             0.0214
-Time:                        17:14:16   Log-Likelihood:                -2968.3
+Time:                        18:54:19   Log-Likelihood:                -2968.3
 No. Observations:                 407   AIC:                             5951.
 Df Residuals:                     400   BIC:                             5979.
 Df Model:                           6                                         
@@ -213,7 +213,7 @@ Dep. Variable:        XRCC3expression   R-squared:                       0.034
 Model:                            OLS   Adj. R-squared:                  0.023
 Method:                 Least Squares   F-statistic:                     3.034
 Date:                Tue, 30 Jun 2026   Prob (F-statistic):             0.0177
-Time:                        17:14:16   Log-Likelihood:                -2528.1
+Time:                        18:54:19   Log-Likelihood:                -2528.1
 No. Observations:                 346   AIC:                             5066.
 Df Residuals:                     341   BIC:                             5085.
 Df Model:                           4                                         
@@ -236,21 +236,7 @@ Kurtosis:                      15.179   Cond. No.                         785.
 Notes:
 [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
 --- 2-4. Kaplan-Meier 생존분석 ---
---- 2-5. Cox 회귀분석 ---
-     OS.time   OS XRCC3group  gender  pathologic_stage   age  number_pack_years_smoked
-0      371.0  1.0        Low    MALE               1.0  67.0                     200.0
-1      136.0  1.0        Low    MALE               1.0  72.0                      40.0
-2     2304.0  1.0        Low  FEMALE               1.0  77.0                      30.0
-3     3747.0  0.0        Low    MALE               1.0  74.0                      20.0
-5     3576.0  0.0       High  FEMALE               3.0  63.0                      50.0
-..       ...  ...        ...     ...               ...   ...                       ...
-484    387.0  1.0       High  FEMALE               3.0  57.0                       3.0
-485   1335.0  1.0       High  FEMALE               2.0  75.0                       1.0
-486    261.0  1.0       High    MALE               1.0  63.0                       2.5
-487    340.0  1.0       High  FEMALE               3.0  71.0                       2.5
-488      6.0  1.0        Low  FEMALE               1.0  77.0                      30.0
-
-[409 rows x 7 columns]
+--- 2-5. Cox 회귀분석 () ---
                           exp(coef)  exp(coef) lower 95%  exp(coef) upper 95%         p
 covariate                                                                              
 age                        1.021329             1.002361             1.040656  0.027346
@@ -260,21 +246,7 @@ gender_MALE                1.249947             0.880730             1.773946  0
 pathologic_stage_2.0       1.036878             0.731738             1.469264  0.838635
 pathologic_stage_3.0       1.410747             0.946721             2.102211  0.090850
 pathologic_stage_4.0       2.941847             1.172213             7.383016  0.021538
---- 2-5. Cox 회귀분석 ---
-     OS.time   OS XRCC3group  gender   age  number_pack_years_smoked  pathologic_stage
-0      371.0  1.0        Low    MALE  67.0                     200.0               1.0
-1      136.0  1.0        Low    MALE  72.0                      40.0               1.0
-2     2304.0  1.0        Low  FEMALE  77.0                      30.0               1.0
-3     3747.0  0.0        Low    MALE  74.0                      20.0               1.0
-5     3576.0  0.0       High  FEMALE  63.0                      50.0               3.0
-..       ...  ...        ...     ...   ...                       ...               ...
-484    387.0  1.0       High  FEMALE  57.0                       3.0               3.0
-485   1335.0  1.0       High  FEMALE  75.0                       1.0               2.0
-486    261.0  1.0       High    MALE  63.0                       2.5               1.0
-487    340.0  1.0       High  FEMALE  71.0                       2.5               3.0
-488      6.0  1.0        Low  FEMALE  77.0                      30.0               1.0
-
-[409 rows x 7 columns]
+--- 2-5. Cox 회귀분석 (stage_continuous_) ---
                           exp(coef)  exp(coef) lower 95%  exp(coef) upper 95%         p
 covariate                                                                              
 age                        1.022104             1.003283             1.041277  0.021133
