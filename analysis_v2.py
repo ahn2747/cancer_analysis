@@ -422,9 +422,12 @@ def analyze_cox_regression(target, df, mode, save_dir, group_col='gene_group', c
             df_cox[col] = df_cox[col].replace(r'^\s*$', np.nan, regex=True)
             # 2. 지정된 찌꺼기 텍스트를 NaN으로 치환 (대소문자 무시)
             df_cox[col] = df_cox[col].apply(lambda x: np.nan if pd.isna(x) or str(x).strip().lower() in na_strings else x)
+
     
     # 찌꺼기가 완벽하게 NaN으로 치환된 후, 순수 데이터만 남기기
     df_cox = df_cox.dropna()
+
+    print(f"{df_cox}")
     
     if df_cox.empty: return pd.DataFrame()
         
@@ -559,8 +562,8 @@ if __name__ == "__main__":
             
             df_table5 = analyze_kaplan_meier(target_gene, merged_df, mode, plot_base_dir, group_col=group_col_name, plot_type=CURRENT_PLOT_TYPE)
             
-            cox_categorical = [group_col_name, 'gender', 'pathologic_stage']
-            cox_continuous = [age_col, 'number_pack_years_smoked'] + gene_vars
+            cox_categorical = [group_col_name, 'gender']
+            cox_continuous = [age_col, 'number_pack_years_smoked', 'pathologic_stage'] #+ gene_vars
             
             df_table3 = analyze_cox_regression(
                 target_gene, merged_df, mode, plot_base_dir, 
@@ -569,7 +572,8 @@ if __name__ == "__main__":
                 continuous_vars=cox_continuous
             )
             
-            excel_save_path = os.path.join(result_dir, f"{target_gene}_{mode}_Tables.xlsx")
+            CUSTOM_PREIFX = "stage_continuous"
+            excel_save_path = os.path.join(result_dir, f"{CUSTOM_PREIFX}_{target_gene}_{mode}_Tables.xlsx")
             with pd.ExcelWriter(excel_save_path, engine='openpyxl') as writer:
                 if not df_table1.empty: df_table1.to_excel(writer, sheet_name='Table 1 (Chi-square)', index=False)
                 if not df_table2.empty: df_table2.to_excel(writer, sheet_name='Table 2 (Correlation)', index=False)
