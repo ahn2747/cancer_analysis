@@ -81,16 +81,20 @@ def analyze_chi_square(df, target_col='gene_group', row_vars=None):
     if row_vars is None:
         row_vars = ['ageG', 'gender', 'pathologic_stage', 'pathologic_M', 'pathologic_N', 'pathologic_T', 'SmokingStatus']
     
-    target_cats = sorted(df[target_col].dropna().unique())
-    if len(target_cats) == 0: target_cats = ['Group1', 'Group2']
+    # [핵심 수술 적용] 그룹 변수에 숨어있는 빈칸("")이나 이상한 찌꺼기 그룹을 완벽 차단
+    # 오직 명확한 'High'와 'Low' 그룹 환자만을 대상으로 Table 1을 산출합니다.
+    df_target = df[df[target_col].isin(['High', 'Low'])].copy()
+    
+    target_cats = sorted(df_target[target_col].dropna().unique())
+    if len(target_cats) == 0: target_cats = ['High', 'Low'] # 기본값 안전장치
         
     table1_data = []
     na_strings = ['not reported', '[not available]', 'unknown', 'na', 'n/a', '', 'none']
     
     for var in row_vars:
-        if var not in df.columns: continue
+        if var not in df_target.columns: continue
         
-        df_clean = df[[var, target_col]].copy()
+        df_clean = df_target[[var, target_col]].copy()
         df_clean[var] = df_clean[var].apply(lambda x: np.nan if pd.isna(x) or str(x).strip().lower() in na_strings else x)
         df_clean = df_clean.dropna()
         
