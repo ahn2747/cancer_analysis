@@ -575,7 +575,8 @@ if __name__ == "__main__":
             # [추가된 기능 적용] KM 분석 시 제외할 샘플 리스트와 그룹을 강제 변경할 샘플 딕셔너리
             # 예: exclude_list = ['TCGA-05-4244'], replace_dict = [('TCGA-38-4625', 'OS', 0)]
             exclude_list = [] 
-            replace_dict = [('TCGA-49-6742', 'OS.time', 1678), ('TCGA-69-8453', 'OS.time', 788), ('TCGA-69-8453', 'OS', 1), ('TCGA-49-4486', 'OS.time', 2318), ('TCGA-49-4486', 'OS', 0), ('TCGA-83-5908', 'OS.time', 824), ('TCGA-83-5908', 'OS', 1)] 
+            replace_dict = [] 
+            # FOR XRCC3 [('TCGA-49-6742', 'OS.time', 1678), ('TCGA-69-8453', 'OS.time', 788), ('TCGA-69-8453', 'OS', 1), ('TCGA-49-4486', 'OS.time', 2318), ('TCGA-49-4486', 'OS', 0), ('TCGA-83-5908', 'OS.time', 824), ('TCGA-83-5908', 'OS', 1)] 
             
             df_table5 = analyze_kaplan_meier(
                 target_gene, merged_df, mode, plot_base_dir, 
