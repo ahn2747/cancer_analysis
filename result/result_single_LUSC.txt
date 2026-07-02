@@ -5,66 +5,66 @@
 --- 1. 기존 데이터 로드 (Target: ADAM10) ---
 --- 2-1. 예후 분석 (Chi-square Test) ---
 [ADAM10group vs ageG]
-ADAM10group     High  Low   전체
-ageG                          
-0.0          0    86  103  189
-1.0          1   158  140  299
-전체           1   244  243  488
-Chi-square: 3.2497, p-value: 0.197 (⚠️경고: 최소 기대빈도 0.4<5)
+ADAM10group  High  Low   전체
+ageG                       
+0.0            86  103  189
+1.0           158  140  298
+전체            244  243  487
+Chi-square: 2.6143, p-value: 0.106
 
 [ADAM10group vs gender]
-ADAM10group     High  Low   전체
-gender                        
-FEMALE       1    61   64  126
-MALE         0   183  179  362
-전체           1   244  243  488
-Chi-square: 2.9926, p-value: 0.224 (⚠️경고: 최소 기대빈도 0.3<5)
+ADAM10group  High  Low   전체
+gender                     
+FEMALE         61   64  125
+MALE          183  179  362
+전체            244  243  487
+Chi-square: 0.1141, p-value: 0.735
 
 [ADAM10group vs pathologic_stage]
-ADAM10group          High  Low   전체
-pathologic_stage                   
-1.0               0   121  117  238
-2.0               1    79   76  156
-3.0               0    40   43   83
-4.0               0     4    3    7
-전체                1   244  239  484
-Chi-square: 2.4324, p-value: 0.876 (⚠️경고: 최소 기대빈도 0.0<5)
+ADAM10group       High  Low   전체
+pathologic_stage                
+1.0                121  117  238
+2.0                 79   76  155
+3.0                 40   43   83
+4.0                  4    3    7
+전체                 244  239  483
+Chi-square: 0.3249, p-value: 0.955 (⚠️경고: 최소 기대빈도 3.5<5)
 
 [ADAM10group vs pathologic_M]
-ADAM10group      High  Low   전체
-pathologic_M                   
-0.0           1   195  205  401
-1.0           0     4    3    7
-전체            1   199  208  408
-Chi-square: 0.2119, p-value: 0.899 (⚠️경고: 최소 기대빈도 0.0<5)
+ADAM10group   High  Low   전체
+pathologic_M                
+0.0            195  205  400
+1.0              4    3    7
+전체             199  208  407
+Chi-square: 0.1939, p-value: 0.660 (⚠️경고: 최소 기대빈도 3.4<5)
 
 [ADAM10group vs pathologic_N]
-ADAM10group      High  Low   전체
-pathologic_N                   
-0.0           0   159  152  311
-1.0           1    62   63  126
-2.0           0    18   22   40
-3.0           0     2    3    5
-전체            1   241  240  482
-Chi-square: 3.5962, p-value: 0.731 (⚠️경고: 최소 기대빈도 0.0<5)
+ADAM10group   High  Low   전체
+pathologic_N                
+0.0            159  152  311
+1.0             62   63  125
+2.0             18   22   40
+3.0              2    3    5
+전체             241  240  481
+Chi-square: 0.7635, p-value: 0.858 (⚠️경고: 최소 기대빈도 2.5<5)
 
 [ADAM10group vs pathologic_T]
-ADAM10group      High  Low   전체
-pathologic_T                   
-1.0           1    56   52  109
-2.0           0   141  145  286
-3.0           0    37   33   70
-4.0           0    10   13   23
-전체            1   244  243  488
-Chi-square: 4.3066, p-value: 0.635 (⚠️경고: 최소 기대빈도 0.0<5)
+ADAM10group   High  Low   전체
+pathologic_T                
+1.0             56   52  108
+2.0            141  145  286
+3.0             37   33   70
+4.0             10   13   23
+전체             244  243  487
+Chi-square: 0.8219, p-value: 0.844
 
 [ADAM10group vs SmokingStatus]
-ADAM10group       High  Low   전체
-SmokingStatus                   
-0.0            1    40   35   76
-1.0            0   204  209  413
-전체             1   244  244  489
-Chi-square: 5.8356, p-value: 0.054 (⚠️경고: 최소 기대빈도 0.2<5)
+ADAM10group    High  Low   전체
+SmokingStatus                
+0.0              40   35   75
+1.0             204  209  413
+전체              244  244  488
+Chi-square: 0.3939, p-value: 0.530
 
 --- 2-2. 이변량 상관 분석 (Pearson 행렬 - SPSS Pairwise 방식) ---
 [Pearson 상관계수 행렬 (SPSS Pairwise 방식)]
@@ -88,7 +88,7 @@ Dep. Variable:       ADAM10expression   R-squared:                       0.019
 Model:                            OLS   Adj. R-squared:                  0.012
 Method:                 Least Squares   F-statistic:                     2.705
 Date:                Thu, 02 Jul 2026   Prob (F-statistic):             0.0451
-Time:                        22:35:03   Log-Likelihood:                -3390.1
+Time:                        23:28:32   Log-Likelihood:                -3390.1
 No. Observations:                 413   AIC:                             6788.
 Df Residuals:                     409   BIC:                             6804.
 Df Model:                           3                                         
@@ -117,7 +117,7 @@ Dep. Variable:       ADAM10expression   R-squared:                       0.027
 Model:                            OLS   Adj. R-squared:                  0.013
 Method:                 Least Squares   F-statistic:                     1.881
 Date:                Thu, 02 Jul 2026   Prob (F-statistic):             0.0828
-Time:                        22:35:03   Log-Likelihood:                -3364.9
+Time:                        23:28:32   Log-Likelihood:                -3364.9
 No. Observations:                 410   AIC:                             6744.
 Df Residuals:                     403   BIC:                             6772.
 Df Model:                           6                                         
@@ -149,7 +149,7 @@ Dep. Variable:       ADAM10expression   R-squared:                       0.021
 Model:                            OLS   Adj. R-squared:                  0.007
 Method:                 Least Squares   F-statistic:                     1.468
 Date:                Thu, 02 Jul 2026   Prob (F-statistic):              0.188
-Time:                        22:35:03   Log-Likelihood:                -3389.7
+Time:                        23:28:32   Log-Likelihood:                -3389.7
 No. Observations:                 413   AIC:                             6793.
 Df Residuals:                     406   BIC:                             6822.
 Df Model:                           6                                         
@@ -181,7 +181,7 @@ Dep. Variable:       ADAM10expression   R-squared:                       0.022
 Model:                            OLS   Adj. R-squared:                  0.007
 Method:                 Least Squares   F-statistic:                     1.473
 Date:                Thu, 02 Jul 2026   Prob (F-statistic):              0.186
-Time:                        22:35:03   Log-Likelihood:                -3350.6
+Time:                        23:28:32   Log-Likelihood:                -3350.6
 No. Observations:                 408   AIC:                             6715.
 Df Residuals:                     401   BIC:                             6743.
 Df Model:                           6                                         
@@ -213,7 +213,7 @@ Dep. Variable:       ADAM10expression   R-squared:                       0.024
 Model:                            OLS   Adj. R-squared:                  0.012
 Method:                 Least Squares   F-statistic:                     2.075
 Date:                Thu, 02 Jul 2026   Prob (F-statistic):             0.0837
-Time:                        22:35:03   Log-Likelihood:                -2852.8
+Time:                        23:28:32   Log-Likelihood:                -2852.8
 No. Observations:                 347   AIC:                             5716.
 Df Residuals:                     342   BIC:                             5735.
 Df Model:                           4                                         
