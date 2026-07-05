@@ -217,8 +217,8 @@ def analyze_glm_multivariate(df, mode, expr_col='target_expression', categorical
             for idx in coef.index:
                 all_table4_data.append({
                     "Variable": idx,
-                    "Coefficient": round(coef[idx], 4),
-                    "95% CI": f"{round(conf_int.loc[idx, 0], 4)}-{round(conf_int.loc[idx, 1], 4)}",
+                    "Coefficient": round(coef[idx], 3),
+                    "95% CI": f"{round(conf_int.loc[idx, 0], 3)}-{round(conf_int.loc[idx, 1], 3)}",
                     "P-value": f"{pvalues[idx]:.3f}" if pvalues[idx] >= 0.001 else "<0.001"
                 })
             all_table4_data.append({"Variable": "", "Coefficient": "", "95% CI": "", "P-value": ""})
@@ -263,8 +263,8 @@ def analyze_glm_multivariate(df, mode, expr_col='target_expression', categorical
                 for idx in coef.index:
                     all_table4_data.append({
                         "Variable": idx,
-                        "Coefficient": round(coef[idx], 4),
-                        "95% CI": f"{round(conf_int.loc[idx, 0], 4)}-{round(conf_int.loc[idx, 1], 4)}",
+                        "Coefficient": round(coef[idx], 3),
+                        "95% CI": f"{round(conf_int.loc[idx, 0], 3)}-{round(conf_int.loc[idx, 1], 3)}",
                         "P-value": f"{pvalues[idx]:.3f}" if pvalues[idx] >= 0.001 else "<0.001"
                     })
                 all_table4_data.append({"Variable": "", "Coefficient": "", "95% CI": "", "P-value": ""})
