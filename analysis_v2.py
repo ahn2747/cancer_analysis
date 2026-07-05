@@ -81,12 +81,18 @@ def analyze_chi_square(df, target_col='gene_group', row_vars=None):
     if row_vars is None:
         row_vars = ['ageG', 'gender', 'pathologic_stage', 'pathologic_M', 'pathologic_N', 'pathologic_T', 'SmokingStatus']
     
-    # [핵심 수술 적용] 그룹 변수에 숨어있는 빈칸("")이나 이상한 찌꺼기 그룹을 완벽 차단
-    # 오직 명확한 'High'와 'Low' 그룹 환자만을 대상으로 Table 1을 산출합니다.
-    df_target = df[df[target_col].isin(['High', 'Low'])].copy()
+    print("  [진단 로그] ⚠️ 카이제곱 분석 그룹 필터링 시작 (강제 정제)")
+    # [핵심 수술 적용] 범주형(Categorical) 데이터의 찌꺼기까지 완벽하게 소각하기 위해 강제로 문자열(String) 타입으로 캐스팅하고 양옆 공백 제거
+    df_target = df.copy()
+    df_target[target_col] = df_target[target_col].astype(str).str.strip()
+    
+    # 18명의 정체불명 환자 그룹을 완전히 차단하고 오직 'High'와 'Low' 환자만 남김
+    df_target = df_target[df_target[target_col].isin(['High', 'Low'])]
     
     target_cats = sorted(df_target[target_col].dropna().unique())
     if len(target_cats) == 0: target_cats = ['High', 'Low'] # 기본값 안전장치
+    
+    print(f"  [진단 로그] ✅ 카이제곱 최종 투입 그룹: {target_cats} (2개여야 정상)")
         
     table1_data = []
     na_strings = ['not reported', '[not available]', 'unknown', 'na', 'n/a', '', 'none']
@@ -199,12 +205,12 @@ def analyze_glm_multivariate(df, mode, expr_col='target_expression', categorical
             print(model_base.summary())
             
             all_table4_data.extend([
-                {"Variable": f"=== [ Model: Base Model (No Stage) ] ===", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
-                {"Variable": "Dependent Variable (Y)", "Coefficient": expr_col, "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
-                {"Variable": "Model Formula", "Coefficient": formula_base, "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
-                {"Variable": "R-squared", "Coefficient": f"{model_base.rsquared:.4f}", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
-                {"Variable": "Prob (F-statistic)", "Coefficient": f"{model_base.f_pvalue:.4e}", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
-                {"Variable": "--- [ Coefficients ] ---", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""}
+                {"Variable": f"=== [ Model: Base Model (No Stage) ] ===", "Coefficient": "", "95% CI": "", "P-value": ""},
+                {"Variable": "Dependent Variable (Y)", "Coefficient": expr_col, "95% CI": "", "P-value": ""},
+                {"Variable": "Model Formula", "Coefficient": formula_base, "95% CI": "", "P-value": ""},
+                {"Variable": "R-squared", "Coefficient": f"{model_base.rsquared:.4f}", "95% CI": "", "P-value": ""},
+                {"Variable": "Prob (F-statistic)", "Coefficient": f"{model_base.f_pvalue:.4e}", "95% CI": "", "P-value": ""},
+                {"Variable": "--- [ Coefficients ] ---", "Coefficient": "", "95% CI": "", "P-value": ""}
             ])
             
             coef, pvalues, conf_int = model_base.params, model_base.pvalues, model_base.conf_int()
@@ -212,11 +218,10 @@ def analyze_glm_multivariate(df, mode, expr_col='target_expression', categorical
                 all_table4_data.append({
                     "Variable": idx,
                     "Coefficient": round(coef[idx], 4),
-                    "95% CI Lower": round(conf_int.loc[idx, 0], 4),
-                    "95% CI Upper": round(conf_int.loc[idx, 1], 4),
+                    "95% CI": f"{round(conf_int.loc[idx, 0], 4)}-{round(conf_int.loc[idx, 1], 4)}",
                     "P-value": f"{pvalues[idx]:.3f}" if pvalues[idx] >= 0.001 else "<0.001"
                 })
-            all_table4_data.append({"Variable": "", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""})
+            all_table4_data.append({"Variable": "", "Coefficient": "", "95% CI": "", "P-value": ""})
         except Exception as e:
             print(f"기본 모델 분석 중 오류 발생: {e}\n")
 
@@ -246,12 +251,12 @@ def analyze_glm_multivariate(df, mode, expr_col='target_expression', categorical
                 print(model_stage.summary())
                 
                 all_table4_data.extend([
-                    {"Variable": f"=== [ Model: Base + {model_name} ] ===", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
-                    {"Variable": "Dependent Variable (Y)", "Coefficient": expr_col, "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
-                    {"Variable": "Model Formula", "Coefficient": formula_stage, "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
-                    {"Variable": "R-squared", "Coefficient": f"{model_stage.rsquared:.4f}", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
-                    {"Variable": "Prob (F-statistic)", "Coefficient": f"{model_stage.f_pvalue:.4e}", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""},
-                    {"Variable": "--- [ Coefficients ] ---", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""}
+                    {"Variable": f"=== [ Model: Base + {model_name} ] ===", "Coefficient": "", "95% CI": "", "P-value": ""},
+                    {"Variable": "Dependent Variable (Y)", "Coefficient": expr_col, "95% CI": "", "P-value": ""},
+                    {"Variable": "Model Formula", "Coefficient": formula_stage, "95% CI": "", "P-value": ""},
+                    {"Variable": "R-squared", "Coefficient": f"{model_stage.rsquared:.4f}", "95% CI": "", "P-value": ""},
+                    {"Variable": "Prob (F-statistic)", "Coefficient": f"{model_stage.f_pvalue:.4e}", "95% CI": "", "P-value": ""},
+                    {"Variable": "--- [ Coefficients ] ---", "Coefficient": "", "95% CI": "", "P-value": ""}
                 ])
                 
                 coef, pvalues, conf_int = model_stage.params, model_stage.pvalues, model_stage.conf_int()
@@ -259,11 +264,10 @@ def analyze_glm_multivariate(df, mode, expr_col='target_expression', categorical
                     all_table4_data.append({
                         "Variable": idx,
                         "Coefficient": round(coef[idx], 4),
-                        "95% CI Lower": round(conf_int.loc[idx, 0], 4),
-                        "95% CI Upper": round(conf_int.loc[idx, 1], 4),
+                        "95% CI": f"{round(conf_int.loc[idx, 0], 4)}-{round(conf_int.loc[idx, 1], 4)}",
                         "P-value": f"{pvalues[idx]:.3f}" if pvalues[idx] >= 0.001 else "<0.001"
                     })
-                all_table4_data.append({"Variable": "", "Coefficient": "", "95% CI Lower": "", "95% CI Upper": "", "P-value": ""})
+                all_table4_data.append({"Variable": "", "Coefficient": "", "95% CI": "", "P-value": ""})
                 
             except Exception as e:
                 print(f"{model_name} 다변량 분석 중 오류 발생: {e}\n")
