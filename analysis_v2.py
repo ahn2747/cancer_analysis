@@ -467,8 +467,7 @@ def analyze_cox_regression(target, df, mode, save_dir, group_col='gene_group', c
         df_table3 = pd.DataFrame({
             'Clinical Variable': summary.index,
             'Hazard Ratio (HR)': summary['exp(coef)'].round(3),
-            '95% CI Lower': summary['exp(coef) lower 95%'].round(3),
-            '95% CI Upper': summary['exp(coef) upper 95%'].round(3),
+            '95% CI': summary.apply(lambda row: f"{row['exp(coef) lower 95%']:.3f}-{row['exp(coef) upper 95%']:.3f}", axis=1),
             'P-value': summary['p'].apply(lambda x: f"{x:.3f}" if x >= 0.001 else "<0.001")
         })
         
