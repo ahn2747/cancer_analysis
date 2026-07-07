@@ -543,9 +543,9 @@ if __name__ == "__main__":
             df_table1 = analyze_chi_square(merged_df, target_col=group_col_name)
             
             if mode == "LUAD":
-                gene_vars = ['KrasExpression', 'TP53Expression', 'ALKExpression', 'BRAFExpression']
+                gene_vars = ['EGFRExpression', 'KrasExpression', 'TP53Expression', 'ALKExpression', 'BRAFExpression']
                 corr_continuous = [expr_col_name, 'number_pack_years_smoked', 'age_at_initial_pathologic_diagnosis'] + gene_vars
-                corr_binary_targets = ['EGFR']
+                corr_binary_targets = []
             else:
                 gene_vars = ['TP53Expression', 'CDKN2AExpression', 'SOX2Expression', 'PIK3CAExpression', 'NOTCH1Expression']
                 corr_continuous = [expr_col_name, 'number_pack_years_smoked', 'age'] + gene_vars
