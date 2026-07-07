@@ -249,7 +249,7 @@ if __name__ == "__main__":
     print(f"          자동화 GSEA 시작 (모드: {ANALYSIS_MODE.upper()})")
     print(f"{'='*60}")
     
-    mode = 'LUSC' 
+    mode = 'LUAD' 
     expr_file_path = os.path.join(super_dir, "database", f"TCGA_{mode}_RNAseq_Expression.csv")
     clin_file_path = os.path.join(super_dir, "database", '(LUAD) lung adenocarcinoma.sav' if mode == 'LUAD' else '(LUSC) lung squamous cell carcinoma.sav')
     group_column_name = "FAT1group"
