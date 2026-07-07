@@ -1,0 +1,31 @@
+
+============================================================
+          자동화 GSEA 시작 (모드: CHIP)
+============================================================
+--- 1. GSEA 데이터 준비 시작 ---
+  [진단 로그] 발현량 데이터 로드 중: D:\coding\medin\database\TCGA_LUAD_RNAseq_Expression.csv
+  [진단 로그] 임상 그룹 데이터 로드 중: D:\coding\medin\database\(LUAD) lung adenocarcinoma.sav
+  [진단 로그] 공통 환자 샘플 수: 492 명
+  [진단 로그] 감지된 환자 그룹 분포:
+High    246
+Low     246
+--- GSEA 데이터 준비 완료 ---
+
+--- CHIP Collapse 적용 시작 ---
+  [안내] CHIP 파일 로드: D:\coding\medin\database\Human_Gene_Symbol_with_Remapping_MSigDB.v2026.1.Hs.chip
+  [완료] CHIP 파일 기반 매핑 및 중복 제거 완료. 남은 유전자 수: 42433개
+
+
+>> MSigDB_Hallmark_2020 분석 진행...
+--- GSEA 분석 실행 (Gene Set: MSigDB_Hallmark_2020) ---
+  [진단 로그] 발현량 데이터 스케일링 생략 (입력값이 이미 Log2 변환된 데이터로 간주함)...
+  [저장] GSEA Report 파일 처리 완료
+
+>> KEGG_2021_Human 분석 진행...
+--- GSEA 분석 실행 (Gene Set: KEGG_2021_Human) ---
+  [진단 로그] 발현량 데이터 스케일링 생략 (입력값이 이미 Log2 변환된 데이터로 간주함)...
+  [저장] GSEA Report 파일 처리 완료
+
+============================================================
+          GSEA 파이프라인 실행 완료
+============================================================

@@ -186,11 +186,11 @@ def run_gsea_analysis(df_expr, pheno_list, gene_set_name, save_dir, prefix="", r
                 report_df_cleaned[col] = pd.to_numeric(report_df_cleaned[col], errors='coerce')
                 report_df_cleaned[col] = report_df_cleaned[col].apply(lambda x: f"{x:.3f}" if pd.notnull(x) else x)
                 
-        cleaned_report_csv_path = os.path.join(out_dir, "gseapy.phenotype.gsea.report_cleaned.csv")
+        cleaned_report_csv_path = os.path.join(out_dir, "gseapy.phenotype.gsea.report_cleaned.xlsx")
         if os.path.exists(cleaned_report_csv_path):
             try: os.remove(cleaned_report_csv_path)
             except: pass
-        report_df_cleaned.to_csv(cleaned_report_csv_path, index=False, encoding='utf-8-sig')
+        report_df_cleaned.to_excel(cleaned_report_csv_path, index=False)
         print(f"  [저장] GSEA Report 파일 처리 완료")
             
         sig_results = results_df[results_df['FDR q-val'] < 2.00].sort_values(by='NES', ascending=False)
@@ -234,12 +234,12 @@ if __name__ == "__main__":
     
     # [옵션 설정]
     # ANALYSIS_MODE: "raw" (모든 유전자 사용) 또는 "chip" (CHIP 파일 필터링 적용)
-    ANALYSIS_MODE = "raw" 
+    ANALYSIS_MODE = "chip" 
     
     # CHIP 파일 설정 (ANALYSIS_MODE가 "chip"일 때만 사용됩니다)
     CHIP_FILE_NAME = "Human_Gene_Symbol_with_Remapping_MSigDB.v2026.1.Hs.chip"
     
-    CUSTOM_FILE_PREFIX = f"Signature_2차_{ANALYSIS_MODE}_" 
+    CUSTOM_FILE_PREFIX = f"FAT1_{ANALYSIS_MODE}_" 
     
     if isinstance(sys.stdout, PrintLogger):
         sys.stdout.flush()
@@ -252,8 +252,8 @@ if __name__ == "__main__":
     mode = 'LUSC' 
     expr_file_path = os.path.join(super_dir, "database", f"TCGA_{mode}_RNAseq_Expression.csv")
     clin_file_path = os.path.join(super_dir, "database", '(LUAD) lung adenocarcinoma.sav' if mode == 'LUAD' else '(LUSC) lung squamous cell carcinoma.sav')
-    group_column_name = "SignatureGroup_LOXL2_ITGB1_PLAUR_SNAI1_VEGFC"
-    genes_to_remove = ["LOXL2", "ITGB1", "PLAUR", "SNAI1", "VEGFC"] 
+    group_column_name = "FAT1group"
+    genes_to_remove = [] 
     
     if not os.path.exists(expr_file_path):
         print(f"\n[오류] 발현량 파일을 찾을 수 없습니다: {expr_file_path}")
