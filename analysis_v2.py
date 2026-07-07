@@ -329,7 +329,7 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
     if plot_type == 1:
         ax_os.set_title(f'{mode}_OS 생존함수'); ax_os.set_xlabel('OS.time'); ax_os.set_ylabel('누적 생존함수')
     elif plot_type == 2:
-        ax_os.set_title(f'{mode}_OS'); ax_os.set_xlabel('Time(Days)', fontweight='bold', fontsize=12); ax_os.set_ylabel('Overall Survival', fontweight='bold', fontsize=12)
+        ax_os.set_title(f'{mode}_OS'); ax_os.set_xlabel('Time(Days)', fontweight='bold', fontsize=12); ax_os.set_ylabel('OS', fontweight='bold', fontsize=12)
         ax_os.spines['top'].set_visible(False); ax_os.spines['right'].set_visible(False)
     ax_os.grid(axis='y', color='lightgray', linestyle='-'); ax_os.set_facecolor('white')
     for spine in ax_os.spines.values():
@@ -381,7 +381,7 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
             if plot_type == 1:
                 ax_rfs.set_title(f'{mode}_RFS 생존함수'); ax_rfs.set_xlabel('RFS.time'); ax_rfs.set_ylabel('누적 생존함수')
             elif plot_type == 2:
-                ax_rfs.set_title(f'{mode}_RFS'); ax_rfs.set_xlabel('Time(Days)', fontweight='bold', fontsize=12); ax_rfs.set_ylabel('Relapse-Free Survival', fontweight='bold', fontsize=12)
+                ax_rfs.set_title(f'{mode}_RFS'); ax_rfs.set_xlabel('Time(Days)', fontweight='bold', fontsize=12); ax_rfs.set_ylabel('RFS', fontweight='bold', fontsize=12)
                 ax_rfs.spines['top'].set_visible(False); ax_rfs.spines['right'].set_visible(False)
             ax_rfs.grid(axis='y', color='lightgray', linestyle='-'); ax_rfs.set_facecolor('white')
             for spine in ax_rfs.spines.values():
