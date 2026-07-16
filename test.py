@@ -11,20 +11,29 @@ df2 = pandas.read_csv(os.path.join(csv_dir, 'LUAD_50_50_XRCC3.csv'))
 print(df1.head())
 print(df2.head())
 
-list1 = []
-list2 = []
-for Patient,Days,Status,Expression,Group in df2[['Patient','Days','Status','Expression','Group']].values:
-    print(Patient, Days, Status, Expression, Group)
-    val1 = df1[df1['sampleID'] == Patient]
-    val2 = df2[df2['Patient'] == Patient]
+def check_patient_match(df1, df2):
+    list1 = []
+    list2 = []
+    for Patient,Days,Status,Expression,Group in df2[['Patient','Days','Status','Expression','Group']].values:
+        print(Patient, Days, Status, Expression, Group)
+        val1 = df1[df1['sampleID'] == Patient]
+        val2 = df2[df2['Patient'] == Patient]
 
-    if val1['OS.time'].values[0] == val2['Days'].values[0]:
-        print(f"Match found for Patient: {Patient}, {Days}")
-        list1.append((Patient, Days))
-    else:
-        print(f"No match for Patient: {Patient}, {Days}")
-        list2.append((Patient, Days, val1['OS.time'].values[0], val2['Status'].values[0], val1['OS'].values[0]))
+        if val1['OS.time'].values[0] == val2['Days'].values[0]:
+            print(f"Match found for Patient: {Patient}, {Days}")
+            list1.append((Patient, Days))
+        else:
+            print(f"No match for Patient: {Patient}, {Days}")
+            list2.append((Patient, Days, val1['OS.time'].values[0], val2['Status'].values[0], val1['OS'].values[0]))
 
-print(list1)
-print('--------------------')
-print(list2)
+    print(list1)
+    print('--------------------')
+    print(list2)
+
+
+
+if __name__ == "__main__":
+    # check_patient_match(df1, df2)
+    pass
+
+    

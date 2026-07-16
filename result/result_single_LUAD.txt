@@ -92,7 +92,7 @@ Dep. Variable:       ADAM10expression   R-squared:                       0.014
 Model:                            OLS   Adj. R-squared:                  0.004
 Method:                 Least Squares   F-statistic:                     1.444
 Date:                Thu, 16 Jul 2026   Prob (F-statistic):              0.230
-Time:                        10:24:17   Log-Likelihood:                -2299.8
+Time:                        11:19:56   Log-Likelihood:                -2299.8
 No. Observations:                 301   AIC:                             4608.
 Df Residuals:                     297   BIC:                             4622.
 Df Model:                           3                                         
@@ -121,7 +121,7 @@ Dep. Variable:       ADAM10expression   R-squared:                       0.026
 Model:                            OLS   Adj. R-squared:                  0.006
 Method:                 Least Squares   F-statistic:                     1.322
 Date:                Thu, 16 Jul 2026   Prob (F-statistic):              0.247
-Time:                        10:24:17   Log-Likelihood:                -2282.1
+Time:                        11:19:56   Log-Likelihood:                -2282.1
 No. Observations:                 299   AIC:                             4578.
 Df Residuals:                     292   BIC:                             4604.
 Df Model:                           6                                         
@@ -153,7 +153,7 @@ Dep. Variable:       ADAM10expression   R-squared:                       0.033
 Model:                            OLS   Adj. R-squared:                  0.013
 Method:                 Least Squares   F-statistic:                     1.671
 Date:                Thu, 16 Jul 2026   Prob (F-statistic):              0.128
-Time:                        10:24:17   Log-Likelihood:                -2297.0
+Time:                        11:19:56   Log-Likelihood:                -2297.0
 No. Observations:                 301   AIC:                             4608.
 Df Residuals:                     294   BIC:                             4634.
 Df Model:                           6                                         
@@ -185,7 +185,7 @@ Dep. Variable:       ADAM10expression   R-squared:                       0.022
 Model:                            OLS   Adj. R-squared:                  0.001
 Method:                 Least Squares   F-statistic:                     1.064
 Date:                Thu, 16 Jul 2026   Prob (F-statistic):              0.384
-Time:                        10:24:17   Log-Likelihood:                -2269.0
+Time:                        11:19:56   Log-Likelihood:                -2269.0
 No. Observations:                 297   AIC:                             4552.
 Df Residuals:                     290   BIC:                             4578.
 Df Model:                           6                                         
@@ -217,7 +217,7 @@ Dep. Variable:       ADAM10expression   R-squared:                       0.022
 Model:                            OLS   Adj. R-squared:                  0.003
 Method:                 Least Squares   F-statistic:                     1.168
 Date:                Thu, 16 Jul 2026   Prob (F-statistic):              0.326
-Time:                        10:24:17   Log-Likelihood:                -1624.1
+Time:                        11:19:56   Log-Likelihood:                -1624.1
 No. Observations:                 213   AIC:                             3258.
 Df Residuals:                     208   BIC:                             3275.
 Df Model:                           4                                         
@@ -356,7 +356,7 @@ Dep. Variable:       ADAM10expression   R-squared:                       0.019
 Model:                            OLS   Adj. R-squared:                  0.012
 Method:                 Least Squares   F-statistic:                     2.705
 Date:                Thu, 16 Jul 2026   Prob (F-statistic):             0.0451
-Time:                        10:24:20   Log-Likelihood:                -3390.1
+Time:                        11:19:59   Log-Likelihood:                -3390.1
 No. Observations:                 413   AIC:                             6788.
 Df Residuals:                     409   BIC:                             6804.
 Df Model:                           3                                         
@@ -385,7 +385,7 @@ Dep. Variable:       ADAM10expression   R-squared:                       0.027
 Model:                            OLS   Adj. R-squared:                  0.013
 Method:                 Least Squares   F-statistic:                     1.881
 Date:                Thu, 16 Jul 2026   Prob (F-statistic):             0.0828
-Time:                        10:24:20   Log-Likelihood:                -3364.9
+Time:                        11:19:59   Log-Likelihood:                -3364.9
 No. Observations:                 410   AIC:                             6744.
 Df Residuals:                     403   BIC:                             6772.
 Df Model:                           6                                         
@@ -417,7 +417,7 @@ Dep. Variable:       ADAM10expression   R-squared:                       0.021
 Model:                            OLS   Adj. R-squared:                  0.007
 Method:                 Least Squares   F-statistic:                     1.468
 Date:                Thu, 16 Jul 2026   Prob (F-statistic):              0.188
-Time:                        10:24:20   Log-Likelihood:                -3389.7
+Time:                        11:19:59   Log-Likelihood:                -3389.7
 No. Observations:                 413   AIC:                             6793.
 Df Residuals:                     406   BIC:                             6822.
 Df Model:                           6                                         
@@ -449,7 +449,7 @@ Dep. Variable:       ADAM10expression   R-squared:                       0.022
 Model:                            OLS   Adj. R-squared:                  0.007
 Method:                 Least Squares   F-statistic:                     1.473
 Date:                Thu, 16 Jul 2026   Prob (F-statistic):              0.186
-Time:                        10:24:20   Log-Likelihood:                -3350.6
+Time:                        11:19:59   Log-Likelihood:                -3350.6
 No. Observations:                 408   AIC:                             6715.
 Df Residuals:                     401   BIC:                             6743.
 Df Model:                           6                                         
@@ -481,7 +481,7 @@ Dep. Variable:       ADAM10expression   R-squared:                       0.024
 Model:                            OLS   Adj. R-squared:                  0.012
 Method:                 Least Squares   F-statistic:                     2.075
 Date:                Thu, 16 Jul 2026   Prob (F-statistic):             0.0837
-Time:                        10:24:20   Log-Likelihood:                -2852.8
+Time:                        11:19:59   Log-Likelihood:                -2852.8
 No. Observations:                 347   AIC:                             5716.
 Df Residuals:                     342   BIC:                             5735.
 Df Model:                           4                                         
