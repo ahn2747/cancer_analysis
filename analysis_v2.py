@@ -102,7 +102,7 @@ def analyze_chi_square(df, target_col='gene_group', row_vars=None):
         
         df_clean = df_target[[var, target_col]].copy()
         df_clean[var] = df_clean[var].apply(lambda x: np.nan if pd.isna(x) or str(x).strip().lower() in na_strings else x)
-        df_clean = df_clean.dropna()
+        # df_clean = df_clean.dropna()
         
         if df_clean[var].nunique() <= 1 or df_clean[target_col].nunique() <= 1: continue
         crosstab_stat = pd.crosstab(df_clean[var], df_clean[target_col])

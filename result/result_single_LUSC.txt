@@ -1,84 +1,84 @@
 'D:\coding\medin\input_LUSC_csv' 폴더에 병합할 CSV 파일이 없습니다.
 [LUSC] 마스터 파일(SAV)에 이미 존재하는 유전자로 분석하려면 이름을 입력하세요
 (여러 개는 쉼표 구분, 없으면 그냥 엔터): 
-[FAT1 유전자 분석 시작]
---- 1. 기존 데이터 로드 (Target: FAT1) ---
+[ADAM10 유전자 분석 시작]
+--- 1. 기존 데이터 로드 (Target: ADAM10) ---
 --- 2-1. 예후 분석 (Chi-square Test) ---
   [진단 로그] ⚠️ 카이제곱 분석 그룹 필터링 시작 (강제 정제)
   [진단 로그] ✅ 카이제곱 최종 투입 그룹: ['High', 'Low'] (2개여야 정상)
-[FAT1group vs ageG]
-FAT1group  High  Low   전체
-ageG                     
-0.0          79  110  189
-1.0         165  133  298
-전체          244  243  487
-Chi-square: 8.5189, p-value: 0.004
+[ADAM10group vs ageG]
+ADAM10group  High  Low   전체
+ageG                       
+0.0            86  103  189
+1.0           158  140  298
+전체            244  243  487
+Chi-square: 2.6143, p-value: 0.106
 
-[FAT1group vs gender]
-FAT1group  High  Low   전체
-gender                   
-FEMALE       55   71  126
-MALE        189  172  361
-전체          244  243  487
-Chi-square: 2.8303, p-value: 0.093
+[ADAM10group vs gender]
+ADAM10group  High  Low   전체
+gender                     
+FEMALE         61   64  125
+MALE          183  179  362
+전체            244  243  487
+Chi-square: 0.1141, p-value: 0.735
 
-[FAT1group vs pathologic_stage]
-FAT1group         High  Low   전체
+[ADAM10group vs pathologic_stage]
+ADAM10group       High  Low   전체
 pathologic_stage                
-1.0                116  122  238
-2.0                 86   69  155
-3.0                 35   48   83
+1.0                121  117  238
+2.0                 79   76  155
+3.0                 40   43   83
 4.0                  4    3    7
-전체                 241  242  483
-Chi-square: 4.1927, p-value: 0.241 (⚠️경고: 최소 기대빈도 3.5<5)
+전체                 244  239  483
+Chi-square: 0.3249, p-value: 0.955 (⚠️경고: 최소 기대빈도 3.5<5)
 
-[FAT1group vs pathologic_M]
-FAT1group     High  Low   전체
+[ADAM10group vs pathologic_M]
+ADAM10group   High  Low   전체
 pathologic_M                
-0.0            199  201  400
+0.0            195  205  400
 1.0              4    3    7
-전체             203  204  407
-Chi-square: 0.1504, p-value: 0.698 (⚠️경고: 최소 기대빈도 3.5<5)
+전체             199  208  407
+Chi-square: 0.1939, p-value: 0.660 (⚠️경고: 최소 기대빈도 3.4<5)
 
-[FAT1group vs pathologic_N]
-FAT1group     High  Low   전체
+[ADAM10group vs pathologic_N]
+ADAM10group   High  Low   전체
 pathologic_N                
-0.0            157  153  310
-1.0             64   62  126
+0.0            159  152  311
+1.0             62   63  125
 2.0             18   22   40
-3.0              1    4    5
-전체             240  241  481
-Chi-square: 2.2813, p-value: 0.516 (⚠️경고: 최소 기대빈도 2.5<5)
+3.0              2    3    5
+전체             241  240  481
+Chi-square: 0.7635, p-value: 0.858 (⚠️경고: 최소 기대빈도 2.5<5)
 
-[FAT1group vs pathologic_T]
-FAT1group     High  Low   전체
+[ADAM10group vs pathologic_T]
+ADAM10group   High  Low   전체
 pathologic_T                
-1.0             51   58  109
-2.0            152  134  286
-3.0             30   39   69
-4.0             11   12   23
+1.0             56   52  108
+2.0            141  145  286
+3.0             37   33   70
+4.0             10   13   23
 전체             244  243  487
-Chi-square: 2.7978, p-value: 0.424
+Chi-square: 0.8219, p-value: 0.844
 
-[FAT1group vs SmokingStatus]
-FAT1group      High  Low   전체
+[ADAM10group vs SmokingStatus]
+ADAM10group    High  Low   전체
 SmokingStatus                
-0.0              41   35   76
-1.0             203  209  412
+0.0              40   35   75
+1.0             204  209  413
 전체              244  244  488
-Chi-square: 0.5611, p-value: 0.454
+Chi-square: 0.3939, p-value: 0.530
 
 --- 2-2. 이변량 상관 분석 (Pearson 행렬 - SPSS Pairwise 방식) ---
 [Pearson 상관계수 행렬 (SPSS Pairwise 방식)]
-                          FAT1expression  number_pack_years_smoked    age  TP53Expression  CDKN2AExpression  SOX2Expression  PIK3CAExpression  NOTCH1Expression
-FAT1expression                     1.000                     0.011  0.053          -0.002            -0.038          -0.185             0.030             0.190
-number_pack_years_smoked           0.011                     1.000  0.045          -0.012            -0.021          -0.040             0.018             0.001
-age                                0.053                     0.045  1.000          -0.045            -0.012          -0.116            -0.025            -0.012
-TP53Expression                    -0.002                    -0.012 -0.045           1.000            -0.011           0.058             0.050             0.196
-CDKN2AExpression                  -0.038                    -0.021 -0.012          -0.011             1.000          -0.004            -0.014            -0.074
-SOX2Expression                    -0.185                    -0.040 -0.116           0.058            -0.004           1.000             0.528             0.004
-PIK3CAExpression                   0.030                     0.018 -0.025           0.050            -0.014           0.528             1.000            -0.032
-NOTCH1Expression                   0.190                     0.001 -0.012           0.196            -0.074           0.004            -0.032             1.000
+                          ADAM10expression  number_pack_years_smoked    age  TP53Expression  CDKN2AExpression  SOX2Expression  PIK3CAExpression  NOTCH1Expression
+ADAM10expression                     1.000                    -0.019  0.111          -0.006            -0.009          -0.088             0.197            -0.005
+number_pack_years_smoked            -0.019                     1.000  0.045          -0.012            -0.021          -0.040             0.018             0.001
+age                                  0.111                     0.045  1.000          -0.045            -0.012          -0.116            -0.025            -0.012
+TP53Expression                      -0.006                    -0.012 -0.045           1.000            -0.011           0.058             0.050             0.196
+CDKN2AExpression                    -0.009                    -0.021 -0.012          -0.011             1.000          -0.004            -0.014            -0.074
+SOX2Expression                      -0.088                    -0.040 -0.116           0.058            -0.004           1.000             0.528             0.004
+PIK3CAExpression                     0.197                     0.018 -0.025           0.050            -0.014           0.528             1.000            -0.032
+NOTCH1Expression                    -0.005                     0.001 -0.012           0.196            -0.074           0.004            -0.032             1.000
 
 
 --- 2-3. 다변량 일반선형모형 (GLM / OLS) - Base 모델 및 병기 결합 ---
@@ -86,27 +86,27 @@ NOTCH1Expression                   0.190                     0.001 -0.012       
 [Model: Base Model (No Stage)]
                             OLS Regression Results                            
 ==============================================================================
-Dep. Variable:         FAT1expression   R-squared:                       0.004
-Model:                            OLS   Adj. R-squared:                 -0.004
-Method:                 Least Squares   F-statistic:                    0.4802
-Date:                Tue, 07 Jul 2026   Prob (F-statistic):              0.696
-Time:                        14:41:27   Log-Likelihood:                -4012.8
-No. Observations:                 412   AIC:                             8034.
-Df Residuals:                     408   BIC:                             8050.
+Dep. Variable:       ADAM10expression   R-squared:                       0.019
+Model:                            OLS   Adj. R-squared:                  0.012
+Method:                 Least Squares   F-statistic:                     2.705
+Date:                Thu, 16 Jul 2026   Prob (F-statistic):             0.0451
+Time:                        10:24:20   Log-Likelihood:                -3390.1
+No. Observations:                 413   AIC:                             6788.
+Df Residuals:                     409   BIC:                             6804.
 Df Model:                           3                                         
 Covariance Type:            nonrobust                                         
 ============================================================================================
                                coef    std err          t      P>|t|      [0.025      0.975]
 --------------------------------------------------------------------------------------------
-Intercept                 2567.2399   1721.059      1.492      0.137    -816.010    5950.489
-C(gender)[T.MALE]          139.1620    466.424      0.298      0.766    -777.732    1056.056
-age                         28.2069     24.625      1.145      0.253     -20.200      76.614
-number_pack_years_smoked     0.9254      6.568      0.141      0.888     -11.987      13.837
+Intercept                 1095.9926    372.224      2.944      0.003     364.281    1827.704
+C(gender)[T.MALE]           78.7858    100.822      0.781      0.435    -119.408     276.980
+age                         14.5303      5.326      2.728      0.007       4.061      25.000
+number_pack_years_smoked    -0.8641      1.420     -0.609      0.543      -3.655       1.927
 ==============================================================================
-Omnibus:                      413.750   Durbin-Watson:                   1.881
-Prob(Omnibus):                  0.000   Jarque-Bera (JB):            20043.247
-Skew:                           4.266   Prob(JB):                         0.00
-Kurtosis:                      36.087   Cond. No.                         748.
+Omnibus:                      131.886   Durbin-Watson:                   1.748
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              446.655
+Skew:                           1.436   Prob(JB):                     1.02e-97
+Kurtosis:                       7.209   Cond. No.                         749.
 ==============================================================================
 
 Notes:
@@ -115,30 +115,30 @@ Notes:
 [Model: Base + Pathologic Stage]
                             OLS Regression Results                            
 ==============================================================================
-Dep. Variable:         FAT1expression   R-squared:                       0.018
-Model:                            OLS   Adj. R-squared:                  0.003
-Method:                 Least Squares   F-statistic:                     1.232
-Date:                Tue, 07 Jul 2026   Prob (F-statistic):              0.289
-Time:                        14:41:27   Log-Likelihood:                -3982.0
-No. Observations:                 409   AIC:                             7978.
-Df Residuals:                     402   BIC:                             8006.
+Dep. Variable:       ADAM10expression   R-squared:                       0.027
+Model:                            OLS   Adj. R-squared:                  0.013
+Method:                 Least Squares   F-statistic:                     1.881
+Date:                Thu, 16 Jul 2026   Prob (F-statistic):             0.0828
+Time:                        10:24:20   Log-Likelihood:                -3364.9
+No. Observations:                 410   AIC:                             6744.
+Df Residuals:                     403   BIC:                             6772.
 Df Model:                           6                                         
 Covariance Type:            nonrobust                                         
 ==============================================================================================
                                  coef    std err          t      P>|t|      [0.025      0.975]
 ----------------------------------------------------------------------------------------------
-Intercept                   2588.9245   1766.913      1.465      0.144    -884.619    6062.468
-C(gender)[T.MALE]             72.7373    468.916      0.155      0.877    -849.097     994.571
-C(pathologic_stage)[T.2.0]   614.3365    465.646      1.319      0.188    -301.070    1529.743
-C(pathologic_stage)[T.3.0]  -562.1844    580.143     -0.969      0.333   -1702.677     578.309
-C(pathologic_stage)[T.4.0]  2564.0666   1717.508      1.493      0.136    -812.353    5940.486
-age                           26.3274     24.888      1.058      0.291     -22.599      75.254
-number_pack_years_smoked       1.2873      6.589      0.195      0.845     -11.666      14.241
+Intercept                   1153.6090    383.018      3.012      0.003     400.647    1906.571
+C(gender)[T.MALE]             72.8843    101.595      0.717      0.474    -126.839     272.607
+C(pathologic_stage)[T.2.0]    -4.8765    100.702     -0.048      0.961    -202.844     193.091
+C(pathologic_stage)[T.3.0]  -102.4179    125.760     -0.814      0.416    -349.645     144.809
+C(pathologic_stage)[T.4.0]   540.8569    372.307      1.453      0.147    -191.050    1272.764
+age                           13.9321      5.395      2.582      0.010       3.326      24.538
+number_pack_years_smoked      -0.8370      1.428     -0.586      0.558      -3.643       1.969
 ==============================================================================
-Omnibus:                      411.245   Durbin-Watson:                   1.873
-Prob(Omnibus):                  0.000   Jarque-Bera (JB):            20421.470
-Skew:                           4.258   Prob(JB):                         0.00
-Kurtosis:                      36.553   Cond. No.                         769.
+Omnibus:                      127.266   Durbin-Watson:                   1.703
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              428.906
+Skew:                           1.393   Prob(JB):                     7.31e-94
+Kurtosis:                       7.165   Cond. No.                         769.
 ==============================================================================
 
 Notes:
@@ -147,30 +147,30 @@ Notes:
 [Model: Base + Pathologic T]
                             OLS Regression Results                            
 ==============================================================================
-Dep. Variable:         FAT1expression   R-squared:                       0.007
-Model:                            OLS   Adj. R-squared:                 -0.008
-Method:                 Least Squares   F-statistic:                    0.4828
-Date:                Tue, 07 Jul 2026   Prob (F-statistic):              0.821
-Time:                        14:41:27   Log-Likelihood:                -4012.0
-No. Observations:                 412   AIC:                             8038.
-Df Residuals:                     405   BIC:                             8066.
+Dep. Variable:       ADAM10expression   R-squared:                       0.021
+Model:                            OLS   Adj. R-squared:                  0.007
+Method:                 Least Squares   F-statistic:                     1.468
+Date:                Thu, 16 Jul 2026   Prob (F-statistic):              0.188
+Time:                        10:24:20   Log-Likelihood:                -3389.7
+No. Observations:                 413   AIC:                             6793.
+Df Residuals:                     406   BIC:                             6822.
 Df Model:                           6                                         
 Covariance Type:            nonrobust                                         
 ============================================================================================
                                coef    std err          t      P>|t|      [0.025      0.975]
 --------------------------------------------------------------------------------------------
-Intercept                 2951.5437   1757.289      1.680      0.094    -503.003    6406.090
-C(gender)[T.MALE]          173.4211    473.571      0.366      0.714    -757.542    1104.385
-C(pathologic_T)[T.2.0]    -384.7719    506.754     -0.759      0.448   -1380.968     611.424
-C(pathologic_T)[T.3.0]    -852.4938    716.162     -1.190      0.235   -2260.352     555.364
-C(pathologic_T)[T.4.0]    -464.7225   1096.098     -0.424      0.672   -2619.474    1690.029
-age                         27.6948     24.754      1.119      0.264     -20.968      76.357
-number_pack_years_smoked     0.6273      6.593      0.095      0.924     -12.334      13.589
+Intercept                 1088.7484    380.385      2.862      0.004     340.978    1836.519
+C(gender)[T.MALE]           73.5083    102.432      0.718      0.473    -127.855     274.871
+C(pathologic_T)[T.2.0]      37.9883    109.695      0.346      0.729    -177.653     253.630
+C(pathologic_T)[T.3.0]     -35.3811    154.123     -0.230      0.819    -338.360     267.598
+C(pathologic_T)[T.4.0]    -119.1889    237.273     -0.502      0.616    -585.625     347.247
+age                         14.4734      5.358      2.701      0.007       3.940      25.007
+number_pack_years_smoked    -0.8356      1.427     -0.586      0.558      -3.640       1.969
 ==============================================================================
-Omnibus:                      409.510   Durbin-Watson:                   1.891
-Prob(Omnibus):                  0.000   Jarque-Bera (JB):            19234.129
-Skew:                           4.206   Prob(JB):                         0.00
-Kurtosis:                      35.399   Cond. No.                         766.
+Omnibus:                      131.234   Durbin-Watson:                   1.758
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              444.355
+Skew:                           1.428   Prob(JB):                     3.23e-97
+Kurtosis:                       7.203   Cond. No.                         767.
 ==============================================================================
 
 Notes:
@@ -179,30 +179,30 @@ Notes:
 [Model: Base + Pathologic N]
                             OLS Regression Results                            
 ==============================================================================
-Dep. Variable:         FAT1expression   R-squared:                       0.009
-Model:                            OLS   Adj. R-squared:                 -0.005
-Method:                 Least Squares   F-statistic:                    0.6324
-Date:                Tue, 07 Jul 2026   Prob (F-statistic):              0.704
-Time:                        14:41:27   Log-Likelihood:                -3964.9
-No. Observations:                 407   AIC:                             7944.
-Df Residuals:                     400   BIC:                             7972.
+Dep. Variable:       ADAM10expression   R-squared:                       0.022
+Model:                            OLS   Adj. R-squared:                  0.007
+Method:                 Least Squares   F-statistic:                     1.473
+Date:                Thu, 16 Jul 2026   Prob (F-statistic):              0.186
+Time:                        10:24:20   Log-Likelihood:                -3350.6
+No. Observations:                 408   AIC:                             6715.
+Df Residuals:                     401   BIC:                             6743.
 Df Model:                           6                                         
 Covariance Type:            nonrobust                                         
 ============================================================================================
                                coef    std err          t      P>|t|      [0.025      0.975]
 --------------------------------------------------------------------------------------------
-Intercept                 2569.1414   1791.682      1.434      0.152    -953.148    6091.430
-C(gender)[T.MALE]          150.9179    470.480      0.321      0.749    -774.004    1075.840
-C(pathologic_N)[T.1.0]     221.6060    478.046      0.464      0.643    -718.191    1161.403
-C(pathologic_N)[T.2.0]    -246.3987    772.894     -0.319      0.750   -1765.840    1273.043
-C(pathologic_N)[T.3.0]   -2618.6068   1876.617     -1.395      0.164   -6307.872    1070.659
-age                         28.3491     25.352      1.118      0.264     -21.491      78.189
-number_pack_years_smoked     0.4045      6.629      0.061      0.951     -12.628      13.437
+Intercept                 1128.8198    388.177      2.908      0.004     365.704    1891.936
+C(gender)[T.MALE]           77.7010    101.880      0.763      0.446    -122.584     277.986
+C(pathologic_N)[T.1.0]     -51.0047    103.517     -0.493      0.622    -254.508     152.498
+C(pathologic_N)[T.2.0]    -117.0621    167.428     -0.699      0.485    -446.209     212.085
+C(pathologic_N)[T.3.0]     126.6878    406.583      0.312      0.756    -672.612     925.988
+age                         14.3060      5.493      2.604      0.010       3.507      25.105
+number_pack_years_smoked    -0.7754      1.436     -0.540      0.589      -3.598       2.047
 ==============================================================================
-Omnibus:                      409.176   Durbin-Watson:                   1.882
-Prob(Omnibus):                  0.000   Jarque-Bera (JB):            19806.994
-Skew:                           4.265   Prob(JB):                         0.00
-Kurtosis:                      36.094   Cond. No.                         809.
+Omnibus:                      128.850   Durbin-Watson:                   1.738
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              430.451
+Skew:                           1.422   Prob(JB):                     3.38e-94
+Kurtosis:                       7.151   Cond. No.                         810.
 ==============================================================================
 
 Notes:
@@ -211,28 +211,28 @@ Notes:
 [Model: Base + Pathologic M]
                             OLS Regression Results                            
 ==============================================================================
-Dep. Variable:         FAT1expression   R-squared:                       0.009
-Model:                            OLS   Adj. R-squared:                 -0.003
-Method:                 Least Squares   F-statistic:                    0.7667
-Date:                Tue, 07 Jul 2026   Prob (F-statistic):              0.548
-Time:                        14:41:27   Log-Likelihood:                -3380.3
-No. Observations:                 346   AIC:                             6771.
-Df Residuals:                     341   BIC:                             6790.
+Dep. Variable:       ADAM10expression   R-squared:                       0.024
+Model:                            OLS   Adj. R-squared:                  0.012
+Method:                 Least Squares   F-statistic:                     2.075
+Date:                Thu, 16 Jul 2026   Prob (F-statistic):             0.0837
+Time:                        10:24:20   Log-Likelihood:                -2852.8
+No. Observations:                 347   AIC:                             5716.
+Df Residuals:                     342   BIC:                             5735.
 Df Model:                           4                                         
 Covariance Type:            nonrobust                                         
 ============================================================================================
                                coef    std err          t      P>|t|      [0.025      0.975]
 --------------------------------------------------------------------------------------------
-Intercept                 2668.6045   2004.554      1.331      0.184   -1274.244    6611.453
-C(gender)[T.MALE]          127.4343    532.257      0.239      0.811    -919.486    1174.354
-C(pathologic_M)[T.1.0]    2500.7483   1766.572      1.416      0.158    -974.003    5975.499
-age                         24.7838     28.485      0.870      0.385     -31.245      80.812
-number_pack_years_smoked     2.1383      7.493      0.285      0.776     -12.600      16.876
+Intercept                 1172.8164    426.155      2.752      0.006     334.602    2011.031
+C(gender)[T.MALE]          110.4368    113.082      0.977      0.329    -111.988     332.861
+C(pathologic_M)[T.1.0]     539.2194    375.538      1.436      0.152    -199.436    1277.875
+age                         13.2030      6.056      2.180      0.030       1.292      25.114
+number_pack_years_smoked    -0.9345      1.592     -0.587      0.558      -4.066       2.197
 ==============================================================================
-Omnibus:                      366.286   Durbin-Watson:                   1.877
-Prob(Omnibus):                  0.000   Jarque-Bera (JB):            18713.478
-Skew:                           4.496   Prob(JB):                         0.00
-Kurtosis:                      37.888   Cond. No.                         779.
+Omnibus:                      119.351   Durbin-Watson:                   1.758
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              423.603
+Skew:                           1.503   Prob(JB):                     1.04e-92
+Kurtosis:                       7.502   Cond. No.                         780.
 ==============================================================================
 
 Notes:
@@ -241,20 +241,20 @@ Notes:
 --- 2-5. Cox 회귀분석 () ---
                           exp(coef)  exp(coef) lower 95%  exp(coef) upper 95%         p
 covariate                                                                              
-age                        1.019993             1.001127             1.039215  0.037690
-number_pack_years_smoked   1.000324             0.995678             1.004992  0.891403
-FAT1group_Low              0.722650             0.537187             0.972144  0.031820
-gender_MALE                1.217395             0.858487             1.726351  0.269683
-pathologic_stage_2.0       1.002197             0.706483             1.421689  0.990183
-pathologic_stage_3.0       1.355498             0.912434             2.013706  0.132020
-pathologic_stage_4.0       3.157179             1.262379             7.896028  0.013966
+age                        1.021324             1.002139             1.040876  0.029195
+number_pack_years_smoked   1.000206             0.995572             1.004861  0.930833
+ADAM10group_Low            0.881367             0.653973             1.187829  0.406865
+gender_MALE                1.213965             0.855777             1.722072  0.277081
+pathologic_stage_2.0       1.027176             0.725387             1.454520  0.879919
+pathologic_stage_3.0       1.357125             0.914006             2.015071  0.129995
+pathologic_stage_4.0       3.069661             1.223603             7.700878  0.016849
 --- 2-5. Cox 회귀분석 (stage_continuous_) ---
                           exp(coef)  exp(coef) lower 95%  exp(coef) upper 95%         p
 covariate                                                                              
-age                        1.021117             1.002402             1.040181  0.026815
-number_pack_years_smoked   1.000075             0.995437             1.004735  0.974791
-pathologic_stage           1.200584             1.001791             1.438826  0.047778
-FAT1group_Low              0.734835             0.547011             0.987150  0.040772
-gender_MALE                1.231305             0.870688             1.741280  0.239272
+age                        1.022038             1.002963             1.041476  0.023347
+number_pack_years_smoked   0.999976             0.995346             1.004627  0.991772
+pathologic_stage           1.201686             1.003656             1.438788  0.045534
+ADAM10group_Low            0.873803             0.648617             1.177169  0.374965
+gender_MALE                1.226794             0.867179             1.735539  0.248163
 
 === LUSC 파이프라인 완료 ===

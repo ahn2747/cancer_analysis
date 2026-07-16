@@ -1,0 +1,52 @@
+
+=== LUAD 마스터 SAV 파일 로드 중... ===
+
+------------------------------------------------------------
+[LUAD] 임상 변수 결측치(Missing Values) 정밀 추적 시작
+------------------------------------------------------------
+▶ 초기 전체 환자 수(Initial N): 492명
+
+                  Clinical Variable  Total N  Valid N (유효)  Missing N (결측)  Missing Rate (%)
+age_at_initial_pathologic_diagnosis      492           490               2              0.41
+                               ageG      492           490               2              0.41
+                             gender      492           490               2              0.41
+                   pathologic_stage      492           482              10              2.03
+                       pathologic_M      492           346             146             29.67
+                       pathologic_N      492           479              13              2.64
+                       pathologic_T      492           487               5              1.02
+                      SmokingStatus      492           492               0              0.00
+           number_pack_years_smoked      492           333             159             32.32
+                                 OS      492           490               2              0.41
+                            OS.time      492           490               2              0.41
+                                RFS      492           415              77             15.65
+                           RFS.time      492           415              77             15.65
+
+▶ 결측치 정밀 추적 완료. (총 13개 변수 검증)
+
+=== LUSC 마스터 SAV 파일 로드 중... ===
+
+------------------------------------------------------------
+[LUSC] 임상 변수 결측치(Missing Values) 정밀 추적 시작
+------------------------------------------------------------
+▶ 초기 전체 환자 수(Initial N): 489명
+
+       Clinical Variable  Total N  Valid N (유효)  Missing N (결측)  Missing Rate (%)
+                     age      489           488               1              0.20
+                    ageG      489           488               1              0.20
+                  gender      489           488               1              0.20
+        pathologic_stage      489           484               5              1.02
+            pathologic_M      489           408              81             16.56
+            pathologic_N      489           482               7              1.43
+            pathologic_T      489           488               1              0.20
+           SmokingStatus      489           489               0              0.00
+number_pack_years_smoked      489           413              76             15.54
+                      OS      489           488               1              0.20
+                 OS.time      489           488               1              0.20
+                     RFS      489           380             109             22.29
+                RFS.time      489           380             109             22.29
+
+▶ 결측치 정밀 추적 완료. (총 13개 변수 검증)
+
+============================================================
+✅ 결측치 검증 통합 엑셀 리포트가 저장되었습니다: D:\coding\medin\result_missing_check\Missing_Values_Report.xlsx
+============================================================
