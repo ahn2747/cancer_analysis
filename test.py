@@ -30,10 +30,19 @@ def check_patient_match(df1, df2):
     print('--------------------')
     print(list2)
 
+def gene_group_Ntest(df, tartget_col):
+    data = df.copy()
+    target = data[tartget_col]
+    print(target)
+    a1 = [i for i in target if i == 'High']
+    a2 = [i for i in target if i == 'Low']
+    print (len(a1), len(a2))
+
 
 
 if __name__ == "__main__":
     # check_patient_match(df1, df2)
+    gene_group_Ntest(df1, 'ADAM10group')
     pass
 
     

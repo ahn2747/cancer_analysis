@@ -76,14 +76,45 @@ PIK3CAExpression                  -0.245                     0.018 -0.025       
 NOTCH1Expression                  -0.088                     0.001 -0.012           0.196            -0.074           0.004            -0.032             1.000
 
 
---- 2-3. 다변량 일반선형모형 (GLM / OLS) ---
+--- 2-3. 다변량 일반선형모형 (GLM / OLS) - Base 모델 및 병기 결합 ---
+
+[Model: Base Model (No Stage)]
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:         SignatureScore   R-squared:                       0.004
+Model:                            OLS   Adj. R-squared:                 -0.003
+Method:                 Least Squares   F-statistic:                    0.5242
+Date:                Thu, 30 Jul 2026   Prob (F-statistic):              0.666
+Time:                        11:33:50   Log-Likelihood:                -439.79
+No. Observations:                 413   AIC:                             887.6
+Df Residuals:                     409   BIC:                             903.7
+Df Model:                           3                                         
+Covariance Type:            nonrobust                                         
+============================================================================================
+                               coef    std err          t      P>|t|      [0.025      0.975]
+--------------------------------------------------------------------------------------------
+Intercept                   -0.3408      0.294     -1.159      0.247      -0.919       0.237
+C(gender)[T.MALE]           -0.0190      0.080     -0.239      0.811      -0.176       0.138
+age                          0.0047      0.004      1.106      0.269      -0.004       0.013
+number_pack_years_smoked     0.0006      0.001      0.504      0.615      -0.002       0.003
+==============================================================================
+Omnibus:                      179.946   Durbin-Watson:                   2.015
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              745.318
+Skew:                           1.937   Prob(JB):                    1.43e-162
+Kurtosis:                       8.320   Cond. No.                         749.
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+[Model: Base + Pathologic Stage]
                             OLS Regression Results                            
 ==============================================================================
 Dep. Variable:         SignatureScore   R-squared:                       0.017
 Model:                            OLS   Adj. R-squared:                  0.002
 Method:                 Least Squares   F-statistic:                     1.164
-Date:                Sun, 28 Jun 2026   Prob (F-statistic):              0.325
-Time:                        22:38:20   Log-Likelihood:                -435.28
+Date:                Thu, 30 Jul 2026   Prob (F-statistic):              0.325
+Time:                        11:33:50   Log-Likelihood:                -435.28
 No. Observations:                 410   AIC:                             884.6
 Df Residuals:                     403   BIC:                             912.7
 Df Model:                           6                                         
@@ -108,18 +139,119 @@ Kurtosis:                       7.845   Cond. No.                         769.
 Notes:
 [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
 
+[Model: Base + Pathologic T]
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:         SignatureScore   R-squared:                       0.022
+Model:                            OLS   Adj. R-squared:                  0.008
+Method:                 Least Squares   F-statistic:                     1.547
+Date:                Thu, 30 Jul 2026   Prob (F-statistic):              0.161
+Time:                        11:33:50   Log-Likelihood:                -435.91
+No. Observations:                 413   AIC:                             885.8
+Df Residuals:                     406   BIC:                             914.0
+Df Model:                           6                                         
+Covariance Type:            nonrobust                                         
+============================================================================================
+                               coef    std err          t      P>|t|      [0.025      0.975]
+--------------------------------------------------------------------------------------------
+Intercept                   -0.4845      0.298     -1.626      0.105      -1.070       0.101
+C(gender)[T.MALE]           -0.0307      0.080     -0.383      0.702      -0.188       0.127
+C(pathologic_T)[T.2.0]       0.1332      0.086      1.551      0.122      -0.036       0.302
+C(pathologic_T)[T.3.0]       0.3309      0.121      2.742      0.006       0.094       0.568
+C(pathologic_T)[T.4.0]       0.1933      0.186      1.040      0.299      -0.172       0.559
+age                          0.0049      0.004      1.163      0.245      -0.003       0.013
+number_pack_years_smoked     0.0007      0.001      0.611      0.542      -0.002       0.003
+==============================================================================
+Omnibus:                      171.580   Durbin-Watson:                   1.959
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              671.084
+Skew:                           1.858   Prob(JB):                    1.89e-146
+Kurtosis:                       8.019   Cond. No.                         767.
+==============================================================================
 
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+[Model: Base + Pathologic N]
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:         SignatureScore   R-squared:                       0.016
+Model:                            OLS   Adj. R-squared:                  0.001
+Method:                 Least Squares   F-statistic:                     1.078
+Date:                Thu, 30 Jul 2026   Prob (F-statistic):              0.375
+Time:                        11:33:50   Log-Likelihood:                -433.10
+No. Observations:                 408   AIC:                             880.2
+Df Residuals:                     401   BIC:                             908.3
+Df Model:                           6                                         
+Covariance Type:            nonrobust                                         
+============================================================================================
+                               coef    std err          t      P>|t|      [0.025      0.975]
+--------------------------------------------------------------------------------------------
+Intercept                   -0.3669      0.304     -1.205      0.229      -0.965       0.232
+C(gender)[T.MALE]           -0.0240      0.080     -0.300      0.764      -0.181       0.133
+C(pathologic_N)[T.1.0]       0.1542      0.081      1.900      0.058      -0.005       0.314
+C(pathologic_N)[T.2.0]      -0.0827      0.131     -0.630      0.529      -0.341       0.175
+C(pathologic_N)[T.3.0]      -0.1805      0.319     -0.566      0.572      -0.807       0.446
+age                          0.0046      0.004      1.062      0.289      -0.004       0.013
+number_pack_years_smoked     0.0006      0.001      0.502      0.616      -0.002       0.003
+==============================================================================
+Omnibus:                      171.697   Durbin-Watson:                   2.046
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              675.562
+Skew:                           1.881   Prob(JB):                    2.01e-147
+Kurtosis:                       8.058   Cond. No.                         810.
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+[Model: Base + Pathologic M]
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:         SignatureScore   R-squared:                       0.011
+Model:                            OLS   Adj. R-squared:                 -0.001
+Method:                 Least Squares   F-statistic:                    0.9334
+Date:                Thu, 30 Jul 2026   Prob (F-statistic):              0.445
+Time:                        11:33:50   Log-Likelihood:                -366.94
+No. Observations:                 347   AIC:                             743.9
+Df Residuals:                     342   BIC:                             763.1
+Df Model:                           4                                         
+Covariance Type:            nonrobust                                         
+============================================================================================
+                               coef    std err          t      P>|t|      [0.025      0.975]
+--------------------------------------------------------------------------------------------
+Intercept                   -0.5357      0.330     -1.624      0.105      -1.184       0.113
+C(gender)[T.MALE]            0.0127      0.088      0.145      0.885      -0.159       0.185
+C(pathologic_M)[T.1.0]       0.2239      0.291      0.770      0.442      -0.348       0.796
+age                          0.0067      0.005      1.428      0.154      -0.003       0.016
+number_pack_years_smoked     0.0012      0.001      0.937      0.349      -0.001       0.004
+==============================================================================
+Omnibus:                      152.459   Durbin-Watson:                   1.989
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              636.849
+Skew:                           1.908   Prob(JB):                    5.13e-139
+Kurtosis:                       8.431   Cond. No.                         780.
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
 --- 2-4. Kaplan-Meier 생존분석 ---
   [OS Log-rank Test] Chi-square: 11.186, p-value: <0.001
 --- 2-5. Cox 회귀분석 ---
                           exp(coef)  exp(coef) lower 95%  exp(coef) upper 95%         p
 covariate                                                                              
-ageG                       1.325693             0.964364             1.822405  0.082480
-number_pack_years_smoked   0.999554             0.994938             1.004191  0.850081
-pathologic_stage           1.205840             1.007463             1.443280  0.041247
-SignatureGroup_Low         0.629291             0.467627             0.846843  0.002233
-gender_MALE                1.282676             0.906694             1.814567  0.159561
-Cox Forest Plot 이미지 저장 완료: 'D:\coding\medin\plot_signature\Signature_2차_Signature_LUSC_Cox_Forest_Plot.png'\n
+age                        1.020846             1.001494             1.040572  0.034616
+number_pack_years_smoked   1.000324             0.995706             1.004963  0.890918
+TP53Expression             0.999995             0.999867             1.000123  0.934667
+CDKN2AExpression           0.999986             0.999823             1.000149  0.865231
+SOX2Expression             0.999983             0.999937             1.000030  0.484458
+PIK3CAExpression           1.000095             0.999811             1.000379  0.512285
+NOTCH1Expression           1.000014             0.999944             1.000085  0.688819
+SignatureGroup_Low         0.665914             0.472988             0.937533  0.019831
+gender_MALE                1.274468             0.888104             1.828916  0.188160
+pathologic_stage_2.0       1.068997             0.750780             1.522090  0.711329
+pathologic_stage_3.0       1.441468             0.965986             2.150994  0.073372
+pathologic_stage_4.0       2.869236             1.137677             7.236249  0.025532
+Cox Forest Plot 이미지 저장 완료: 'D:\coding\medin\plot_signature\Signature_2차_Signature_LUSC_Cox_Forest_Plot.png'
+
 ✅ 논문용 시그니처 표 엑셀 파일 저장 완료: 'D:\coding\medin\result_signature\Signature_2차_Signature_LUSC_Tables.xlsx'
 ============================================================
-\n=== 모든 Signature 생물통계 파이프라인이 성공적으로 완료되었습니다 ===
+
+=== 모든 Signature 생물통계 파이프라인이 성공적으로 완료되었습니다 ===

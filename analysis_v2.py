@@ -274,8 +274,8 @@ def analyze_glm_multivariate(df, mode, expr_col='target_expression', categorical
                 
     return pd.DataFrame(all_table4_data)
 
-def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plot_type=1, replace_mode = None, exclude_samples=None, replace_groups=None, sample_id_col='sampleID'):
-    print("--- 2-4. Kaplan-Meier 생존분석 ---")
+def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plot_type=1, replace_mode = None, exclude_samples=None, replace_groups=None, sample_id_col='sampleID', sub_group_col=None):
+    print(f"--- 2-4. Kaplan-Meier 생존분석 (Sub-group: {sub_group_col if sub_group_col else 'None'}) ---")
     if group_col not in df.columns or 'OS.time' not in df.columns or 'OS' not in df.columns:
         return pd.DataFrame()
         
@@ -296,7 +296,21 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
     # ----------------------------------------------------
 
     df_km = df_km[df_km[group_col].isin(['High', 'Low'])]
-    df_km = df_km.dropna(subset=['OS.time', 'OS'])
+    
+    # ==============================================================
+    # [수석 데이터 과학자 설계] 4분할 다중 변수 조합 로직
+    # ==============================================================
+    plot_group_col = group_col
+    if sub_group_col and sub_group_col in df_km.columns:
+        df_km[sub_group_col] = df_km[sub_group_col].astype(str).str.strip()
+        na_strings = ['not reported', '[not available]', 'unknown', 'na', 'n/a', '', 'none', 'nan']
+        df_km = df_km[~df_km[sub_group_col].str.lower().isin(na_strings)]
+        
+        # 'Age / High' 형태로 문자열 결합하여 독립된 4개 그룹 생성
+        df_km['CombinedGroup'] = df_km[sub_group_col] + " / " + df_km[group_col]
+        plot_group_col = 'CombinedGroup'
+
+    df_km = df_km.dropna(subset=['OS.time', 'OS', plot_group_col])
     if df_km.empty: return pd.DataFrame()
         
     table5_data = []
@@ -304,8 +318,14 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
     plt.rcParams['axes.unicode_minus'] = False
     
     kmf = KaplanMeierFitter()
-    groups = ['High', 'Low'] if all(g in df_km[group_col].values for g in ['High', 'Low']) else df_km[group_col].unique()
-    color_map = {'High': '#00a2e8', 'Low': '#b51a5e'}
+    groups = sorted(df_km[plot_group_col].unique())
+    
+    # 그룹 수에 따른 동적 팔레트 할당 (2분할 vs 4분할 이상)
+    if set(groups) == {'High', 'Low'}:
+        color_map = {'High': '#00a2e8', 'Low': '#b51a5e'}
+    else:
+        palette = ['#b51a5e', '#00a2e8', '#22b14c', '#ff7f27', '#9932cc', '#8b4513']
+        color_map = {g: palette[i % len(palette)] for i, g in enumerate(groups)}
     
     import matplotlib.lines as mlines
     from matplotlib.legend_handler import HandlerLine2D
@@ -317,10 +337,10 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
             line.set_transform(trans)
             return [line]
 
-    # OS 분석
+    # ---------------- OS 분석 ----------------
     plt.figure(figsize=(8, 6)); ax_os = plt.gca()
     for group in groups:
-        mask = (df_km[group_col] == group)
+        mask = (df_km[plot_group_col] == group)
         time, event = df_km.loc[mask, 'OS.time'].dropna(), df_km.loc[mask, 'OS'].dropna()
         if len(time) > 0:
             kmf.fit(time, event_observed=event)
@@ -329,7 +349,7 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
     if plot_type == 1:
         ax_os.set_title(f'{mode}_OS 생존함수'); ax_os.set_xlabel('OS.time'); ax_os.set_ylabel('누적 생존함수')
     elif plot_type == 2:
-        ax_os.set_title(f'{mode}_OS'); ax_os.set_xlabel('Time(Days)', fontweight='bold', fontsize=12); ax_os.set_ylabel('OS', fontweight='bold', fontsize=12)
+        ax_os.set_title(f'{mode}_OS'); ax_os.set_xlabel('Time(Days)', fontweight='bold', fontsize=12); ax_os.set_ylabel('Overall Survival', fontweight='bold', fontsize=12)
         ax_os.spines['top'].set_visible(False); ax_os.spines['right'].set_visible(False)
     ax_os.grid(axis='y', color='lightgray', linestyle='-'); ax_os.set_facecolor('white')
     for spine in ax_os.spines.values():
@@ -343,36 +363,39 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
             
     if len(groups) > 1:
         if len(groups) == 2:
-            mask0, mask1 = (df_km[group_col] == groups[0]), (df_km[group_col] == groups[1])
+            mask0, mask1 = (df_km[plot_group_col] == groups[0]), (df_km[plot_group_col] == groups[1])
             res_os = logrank_test(df_km.loc[mask0, 'OS.time'], df_km.loc[mask1, 'OS.time'], event_observed_A=df_km.loc[mask0, 'OS'], event_observed_B=df_km.loc[mask1, 'OS'])
-        else: res_os = multivariate_logrank_test(df_km['OS.time'], df_km[group_col], df_km['OS'])
+        else: 
+            # 3개 이상의 다중 그룹일 경우 다변량 Log-rank 수행
+            res_os = multivariate_logrank_test(df_km['OS.time'], df_km[plot_group_col], df_km['OS'])
+        
         p_val_os, chi2_os = res_os.p_value, res_os.test_statistic
         p_str_os = f"{p_val_os:.3f}" if p_val_os >= 0.001 else "<0.001"
         table5_data.append(["Overall Survival (OS)", mode, target, f"{chi2_os:.3f}", p_str_os])
         
         if plot_type == 1:
-            ax_os.legend(handles=handles_os, labels=labels_os, title=f'{group_col}\nLog-rank p={p_str_os}', handler_map={StepLine2D: StepHandler()})
+            ax_os.legend(handles=handles_os, labels=labels_os, title=f'{plot_group_col}\nLog-rank p={p_str_os}', handler_map={StepLine2D: StepHandler()})
         elif plot_type == 2:
-            legend = ax_os.legend(handles=handles_os, labels=labels_os, title=group_col, handler_map={StepLine2D: StepHandler()}, frameon=False, loc='upper right')
+            legend = ax_os.legend(handles=handles_os, labels=labels_os, title=plot_group_col, handler_map={StepLine2D: StepHandler()}, frameon=False, loc='upper right')
             plt.setp(legend.get_title(), fontweight='bold')
             ax_os.text(0.05, 0.05, f"P = {p_str_os}", transform=ax_os.transAxes, fontsize=16, fontweight='bold')
     else:
-        legend = ax_os.legend(handles=handles_os, labels=labels_os, title=group_col, handler_map={StepLine2D: StepHandler()}, frameon=(plot_type==1))
+        legend = ax_os.legend(handles=handles_os, labels=labels_os, title=plot_group_col, handler_map={StepLine2D: StepHandler()}, frameon=(plot_type==1))
         if plot_type == 2: plt.setp(legend.get_title(), fontweight='bold')
             
     plt.tight_layout()
     km_plot_path_os = os.path.join(save_dir, f'{target}_{mode}_OS_KM.png')
     plt.savefig(km_plot_path_os); plt.close()
         
-    # RFS 분석
+    # ---------------- RFS 분석 ----------------
     if 'RFS.time' in df.columns and 'RFS' in df.columns:
         df_rfs = df.copy()
-        df_rfs = df_rfs[df_rfs[group_col].isin(['High', 'Low'])].dropna(subset=['RFS.time', 'RFS'])
+        df_rfs = df_rfs.dropna(subset=['RFS.time', 'RFS', plot_group_col])
         
         if not df_rfs.empty:
             plt.figure(figsize=(8, 6)); ax_rfs = plt.gca()
             for group in groups:
-                mask = (df_rfs[group_col] == group)
+                mask = (df_rfs[plot_group_col] == group)
                 time, event = df_rfs.loc[mask, 'RFS.time'].dropna(), df_rfs.loc[mask, 'RFS'].dropna()
                 if len(time) > 0:
                     kmf.fit(time, event_observed=event)
@@ -381,7 +404,7 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
             if plot_type == 1:
                 ax_rfs.set_title(f'{mode}_RFS 생존함수'); ax_rfs.set_xlabel('RFS.time'); ax_rfs.set_ylabel('누적 생존함수')
             elif plot_type == 2:
-                ax_rfs.set_title(f'{mode}_RFS'); ax_rfs.set_xlabel('Time(Days)', fontweight='bold', fontsize=12); ax_rfs.set_ylabel('RFS', fontweight='bold', fontsize=12)
+                ax_rfs.set_title(f'{mode}_RFS'); ax_rfs.set_xlabel('Time(Days)', fontweight='bold', fontsize=12); ax_rfs.set_ylabel('Relapse-Free Survival', fontweight='bold', fontsize=12)
                 ax_rfs.spines['top'].set_visible(False); ax_rfs.spines['right'].set_visible(False)
             ax_rfs.grid(axis='y', color='lightgray', linestyle='-'); ax_rfs.set_facecolor('white')
             for spine in ax_rfs.spines.values():
@@ -395,21 +418,23 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
                     
             if len(groups) > 1:
                 if len(groups) == 2:
-                    mask0, mask1 = (df_rfs[group_col] == groups[0]), (df_rfs[group_col] == groups[1])
+                    mask0, mask1 = (df_rfs[plot_group_col] == groups[0]), (df_rfs[plot_group_col] == groups[1])
                     res_rfs = logrank_test(df_rfs.loc[mask0, 'RFS.time'], df_rfs.loc[mask1, 'RFS.time'], event_observed_A=df_rfs.loc[mask0, 'RFS'], event_observed_B=df_rfs.loc[mask1, 'RFS'])
-                else: res_rfs = multivariate_logrank_test(df_rfs['RFS.time'], df_rfs[group_col], df_rfs['RFS'])
+                else:
+                    res_rfs = multivariate_logrank_test(df_rfs['RFS.time'], df_rfs[plot_group_col], df_rfs['RFS'])
+                    
                 p_val_rfs, chi2_rfs = res_rfs.p_value, res_rfs.test_statistic
                 p_str_rfs = f"{p_val_rfs:.3f}" if p_val_rfs >= 0.001 else "<0.001"
                 table5_data.append(["Relapse-Free Survival (RFS)", mode, target, f"{chi2_rfs:.3f}", p_str_rfs])
                 
                 if plot_type == 1:
-                    ax_rfs.legend(handles=handles_rfs, labels=labels_rfs, title=f'{group_col}\nLog-rank p={p_str_rfs}', handler_map={StepLine2D: StepHandler()})
+                    ax_rfs.legend(handles=handles_rfs, labels=labels_rfs, title=f'{plot_group_col}\nLog-rank p={p_str_rfs}', handler_map={StepLine2D: StepHandler()})
                 elif plot_type == 2:
-                    legend = ax_rfs.legend(handles=handles_rfs, labels=labels_rfs, title=group_col, handler_map={StepLine2D: StepHandler()}, frameon=False, loc='upper right')
+                    legend = ax_rfs.legend(handles=handles_rfs, labels=labels_rfs, title=plot_group_col, handler_map={StepLine2D: StepHandler()}, frameon=False, loc='upper right')
                     plt.setp(legend.get_title(), fontweight='bold')
                     ax_rfs.text(0.05, 0.05, f"P = {p_str_rfs}", transform=ax_rfs.transAxes, fontsize=16, fontweight='bold')
             else:
-                legend = ax_rfs.legend(handles=handles_rfs, labels=labels_rfs, title=group_col, handler_map={StepLine2D: StepHandler()}, frameon=(plot_type==1))
+                legend = ax_rfs.legend(handles=handles_rfs, labels=labels_rfs, title=plot_group_col, handler_map={StepLine2D: StepHandler()}, frameon=(plot_type==1))
                 if plot_type == 2: plt.setp(legend.get_title(), fontweight='bold')
                     
             plt.tight_layout()
@@ -417,6 +442,7 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
             plt.savefig(km_plot_path_rfs); plt.close()
 
     return pd.DataFrame(table5_data, columns=["Survival Type", "Cancer Type", "Target", "Chi-square", "P-value"])
+
 
 # =====================================================================
 # [핵심 수술 적용됨] 결측치 완벽 차단 및 prefix/연속형 숫자화 강제 로직
@@ -542,7 +568,7 @@ if __name__ == "__main__":
             df_table1 = analyze_chi_square(merged_df, target_col=group_col_name)
             
             if mode == "LUAD":
-                gene_vars = ['EGFRExpression', 'KrasExpression', 'TP53Expression', 'ALKExpression', 'BRAFExpression']
+                gene_vars = ['ITGB1expression', 'PLAURexpression', 'SNAI1expression', 'VEGFCexpression','EGFRExpression', 'KrasExpression', 'TP53Expression', 'ALKExpression', 'BRAFExpression']
                 corr_continuous = [expr_col_name, 'number_pack_years_smoked', 'age_at_initial_pathologic_diagnosis'] + gene_vars
                 corr_binary_targets = []
             else:

@@ -560,7 +560,7 @@ if __name__ == "__main__":
         df_table1 = analyze_chi_square(merged_df, target_col=group_col_name)
         
         if mode == "LUAD":
-            gene_vars = ['KrasExpression', 'TP53Expression', 'ALKExpression', 'BRAFExpression']
+            gene_vars = ['KrasExpression', 'TP53Expression', 'ALKExpression', 'BRAFExpression', 'EGFRExpression']
             corr_continuous = [expr_col_name, 'number_pack_years_smoked', 'age_at_initial_pathologic_diagnosis'] + gene_vars
             corr_binary_targets = ['EGFR']
         else:
@@ -585,7 +585,7 @@ if __name__ == "__main__":
                 corr_processed_binary.append(bin_col_name)
                 print(f"  [안내] {mut_var} 데이터를 이진수(0=WT, 1=Mut, 제외=NaN)로 정밀 변환 완료.")
         
-        final_corr_genes = corr_continuous + corr_processed_binary
+        final_corr_genes = corr_continuous #+ corr_processed_binary
         
         df_table2 = analyze_bivariate_correlation(merged_df, gene_list=final_corr_genes)
         
