@@ -256,39 +256,34 @@ def analyze_glm_multivariate(df, mode, expr_col='SignatureScore', categorical_va
 def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_prefix="", sub_group_col=None):
     print(f"--- 2-4. Kaplan-Meier 생존분석 (Sub-group: {sub_group_col if sub_group_col else 'None'}) ---")
     if group_col not in df.columns:
-        return pd.DataFrame()
+        return pd.DataFrame(), pd.DataFrame()
 
     df_km = df.copy()
     df_km = df_km[df_km[group_col].isin(['High', 'Low'])]
     
-    # ==============================================================
-    # [수석 데이터 과학자 설계] 4분할 다중 변수 조합 로직
-    # ==============================================================
     plot_group_col = group_col
     if sub_group_col and sub_group_col in df_km.columns:
         df_km[sub_group_col] = df_km[sub_group_col].astype(str).str.strip()
         na_strings = ['not reported', '[not available]', 'unknown', 'na', 'n/a', '', 'none', 'nan']
         df_km = df_km[~df_km[sub_group_col].str.lower().isin(na_strings)]
-        
         df_km['CombinedGroup'] = df_km[sub_group_col] + " / " + df_km[group_col]
         plot_group_col = 'CombinedGroup'
 
-    # [핵심 수술] OS 결측치 제거 전에 RFS를 위한 베이스 데이터를 복제해 둡니다.
     df_base_for_rfs = df_km.copy()
-
     df_km = df_km.dropna(subset=['OS.time', 'OS', plot_group_col])
     
     if df_km.empty:
-        return pd.DataFrame()
+        return pd.DataFrame(), pd.DataFrame()
         
     table5_data = []
+    post_hoc_list = []
+    
     plt.rcParams['font.family'] = 'Malgun Gothic'
     plt.rcParams['axes.unicode_minus'] = False
     
     kmf = KaplanMeierFitter()
     groups = sorted(df_km[plot_group_col].unique())
             
-    # 그룹 수에 따른 동적 팔레트 할당 (2분할 vs 4분할 이상)
     if set(groups) == {'High', 'Low'}:
         color_map = {'High': '#00a2e8', 'Low': '#b51a5e'}
     else:
@@ -297,10 +292,7 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_pr
     
     import matplotlib.lines as mlines
     from matplotlib.legend_handler import HandlerLine2D
-    
-    class StepLine2D(mlines.Line2D):
-        pass
-        
+    class StepLine2D(mlines.Line2D): pass
     class StepHandler(HandlerLine2D):
         def create_artists(self, legend, orig_handle, xdescent, ydescent, width, height, fontsize, trans):
             xdata = [0, width*0.35, width*0.35, width*0.85, width*0.85]
@@ -356,8 +348,19 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_pr
         p_str_os = f"{p_val_os:.3f}" if p_val_os >= 0.001 else "<0.001"
         
         table5_data.append(["Overall Survival (OS)", mode, "Signature", f"{chi2_os:.3f}", p_str_os])
-        print(f"  [OS Log-rank Test] Chi-square: {chi2_os:.3f}, p-value: {p_str_os}")
         
+        # --- [사후 검정 (Post-hoc) OS] ---
+        if len(groups) > 2:
+            import itertools
+            comparisons = list(itertools.combinations(groups, 2))
+            num_comp = len(comparisons)
+            for (g1, g2) in comparisons:
+                mask1, mask2 = (df_km[plot_group_col] == g1), (df_km[plot_group_col] == g2)
+                res_ph = logrank_test(df_km.loc[mask1, 'OS.time'], df_km.loc[mask2, 'OS.time'], event_observed_A=df_km.loc[mask1, 'OS'], event_observed_B=df_km.loc[mask2, 'OS'])
+                p_ph, chi2_ph = res_ph.p_value, res_ph.test_statistic
+                p_bonf = min(1.0, p_ph * num_comp)
+                post_hoc_list.append(["Overall Survival (OS)", mode, "Signature", f"{g1} vs {g2}", round(chi2_ph, 3), f"{p_ph:.3f}" if p_ph>=0.001 else "<0.001", f"{p_bonf:.3f}" if p_bonf>=0.001 else "<0.001"])
+
         legend = ax_os.legend(handles=handles_os, labels=labels_os, title=plot_group_col, handler_map={StepLine2D: StepHandler()}, frameon=False, loc='upper right')
         plt.setp(legend.get_title(), fontweight='bold')
         ax_os.text(0.05, 0.05, f"P = {p_str_os}", transform=ax_os.transAxes, fontsize=16, fontweight='bold')
@@ -372,7 +375,6 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_pr
         
     # ---------------- RFS 분석 ----------------
     if 'RFS.time' in df.columns and 'RFS' in df.columns:
-        # [핵심 수술] 원본 df가 아닌, CombinedGroup이 포함된 베이스 데이터를 사용합니다.
         df_rfs = df_base_for_rfs.copy()
         df_rfs = df_rfs.dropna(subset=['RFS.time', 'RFS', plot_group_col])
         
@@ -424,6 +426,18 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_pr
                 
                 table5_data.append(["Relapse-Free Survival (RFS)", mode, "Signature", f"{chi2_rfs:.3f}", p_str_rfs])
                 
+                # --- [사후 검정 (Post-hoc) RFS] ---
+                if len(groups) > 2:
+                    import itertools
+                    comparisons = list(itertools.combinations(groups, 2))
+                    num_comp = len(comparisons)
+                    for (g1, g2) in comparisons:
+                        mask1, mask2 = (df_rfs[plot_group_col] == g1), (df_rfs[plot_group_col] == g2)
+                        res_ph = logrank_test(df_rfs.loc[mask1, 'RFS.time'], df_rfs.loc[mask2, 'RFS.time'], event_observed_A=df_rfs.loc[mask1, 'RFS'], event_observed_B=df_rfs.loc[mask2, 'RFS'])
+                        p_ph, chi2_ph = res_ph.p_value, res_ph.test_statistic
+                        p_bonf = min(1.0, p_ph * num_comp)
+                        post_hoc_list.append(["Relapse-Free Survival (RFS)", mode, "Signature", f"{g1} vs {g2}", round(chi2_ph, 3), f"{p_ph:.3f}" if p_ph>=0.001 else "<0.001", f"{p_bonf:.3f}" if p_bonf>=0.001 else "<0.001"])
+
                 legend = ax_rfs.legend(handles=handles_rfs, labels=labels_rfs, title=plot_group_col, handler_map={StepLine2D: StepHandler()}, frameon=False, loc='upper right')
                 plt.setp(legend.get_title(), fontweight='bold')
                 ax_rfs.text(0.05, 0.05, f"P = {p_str_rfs}", transform=ax_rfs.transAxes, fontsize=16, fontweight='bold')
@@ -436,7 +450,9 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_pr
             plt.savefig(km_plot_path_rfs)
             plt.close()
 
-    return pd.DataFrame(table5_data, columns=["Survival Type", "Cancer Type", "Target", "Chi-square", "P-value"])
+    df_posthoc = pd.DataFrame(post_hoc_list, columns=["Survival Type", "Cancer Type", "Target", "Comparison", "Chi-square", "P-value(Unadj)", "P-value(Bonferroni)"])
+    return pd.DataFrame(table5_data, columns=["Survival Type", "Cancer Type", "Target", "Chi-square", "P-value"]), df_posthoc
+
 
 def analyze_cox_regression(df, mode, save_dir, group_col='SignatureGroup', file_prefix="", categorical_vars=None, continuous_vars=None):
     print("--- 2-5. Cox 회귀분석 ---")
@@ -613,7 +629,7 @@ if __name__ == "__main__":
         # 원상복구(2분할)를 원하시면 KM_SUB_GROUP = None 으로 두시면 됩니다.
         KM_SUB_GROUP = 'ageG' 
         
-        df_table5 = analyze_kaplan_meier(
+        df_table5, df_posthoc = analyze_kaplan_meier(
             merged_df, mode, plot_base_dir, 
             group_col=group_col_name, 
             file_prefix=CUSTOM_FILE_PREFIX,
@@ -647,6 +663,8 @@ if __name__ == "__main__":
                 df_table4.to_excel(writer, sheet_name='Table 4 (Multivariate OLS)', index=False)
             if not df_table5.empty:
                 df_table5.to_excel(writer, sheet_name='Table 5 (KM Log-rank)', index=False)
+            if not df_posthoc.empty: 
+                df_posthoc.to_excel(writer, sheet_name='Table 5.1 (KM Post-hoc)', index=False)
         print(f"✅ 논문용 시그니처 표 엑셀 파일 저장 완료: '{excel_save_path}'")
         
         print("="*60)

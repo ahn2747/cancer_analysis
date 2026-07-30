@@ -85,7 +85,7 @@ Dep. Variable:         SignatureScore   R-squared:                       0.004
 Model:                            OLS   Adj. R-squared:                 -0.003
 Method:                 Least Squares   F-statistic:                    0.5242
 Date:                Thu, 30 Jul 2026   Prob (F-statistic):              0.666
-Time:                        17:08:33   Log-Likelihood:                -439.79
+Time:                        17:35:13   Log-Likelihood:                -439.79
 No. Observations:                 413   AIC:                             887.6
 Df Residuals:                     409   BIC:                             903.7
 Df Model:                           3                                         
@@ -114,7 +114,7 @@ Dep. Variable:         SignatureScore   R-squared:                       0.017
 Model:                            OLS   Adj. R-squared:                  0.002
 Method:                 Least Squares   F-statistic:                     1.164
 Date:                Thu, 30 Jul 2026   Prob (F-statistic):              0.325
-Time:                        17:08:33   Log-Likelihood:                -435.28
+Time:                        17:35:13   Log-Likelihood:                -435.28
 No. Observations:                 410   AIC:                             884.6
 Df Residuals:                     403   BIC:                             912.7
 Df Model:                           6                                         
@@ -146,7 +146,7 @@ Dep. Variable:         SignatureScore   R-squared:                       0.022
 Model:                            OLS   Adj. R-squared:                  0.008
 Method:                 Least Squares   F-statistic:                     1.547
 Date:                Thu, 30 Jul 2026   Prob (F-statistic):              0.161
-Time:                        17:08:33   Log-Likelihood:                -435.91
+Time:                        17:35:13   Log-Likelihood:                -435.91
 No. Observations:                 413   AIC:                             885.8
 Df Residuals:                     406   BIC:                             914.0
 Df Model:                           6                                         
@@ -178,7 +178,7 @@ Dep. Variable:         SignatureScore   R-squared:                       0.016
 Model:                            OLS   Adj. R-squared:                  0.001
 Method:                 Least Squares   F-statistic:                     1.078
 Date:                Thu, 30 Jul 2026   Prob (F-statistic):              0.375
-Time:                        17:08:33   Log-Likelihood:                -433.10
+Time:                        17:35:13   Log-Likelihood:                -433.10
 No. Observations:                 408   AIC:                             880.2
 Df Residuals:                     401   BIC:                             908.3
 Df Model:                           6                                         
@@ -210,7 +210,7 @@ Dep. Variable:         SignatureScore   R-squared:                       0.011
 Model:                            OLS   Adj. R-squared:                 -0.001
 Method:                 Least Squares   F-statistic:                    0.9334
 Date:                Thu, 30 Jul 2026   Prob (F-statistic):              0.445
-Time:                        17:08:33   Log-Likelihood:                -366.94
+Time:                        17:35:13   Log-Likelihood:                -366.94
 No. Observations:                 347   AIC:                             743.9
 Df Residuals:                     342   BIC:                             763.1
 Df Model:                           4                                         
@@ -233,7 +233,6 @@ Kurtosis:                       8.431   Cond. No.                         780.
 Notes:
 [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
 --- 2-4. Kaplan-Meier 생존분석 (Sub-group: ageG) ---
-  [OS Log-rank Test] Chi-square: 14.016, p-value: 0.003
 --- 2-5. Cox 회귀분석 ---
                           exp(coef)  exp(coef) lower 95%  exp(coef) upper 95%         p
 covariate                                                                              
