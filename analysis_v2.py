@@ -310,6 +310,9 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
         df_km['CombinedGroup'] = df_km[sub_group_col] + " / " + df_km[group_col]
         plot_group_col = 'CombinedGroup'
 
+    # [핵심 수술] OS 결측치 제거 전에 RFS를 위한 베이스 데이터를 복제해 둡니다.
+    df_base_for_rfs = df_km.copy()
+
     df_km = df_km.dropna(subset=['OS.time', 'OS', plot_group_col])
     if df_km.empty: return pd.DataFrame()
         
@@ -389,7 +392,8 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
         
     # ---------------- RFS 분석 ----------------
     if 'RFS.time' in df.columns and 'RFS' in df.columns:
-        df_rfs = df.copy()
+        # [핵심 수술] 원본 df가 아닌, CombinedGroup이 포함된 베이스 데이터를 사용합니다.
+        df_rfs = df_base_for_rfs.copy()
         df_rfs = df_rfs.dropna(subset=['RFS.time', 'RFS', plot_group_col])
         
         if not df_rfs.empty:
@@ -442,6 +446,7 @@ def analyze_kaplan_meier(target, df, mode, save_dir, group_col='gene_group', plo
             plt.savefig(km_plot_path_rfs); plt.close()
 
     return pd.DataFrame(table5_data, columns=["Survival Type", "Cancer Type", "Target", "Chi-square", "P-value"])
+
 
 
 # =====================================================================
@@ -607,9 +612,14 @@ if __name__ == "__main__":
             
             # [추가된 기능 적용] KM 분석 시 제외할 샘플 리스트와 그룹을 강제 변경할 샘플 딕셔너리
             # 예: exclude_list = ['TCGA-05-4244'], replace_dict = [('TCGA-38-4625', 'OS', 0)]
+            # FOR XRCC3 [('TCGA-49-6742', 'OS.time', 1678), ('TCGA-69-8453', 'OS.time', 788), ('TCGA-69-8453', 'OS', 1), ('TCGA-49-4486', 'OS.time', 2318), ('TCGA-49-4486', 'OS', 0), ('TCGA-83-5908', 'OS.time', 824), ('TCGA-83-5908', 'OS', 1)] 
+            
             exclude_list = [] 
             replace_dict = [] 
-            # FOR XRCC3 [('TCGA-49-6742', 'OS.time', 1678), ('TCGA-69-8453', 'OS.time', 788), ('TCGA-69-8453', 'OS', 1), ('TCGA-49-4486', 'OS.time', 2318), ('TCGA-49-4486', 'OS', 0), ('TCGA-83-5908', 'OS.time', 824), ('TCGA-83-5908', 'OS', 1)] 
+            
+            # [플롯 스위치] 여기에 'ageG', 'gender', 'pathologic_stage' 등을 입력하면 자동으로 다중 플롯이 생성됩니다.
+            # 원상복구(2분할)를 원하시면 KM_SUB_GROUP = None 으로 두시면 됩니다.
+            KM_SUB_GROUP = 'ageG' 
             
             df_table5 = analyze_kaplan_meier(
                 target_gene, merged_df, mode, plot_base_dir, 
@@ -617,7 +627,8 @@ if __name__ == "__main__":
                 plot_type=CURRENT_PLOT_TYPE,
                 replace_mode = 'LUAD',
                 exclude_samples=exclude_list,
-                replace_groups=replace_dict
+                replace_groups=replace_dict,
+                sub_group_col=KM_SUB_GROUP
             )
             
             # -------------------------------------------------------------

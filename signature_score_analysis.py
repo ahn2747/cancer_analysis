@@ -253,32 +253,47 @@ def analyze_glm_multivariate(df, mode, expr_col='SignatureScore', categorical_va
     return pd.DataFrame(all_table4_data)
 
 
-def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_prefix=""):
-    print("--- 2-4. Kaplan-Meier 생존분석 ---")
+def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_prefix="", sub_group_col=None):
+    print(f"--- 2-4. Kaplan-Meier 생존분석 (Sub-group: {sub_group_col if sub_group_col else 'None'}) ---")
     if group_col not in df.columns:
         return pd.DataFrame()
 
     df_km = df.copy()
     df_km = df_km[df_km[group_col].isin(['High', 'Low'])]
-    df_km = df_km.dropna(subset=['OS.time', 'OS'])
+    
+    # ==============================================================
+    # [수석 데이터 과학자 설계] 4분할 다중 변수 조합 로직
+    # ==============================================================
+    plot_group_col = group_col
+    if sub_group_col and sub_group_col in df_km.columns:
+        df_km[sub_group_col] = df_km[sub_group_col].astype(str).str.strip()
+        na_strings = ['not reported', '[not available]', 'unknown', 'na', 'n/a', '', 'none', 'nan']
+        df_km = df_km[~df_km[sub_group_col].str.lower().isin(na_strings)]
+        
+        df_km['CombinedGroup'] = df_km[sub_group_col] + " / " + df_km[group_col]
+        plot_group_col = 'CombinedGroup'
+
+    # [핵심 수술] OS 결측치 제거 전에 RFS를 위한 베이스 데이터를 복제해 둡니다.
+    df_base_for_rfs = df_km.copy()
+
+    df_km = df_km.dropna(subset=['OS.time', 'OS', plot_group_col])
     
     if df_km.empty:
         return pd.DataFrame()
         
     table5_data = []
-
     plt.rcParams['font.family'] = 'Malgun Gothic'
     plt.rcParams['axes.unicode_minus'] = False
     
     kmf = KaplanMeierFitter()
-    
-    groups = ['High', 'Low'] if all(g in df_km[group_col].values for g in ['High', 'Low']) else df_km[group_col].unique()
+    groups = sorted(df_km[plot_group_col].unique())
             
-    colors = ['#00a2e8', '#b51a5e']  
-    color_map = {'High': '#00a2e8', 'Low': '#b51a5e'}
-    for i, g in enumerate(groups):
-        if g not in color_map:
-            color_map[g] = colors[i % len(colors)]
+    # 그룹 수에 따른 동적 팔레트 할당 (2분할 vs 4분할 이상)
+    if set(groups) == {'High', 'Low'}:
+        color_map = {'High': '#00a2e8', 'Low': '#b51a5e'}
+    else:
+        palette = ['#b51a5e', '#00a2e8', '#22b14c', '#ff7f27', '#9932cc', '#8b4513']
+        color_map = {g: palette[i % len(palette)] for i, g in enumerate(groups)}
     
     import matplotlib.lines as mlines
     from matplotlib.legend_handler import HandlerLine2D
@@ -299,7 +314,7 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_pr
     ax_os = plt.gca()
     
     for group in groups:
-        mask = (df_km[group_col] == group)
+        mask = (df_km[plot_group_col] == group)
         time = df_km.loc[mask, 'OS.time'].dropna()
         event = df_km.loc[mask, 'OS'].dropna()
         if len(time) > 0:
@@ -323,22 +338,18 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_pr
     handles_os = []
     labels_os = []
     for group in groups:
-        if group in color_map:
-            handles_os.append(StepLine2D([0], [0], color=color_map[group]))
-            labels_os.append(group)
+        handles_os.append(StepLine2D([0], [0], color=color_map[group]))
+        labels_os.append(group)
     for group in groups:
-        if group in color_map:
-            handles_os.append(mlines.Line2D([], [], color=color_map[group], marker='+', linestyle='-', lw=1.5, mew=1, ms=6))
-            labels_os.append(f'{group}-censored')
+        handles_os.append(mlines.Line2D([], [], color=color_map[group], marker='+', linestyle='-', lw=1.5, mew=1, ms=6))
+        labels_os.append(f'{group}-censored')
             
     if len(groups) > 1:
         if len(groups) == 2:
-            mask0 = (df_km[group_col] == groups[0])
-            mask1 = (df_km[group_col] == groups[1])
-            res_os = logrank_test(df_km.loc[mask0, 'OS.time'], df_km.loc[mask1, 'OS.time'],
-                                event_observed_A=df_km.loc[mask0, 'OS'], event_observed_B=df_km.loc[mask1, 'OS'])
+            mask0, mask1 = (df_km[plot_group_col] == groups[0]), (df_km[plot_group_col] == groups[1])
+            res_os = logrank_test(df_km.loc[mask0, 'OS.time'], df_km.loc[mask1, 'OS.time'], event_observed_A=df_km.loc[mask0, 'OS'], event_observed_B=df_km.loc[mask1, 'OS'])
         else:
-            res_os = multivariate_logrank_test(df_km['OS.time'], df_km[group_col], df_km['OS'])
+            res_os = multivariate_logrank_test(df_km['OS.time'], df_km[plot_group_col], df_km['OS'])
             
         p_val_os = res_os.p_value
         chi2_os = res_os.test_statistic
@@ -347,11 +358,11 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_pr
         table5_data.append(["Overall Survival (OS)", mode, "Signature", f"{chi2_os:.3f}", p_str_os])
         print(f"  [OS Log-rank Test] Chi-square: {chi2_os:.3f}, p-value: {p_str_os}")
         
-        legend = ax_os.legend(handles=handles_os, labels=labels_os, title=group_col, handler_map={StepLine2D: StepHandler()}, frameon=False, loc='upper right')
+        legend = ax_os.legend(handles=handles_os, labels=labels_os, title=plot_group_col, handler_map={StepLine2D: StepHandler()}, frameon=False, loc='upper right')
         plt.setp(legend.get_title(), fontweight='bold')
         ax_os.text(0.05, 0.05, f"P = {p_str_os}", transform=ax_os.transAxes, fontsize=16, fontweight='bold')
     else:
-        legend = ax_os.legend(handles=handles_os, labels=labels_os, title=group_col, handler_map={StepLine2D: StepHandler()}, frameon=False)
+        legend = ax_os.legend(handles=handles_os, labels=labels_os, title=plot_group_col, handler_map={StepLine2D: StepHandler()}, frameon=False)
         plt.setp(legend.get_title(), fontweight='bold')
             
     plt.tight_layout()
@@ -361,17 +372,16 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_pr
         
     # ---------------- RFS 분석 ----------------
     if 'RFS.time' in df.columns and 'RFS' in df.columns:
-        df_rfs = df.copy()
-        
-        df_rfs = df_rfs[df_rfs[group_col].isin(['High', 'Low'])]
-        df_rfs = df_rfs.dropna(subset=['RFS.time', 'RFS'])
+        # [핵심 수술] 원본 df가 아닌, CombinedGroup이 포함된 베이스 데이터를 사용합니다.
+        df_rfs = df_base_for_rfs.copy()
+        df_rfs = df_rfs.dropna(subset=['RFS.time', 'RFS', plot_group_col])
         
         if not df_rfs.empty:
             plt.figure(figsize=(8, 6)) 
             ax_rfs = plt.gca()
             
             for group in groups:
-                mask = (df_rfs[group_col] == group)
+                mask = (df_rfs[plot_group_col] == group)
                 time = df_rfs.loc[mask, 'RFS.time'].dropna()
                 event = df_rfs.loc[mask, 'RFS'].dropna()
                 if len(time) > 0:
@@ -395,22 +405,18 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_pr
             handles_rfs = []
             labels_rfs = []
             for group in groups:
-                if group in color_map:
-                    handles_rfs.append(StepLine2D([0], [0], color=color_map[group]))
-                    labels_rfs.append(group)
+                handles_rfs.append(StepLine2D([0], [0], color=color_map[group]))
+                labels_rfs.append(group)
             for group in groups:
-                if group in color_map:
-                    handles_rfs.append(mlines.Line2D([], [], color=color_map[group], marker='+', linestyle='-', lw=1.5, mew=1, ms=6))
-                    labels_rfs.append(f'{group}-censored')
+                handles_rfs.append(mlines.Line2D([], [], color=color_map[group], marker='+', linestyle='-', lw=1.5, mew=1, ms=6))
+                labels_rfs.append(f'{group}-censored')
                     
             if len(groups) > 1:
                 if len(groups) == 2:
-                    mask0 = (df_rfs[group_col] == groups[0])
-                    mask1 = (df_rfs[group_col] == groups[1])
-                    res_rfs = logrank_test(df_rfs.loc[mask0, 'RFS.time'], df_rfs.loc[mask1, 'RFS.time'],
-                                        event_observed_A=df_rfs.loc[mask0, 'RFS'], event_observed_B=df_rfs.loc[mask1, 'RFS'])
+                    mask0, mask1 = (df_rfs[plot_group_col] == groups[0]), (df_rfs[plot_group_col] == groups[1])
+                    res_rfs = logrank_test(df_rfs.loc[mask0, 'RFS.time'], df_rfs.loc[mask1, 'RFS.time'], event_observed_A=df_rfs.loc[mask0, 'RFS'], event_observed_B=df_rfs.loc[mask1, 'RFS'])
                 else:
-                    res_rfs = multivariate_logrank_test(df_rfs['RFS.time'], df_rfs[group_col], df_rfs['RFS'])
+                    res_rfs = multivariate_logrank_test(df_rfs['RFS.time'], df_rfs[plot_group_col], df_rfs['RFS'])
                     
                 p_val_rfs = res_rfs.p_value
                 chi2_rfs = res_rfs.test_statistic
@@ -418,11 +424,11 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_pr
                 
                 table5_data.append(["Relapse-Free Survival (RFS)", mode, "Signature", f"{chi2_rfs:.3f}", p_str_rfs])
                 
-                legend = ax_rfs.legend(handles=handles_rfs, labels=labels_rfs, title=group_col, handler_map={StepLine2D: StepHandler()}, frameon=False, loc='upper right')
+                legend = ax_rfs.legend(handles=handles_rfs, labels=labels_rfs, title=plot_group_col, handler_map={StepLine2D: StepHandler()}, frameon=False, loc='upper right')
                 plt.setp(legend.get_title(), fontweight='bold')
                 ax_rfs.text(0.05, 0.05, f"P = {p_str_rfs}", transform=ax_rfs.transAxes, fontsize=16, fontweight='bold')
             else:
-                legend = ax_rfs.legend(handles=handles_rfs, labels=labels_rfs, title=group_col, handler_map={StepLine2D: StepHandler()}, frameon=False)
+                legend = ax_rfs.legend(handles=handles_rfs, labels=labels_rfs, title=plot_group_col, handler_map={StepLine2D: StepHandler()}, frameon=False)
                 plt.setp(legend.get_title(), fontweight='bold')
                     
             plt.tight_layout()
@@ -431,7 +437,6 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_pr
             plt.close()
 
     return pd.DataFrame(table5_data, columns=["Survival Type", "Cancer Type", "Target", "Chi-square", "P-value"])
-
 
 def analyze_cox_regression(df, mode, save_dir, group_col='SignatureGroup', file_prefix="", categorical_vars=None, continuous_vars=None):
     print("--- 2-5. Cox 회귀분석 ---")
@@ -604,7 +609,16 @@ if __name__ == "__main__":
             target_stages=None  # 병기 분석을 끄고 Base 모델만 보려면 target_stages=False 옵션을 부여하세요.
         )
         
-        df_table5 = analyze_kaplan_meier(merged_df, mode, plot_base_dir, group_col=group_col_name, file_prefix=CUSTOM_FILE_PREFIX)
+        # [플롯 스위치] 여기에 'ageG', 'gender', 'pathologic_stage' 등을 입력하면 자동으로 다중 플롯이 생성됩니다.
+        # 원상복구(2분할)를 원하시면 KM_SUB_GROUP = None 으로 두시면 됩니다.
+        KM_SUB_GROUP = 'ageG' 
+        
+        df_table5 = analyze_kaplan_meier(
+            merged_df, mode, plot_base_dir, 
+            group_col=group_col_name, 
+            file_prefix=CUSTOM_FILE_PREFIX,
+            sub_group_col=KM_SUB_GROUP
+        )
         
         cox_categorical = [group_col_name, 'gender', 'pathologic_stage']
         cox_continuous = [age_col, 'number_pack_years_smoked'] + gene_vars
