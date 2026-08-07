@@ -263,6 +263,9 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_pr
     
     plot_group_col = group_col
     if sub_group_col and sub_group_col in df_km.columns:
+        if sub_group_col == "ageG":
+            df_km.loc[df_km[sub_group_col] == 1.0, sub_group_col] = ">65"
+            df_km.loc[df_km[sub_group_col] == 0.0, sub_group_col] = "≤65"
         df_km[sub_group_col] = df_km[sub_group_col].astype(str).str.strip()
         na_strings = ['not reported', '[not available]', 'unknown', 'na', 'n/a', '', 'none', 'nan']
         df_km = df_km[~df_km[sub_group_col].str.lower().isin(na_strings)]
@@ -284,11 +287,22 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_pr
     kmf = KaplanMeierFitter()
     groups = sorted(df_km[plot_group_col].unique())
             
-    if set(groups) == {'High', 'Low'}:
-        color_map = {'High': '#00a2e8', 'Low': '#b51a5e'}
+    # --- [추가된 기능] 서브그룹 선(Style) & 메인그룹 색상(Color) 분리 로직 ---
+    base_color_map = {'High': '#00a2e8', 'Low': '#b51a5e'}
+    line_styles = ['-', '--', ':', '-.']
+    
+    if sub_group_col and sub_group_col in df_km.columns:
+        subgroups = sorted(df_km[sub_group_col].dropna().unique())
+        linestyle_map = {sg: line_styles[i % len(line_styles)] for i, sg in enumerate(subgroups)}
     else:
-        palette = ['#b51a5e', '#00a2e8', '#22b14c', '#ff7f27', '#9932cc', '#8b4513']
-        color_map = {g: palette[i % len(palette)] for i, g in enumerate(groups)}
+        linestyle_map = {}
+        
+    def get_style(group_name):
+        if " / " in group_name:
+            sg, bg = group_name.split(" / ")
+            return base_color_map.get(bg, 'black'), linestyle_map.get(sg, '-')
+        return base_color_map.get(group_name, 'black'), '-'
+    # ----------------------------------------------------------------------
     
     import matplotlib.lines as mlines
     from matplotlib.legend_handler import HandlerLine2D
@@ -297,7 +311,7 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_pr
         def create_artists(self, legend, orig_handle, xdescent, ydescent, width, height, fontsize, trans):
             xdata = [0, width*0.35, width*0.35, width*0.85, width*0.85]
             ydata = [height*0.2, height*0.2, height*0.8, height*0.8, height*0.2]
-            line = mlines.Line2D(xdata, ydata, color=orig_handle.get_color(), lw=1.5)
+            line = mlines.Line2D(xdata, ydata, color=orig_handle.get_color(), linestyle=orig_handle.get_linestyle(), lw=1.5)
             line.set_transform(trans)
             return [line]
 
@@ -310,10 +324,10 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_pr
         time = df_km.loc[mask, 'OS.time'].dropna()
         event = df_km.loc[mask, 'OS'].dropna()
         if len(time) > 0:
-            color = color_map[group]
+            c, ls = get_style(group)
             kmf.fit(time, event_observed=event)
-            kmf.plot_survival_function(ax=ax_os, ci_show=False, color=color,
-                                    show_censors=True, censor_styles={'marker': '+', 'mew': 1, 'ms': 6, 'mec': color})
+            kmf.plot_survival_function(ax=ax_os, ci_show=False, color=c, linestyle=ls,
+                                    show_censors=True, censor_styles={'marker': '+', 'mew': 1, 'ms': 6, 'mec': c})
             
     ax_os.set_title(f'{mode}_OS')
     ax_os.set_xlabel('Time(Days)', fontweight='bold', fontsize=12)
@@ -330,10 +344,12 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_pr
     handles_os = []
     labels_os = []
     for group in groups:
-        handles_os.append(StepLine2D([0], [0], color=color_map[group]))
+        c, ls = get_style(group)
+        handles_os.append(StepLine2D([0], [0], color=c, linestyle=ls))
         labels_os.append(group)
     for group in groups:
-        handles_os.append(mlines.Line2D([], [], color=color_map[group], marker='+', linestyle='-', lw=1.5, mew=1, ms=6))
+        c, ls = get_style(group)
+        handles_os.append(mlines.Line2D([], [], color=c, marker='+', linestyle='None', lw=1.5, mew=1, ms=6))
         labels_os.append(f'{group}-censored')
             
     if len(groups) > 1:
@@ -387,10 +403,10 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_pr
                 time = df_rfs.loc[mask, 'RFS.time'].dropna()
                 event = df_rfs.loc[mask, 'RFS'].dropna()
                 if len(time) > 0:
-                    color = color_map[group]
+                    c, ls = get_style(group)
                     kmf.fit(time, event_observed=event)
-                    kmf.plot_survival_function(ax=ax_rfs, ci_show=False, color=color,
-                                            show_censors=True, censor_styles={'marker': '+', 'mew': 1, 'ms': 6, 'mec': color})
+                    kmf.plot_survival_function(ax=ax_rfs, ci_show=False, color=c, linestyle=ls,
+                                            show_censors=True, censor_styles={'marker': '+', 'mew': 1, 'ms': 6, 'mec': c})
                     
             ax_rfs.set_title(f'{mode}_RFS')
             ax_rfs.set_xlabel('Time(Days)', fontweight='bold', fontsize=12)
@@ -407,10 +423,12 @@ def analyze_kaplan_meier(df, mode, save_dir, group_col='SignatureGroup', file_pr
             handles_rfs = []
             labels_rfs = []
             for group in groups:
-                handles_rfs.append(StepLine2D([0], [0], color=color_map[group]))
+                c, ls = get_style(group)
+                handles_rfs.append(StepLine2D([0], [0], color=c, linestyle=ls))
                 labels_rfs.append(group)
             for group in groups:
-                handles_rfs.append(mlines.Line2D([], [], color=color_map[group], marker='+', linestyle='-', lw=1.5, mew=1, ms=6))
+                c, ls = get_style(group)
+                handles_rfs.append(mlines.Line2D([], [], color=c, marker='+', linestyle='None', lw=1.5, mew=1, ms=6))
                 labels_rfs.append(f'{group}-censored')
                     
             if len(groups) > 1:
@@ -635,7 +653,7 @@ if __name__ == "__main__":
             file_prefix=CUSTOM_FILE_PREFIX,
             sub_group_col=KM_SUB_GROUP
         )
-        
+
         cox_categorical = [group_col_name, 'gender', 'pathologic_stage']
         cox_continuous = [age_col, 'number_pack_years_smoked'] + gene_vars
         
