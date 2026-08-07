@@ -38,7 +38,7 @@ def plot_gsea_dotplot(file, target : str):
     # df = pd.DataFrame(data)
     # ---------------------------------------------------------
     
-    # 전처리
+    # 전처리(현재 전처리는 논문에 올라간 table용이니 내 GSEA와 연동용 전처리 업데이트 필요)
     df = pd.read_excel(file)
 
     df.columns = df.columns.str.strip().str.replace(r'\s+', '_', regex=True)  # 컬럼명 공백 제거 및 '_'로 대체
