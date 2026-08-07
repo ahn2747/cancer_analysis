@@ -13,7 +13,7 @@ db_dir = os.path.join(super_dir, 'database')
 result_dir = os.path.join(super_dir, 'GSEA_figure')
 
 # path setting
-def plot_gsea_dotplot(file):
+def plot_gsea_dotplot(file, target : str):
     # ---------------------------------------------------------
     # 테스트용 가상 데이터 (실제 데이터 사용 시 이 부분은 지우세요)
     # data = {
@@ -40,7 +40,10 @@ def plot_gsea_dotplot(file):
     
     # 전처리
     df = pd.read_excel(file)
-    df = df.rename(columns={
+
+    df.columns = df.columns.str.strip().str.replace(r'\s+', '_', regex=True)  # 컬럼명 공백 제거 및 '_'로 대체
+
+    df.rename(columns={
         'Cancer_Type': 'Cohort',
         'Enriched_group': 'Enriched_group',
         'Hallmark_gene_set': 'Pathway',
@@ -48,7 +51,6 @@ def plot_gsea_dotplot(file):
         'FDR_q-val': 'FDR'
     }, inplace=True)
 
-    df.columns = df.columns.str.strip().str.replace(r'\s+', '_', regex=True)  # 컬럼명 공백 제거 및 '_'로 대체
     df['Cohort'] = df['Cohort'].ffill()
     df['Enriched_group'] = df['Enriched_group'].ffill()
 
@@ -95,7 +97,7 @@ def plot_gsea_dotplot(file):
         ax.set_xlabel('Normalized Enrichment Score (NES)', fontsize=11, labelpad=10)
         
         # X축 범위 고정 (데이터에 따라 수정하세요)
-        ax.set_xlim(-2.5, 2.5)
+        ax.set_xlim(0,2.5)
         
         # 차트 외곽선(Spine) 정리 (위, 오른쪽 선 숨기기)
         ax.spines['top'].set_visible(False)
@@ -123,9 +125,9 @@ def plot_gsea_dotplot(file):
     plt.text(0.7, -0.11, 'Circle area increases with -log10(FDR q-value)', transform=fig.transFigure, fontsize=9, verticalalignment='center')
 
     # 4. 고해상도 SVG로 저장
-    output_path = os.path.join(result_dir, 'GSEA_Dotplot_custom.svg')
-    plt.savefig(output_path, format='svg', bbox_inches='tight')
+    output_path = os.path.join(result_dir, f'{target}_GSEA_Dotplot.png')
+    plt.savefig(output_path, format='png', dpi=600, bbox_inches='tight')
     print(f"[{output_path}] 파일 생성 완료!")
 
 if __name__ == "__main__":
-    plot_gsea_dotplot(os.path.join(db_dir, 'ITGB1_GSEA.xlsx'))
+    plot_gsea_dotplot(os.path.join(db_dir, 'ITGB1_GSEA.xlsx'), 'ITGB1')
