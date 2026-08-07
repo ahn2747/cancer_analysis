@@ -59,7 +59,7 @@ def plot_gsea_dotplot(file, target : str):
 
     # 2. 1행 2열의 서브플롯(그래프 공간) 생성
     fig, axes = plt.subplots(1, 2, figsize=(14, 8), sharex=False)
-    fig.suptitle('GSEA Pathways Enriched by ECT2 Expression Status', fontsize=18, fontweight='bold', y=1.05)
+    fig.suptitle(f'GSEA Pathways Enriched by {target} Expression Status', fontsize=18, fontweight='bold', y=1.05)
 
     # 사용할 색상 지정
     colors = {'High': '#d9534f', 'Low': '#428bca'} 
@@ -112,8 +112,8 @@ def plot_gsea_dotplot(file, target : str):
 
     # 3. 하단 커스텀 범례(Legend) 만들기
     legend_elements = [
-        Line2D([0], [0], marker='o', color='w', label='High ECT2', markerfacecolor=colors['High'], markersize=9),
-        Line2D([0], [0], marker='o', color='w', label='Low ECT2', markerfacecolor=colors['Low'], markersize=9),
+        Line2D([0], [0], marker='o', color='w', label=f'High {target}', markerfacecolor=colors['High'], markersize=9),
+        Line2D([0], [0], marker='o', color='w', label=f'Low {target}', markerfacecolor=colors['Low'], markersize=9),
         Line2D([0], [0], marker='o', color='w', label='FDR q < 0.25', markerfacecolor='#888888', markersize=9),
         Line2D([0], [0], marker='o', color='w', label='FDR q ≥ 0.25', markerfacecolor='w', markeredgecolor='#888888', markeredgewidth=1.5, markersize=9),
     ]
