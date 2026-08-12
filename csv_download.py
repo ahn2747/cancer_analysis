@@ -12,9 +12,6 @@ import shutil
 # =====================================================================
 # 디렉토리 설정 (분석 파이프라인과 동일한 구조 유지)
 # =====================================================================
-target1 = "READ"
-target2 = "COAD"
-
 try:
     super_dir = os.path.dirname(os.path.abspath(__file__))
 except NameError:
@@ -132,7 +129,7 @@ def download_gene_data(driver, gene, cancer_type):
         download_btn.click()
         
         # 다운로드가 완료될 때까지 대기
-        downloaded_file = None #wait_for_download()
+        downloaded_file = wait_for_download()
         
         if downloaded_file:
             src_path = os.path.join(temp_download_dir, downloaded_file)
@@ -151,7 +148,7 @@ def download_gene_data(driver, gene, cancer_type):
         return None
 
 def main():
-    gene_list = ["BRCA1", "TIMP1"]
+    gene_list = ["FAT1"]
     significant_genes = []
     
     print("=== 웹 스크래핑 및 자동 다운로드를 시작합니다 ===\n")
@@ -161,20 +158,20 @@ def main():
         for gene in gene_list:
             print(f"\n▶ 유전자 탐색 및 다운로드 중: {gene}")
             
-            # target1 추출 및 파일 다운로드
-            target1_p = download_gene_data(driver, gene, f"{target1}")
-            if target1_p is not None:
-                print(f"  └─ p-value 추출 -> {target1}: {target1_p}")
+            # LUAD 추출 및 파일 다운로드
+            luad_p = download_gene_data(driver, gene, "LUAD")
+            if luad_p is not None:
+                print(f"  └─ p-value 추출 -> LUAD: {luad_p}")
             
-            # target2 추출 및 파일 다운로드
-            target2_p = download_gene_data(driver, gene, f"{target2}")
-            if target2_p is not None:
-                print(f"  └─ p-value 추출 -> {target2}: {target2_p}")
+            # LUSC 추출 및 파일 다운로드
+            lusc_p = download_gene_data(driver, gene, "LUSC")
+            if lusc_p is not None:
+                print(f"  └─ p-value 추출 -> LUSC: {lusc_p}")
             
             # 둘 다 0.05 이하인 경우 기록
-            if target1_p is not None and target2_p is not None:
-                if target1_p <= 0.05 and target2_p <= 0.05:
-                    significant_genes.append((gene, target1_p, target2_p))
+            if luad_p is not None and lusc_p is not None:
+                if luad_p <= 0.05 and lusc_p <= 0.05:
+                    significant_genes.append((gene, luad_p, lusc_p))
                     
     finally:
         driver.quit()
@@ -185,7 +182,7 @@ def main():
     print("  === 양쪽 모두 유의미한(p<=0.05) 유전자 목록 ===")
     print("="*50)
     for g in significant_genes:
-        print(f"Gene: {g[0]} | {target1}: {g[1]} | {target2}: {g[2]}")
+        print(f"Gene: {g[0]} | LUAD: {g[1]} | LUSC: {g[2]}")
     print("="*50)
     print("스크래핑 완료! 이제 분석 파이프라인 코드를 실행하세요.")
 
