@@ -26,7 +26,7 @@ def setup_driver():
     Selenium WebDriver를 설정합니다.
     """
     options = webdriver.ChromeOptions()
-    # options.add_argument('--headless') # 처음엔 눈으로 확인하고, 잘 되면 주석 해제하세요!
+    options.add_argument('--headless') # 처음엔 눈으로 확인하고, 잘 되면 주석 해제하세요!
     options.add_argument('--disable-gpu')
     options.add_argument('--window-size=1920,1080')
     
