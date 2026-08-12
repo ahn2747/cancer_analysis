@@ -1,3 +1,9 @@
-'D:\coding\medin\input_READ_csv' 폴더에 병합할 CSV 파일이 없습니다.
-[READ] 마스터 파일(SAV)에 이미 존재하는 유전자로 분석하려면 이름을 입력하세요
-(여러 개는 쉼표 구분, 없으면 그냥 엔터): 
+
+[BRCA1 유전자 분석 시작]
+--- 1. 데이터 처리 및 병합 시작 (Target: BRCA1) ---
+  [진단 로그] 1-1. OncoLnc CSV 파일 로드 시도 중...
+  [진단 로그] 1-1. CSV 파일 로드 완료.
+  [진단 로그] 1-2. 마스터 SAV 파일 로드 시도 중 (pyreadstat)...
+  [진단 로그] 1-2. SAV 파일 로드 완료.
+  [진단 로그] 1-3. 두 데이터프레임 병합(Merge) 진행 중...
+Backend tkagg is interactive backend. Turning interactive mode on.

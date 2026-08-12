@@ -33,7 +33,7 @@ warnings.filterwarnings('ignore')
 # =====================================================================
 # 1. 데이터 처리 및 병합 (원본 로직 복구: 중복 컬럼 방지 및 SAV/CSV 저장)
 # =====================================================================
-def load_and_merge_data(target, onco_file, clin_file):
+def load_and_merge_data(target, onco_file, clin_file, mode):
     print(f"--- 1. 데이터 처리 및 병합 시작 (Target: {target}) ---")
     
     print("  [진단 로그] 1-1. OncoLnc CSV 파일 로드 시도 중...")
@@ -56,7 +56,10 @@ def load_and_merge_data(target, onco_file, clin_file):
         df_clin.drop(columns=cols_to_drop, inplace=True)
     
     print("  [진단 로그] 1-3. 두 데이터프레임 병합(Merge) 진행 중...")
-    df_merged = pd.merge(df_clin, df_onco, on='sampleID', how='left')
+    if mode == "COAD" or mode == "READ":
+        df_merged = pd.merge(df_clin, df_onco, on='Patients', how='left')
+    else:
+        df_merged = pd.merge(df_clin, df_onco, on='sampleID', how='left')
     print("  [진단 로그] 1-3. 병합 완료.")
     
     print("  [진단 로그] 1-4. 병합본을 마스터 SAV 파일로 저장 진행 중...")
@@ -564,7 +567,7 @@ if __name__ == "__main__":
             
             print(f"\n[{target_gene} 유전자 분석 시작]")
             
-            if csv_file: merged_df = load_and_merge_data(target=target_gene, onco_file=csv_file, clin_file=master_sav_path)
+            if csv_file: merged_df = load_and_merge_data(target=target_gene, onco_file=csv_file, clin_file=master_sav_path, mode=mode)
             else:
                 print(f"--- 1. 기존 데이터 로드 (Target: {target_gene}) ---")
                 merged_df, _ = pyreadstat.read_sav(master_sav_path, user_missing=True)

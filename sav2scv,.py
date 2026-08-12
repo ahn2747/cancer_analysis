@@ -124,7 +124,7 @@ def main():
     
     # =============== [신규 추가 위치] ===============
     # 데이터 병합이 끝난 직후, 해당 sav 파일 경로를 전달하여 csv 변환 및 txt 저장을 수행합니다.
-    sav_path = os.path.join(database_dir, "COAD.sav")
+    sav_path = os.path.join(database_dir, "READ.sav")
     
     # 1. SAV -> CSV 변환 실행
     exported_csv_path = export_sav_to_csv(
