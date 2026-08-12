@@ -518,13 +518,15 @@ def analyze_cox_regression(target, df, mode, save_dir, group_col='gene_group', c
 if __name__ == "__main__":
     super_dir = os.path.dirname(os.path.abspath(__file__))
     CURRENT_PLOT_TYPE = 2
+
+    mode_list = ['READ', 'COAD'] # 예시:["LUAD", "LUSC"]
     
-    for mode in ['LUAD', 'LUSC']:
+    for mode in mode_list:
         print(f"\n{'='*60}")
         print(f"          {mode} 자동화 분석 파이프라인 시작")
         print(f"{'='*60}")
         
-        master_sav_path = os.path.join(super_dir, "database", '(LUAD) lung adenocarcinoma.sav' if mode == 'LUAD' else '(LUSC) lung squamous cell carcinoma.sav')
+        master_sav_path = os.path.join(super_dir, "database", f'{mode}.sav')
         
         if not os.path.exists(master_sav_path):
             print(f"오류: 마스터 임상 파일이 존재하지 않습니다: {master_sav_path}")
