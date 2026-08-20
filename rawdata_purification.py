@@ -41,13 +41,15 @@ if __name__ == "__main__":
     # 폴더가 없다면 생성 (안전장치)
     os.makedirs(db_dir, exist_ok=True)
 
-    # 타겟 파일 경로 설정 (database 폴더 내부)
-    input_file = os.path.join(db_dir, "nationwidechildrens.org_clinical_patient_luad.txt")
-    output_file = os.path.join(db_dir, "TCGA_LUAD_Clinical_Cleaned.csv")
-    
-    # 실행부
-    if os.path.exists(input_file):
-        convert_tcga_txt_to_csv(input_file, output_file)
-    else:
-        print(f"🚨 [경고] '{input_file}' 파일이 존재하지 않습니다.")
-        print(f"   '{db_dir}' 폴더 안에 원본 txt 파일이 있는지 다시 한번 확인해 주십시오!")
+    for i in ["nationwidechildrens.org_clinical_follow_up_v1.0_read"]:
+
+        # 타겟 파일 경로 설정 (database 폴더 내부)    
+        input_file = os.path.join(db_dir, f"{i}.txt")
+        output_file = os.path.join(db_dir, "TCGA_READ_Clinical_FollowUp_Cleaned.csv")
+        
+        # 실행부
+        if os.path.exists(input_file):
+            convert_tcga_txt_to_csv(input_file, output_file)
+        else:
+            print(f"🚨 [경고] '{input_file}' 파일이 존재하지 않습니다.")
+            print(f"   '{db_dir}' 폴더 안에 원본 txt 파일이 있는지 다시 한번 확인해 주십시오!")

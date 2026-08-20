@@ -573,9 +573,9 @@ if __name__ == "__main__":
         print(f"{'='*60}")
 
         if mode == 'LUAD':
-            master_sav_filename = '(LUAD) lung adenocarcinoma.sav'
+            master_sav_filename = 'LUAD.sav'
         else:
-            master_sav_filename = '(LUSC) lung squamous cell carcinoma.sav'
+            master_sav_filename = 'LUSC.sav'
             
         master_sav_path = os.path.join(database_dir, master_sav_filename)
 

@@ -32,6 +32,7 @@ def export_sav_to_csv(sav_filepath, db_dir):
     
     return csv_filepath
 
+
 def extract_genes_from_sav(sav_filepath, db_dir, target_genes=None):
     """
     SAV 파일의 컬럼명을 분석하여 데이터셋에 존재하는 유전자 목록을 추출하고 txt로 저장합니다.
@@ -127,17 +128,28 @@ def main():
     sav_path = os.path.join(database_dir, "READ.sav")
     
     # 1. SAV -> CSV 변환 실행
+    '''
     exported_csv_path = export_sav_to_csv(
         sav_filepath=sav_path, 
         db_dir=database_dir
     )
+    '''
     
     # 2. 유전자 추출 및 TXT 저장 실행 (활성화 완료, gene_list.txt로 생성)
+    '''
     extract_genes_from_sav(
         sav_filepath=sav_path, 
         db_dir=database_dir,
         target_genes=[]
     )
+    '''
+
+    export_csv_to_sav(
+        csv_filepath=os.path.join(database_dir, "BRCA_clinical_follow_up_v2.1.csv"), 
+        db_dir=database_dir, 
+        sav_filename="BRCA_follow_up_v2.1.sav"
+    )
+
     
     # [참고] 방금 생성한 CSV를 다시 새로운 SAV로 변환할 때 사용하는 예시 코드 (필요시 주석 해제)
     # if exported_csv_path:

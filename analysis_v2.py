@@ -522,7 +522,7 @@ if __name__ == "__main__":
     super_dir = os.path.dirname(os.path.abspath(__file__))
     CURRENT_PLOT_TYPE = 2
 
-    mode_list = ['READ', 'COAD'] # 예시:["LUAD", "LUSC"]
+    mode_list = ['LUAD', 'LUSC'] # 예시:["LUAD", "LUSC"]
     
     for mode in mode_list:
         print(f"\n{'='*60}")
